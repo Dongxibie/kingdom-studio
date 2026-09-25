@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Kingdom Studio">
+	<rect width="32" height="32" rx="7" fill="#7d1418" />
+	<path
+		d="M7 12.4l4.6 3.3L16 8.4l4.4 7.3L25 12.4l-2.3 11.6H9.3L7 12.4z"
+		fill="#f0cd72"
+		stroke="#c2963a"
+		stroke-width="0.7"
+		stroke-linejoin="round" />
+</svg>

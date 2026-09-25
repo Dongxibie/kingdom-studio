@@ -1,0 +1,29 @@
+# ---- Java / Maven ----
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.class
+*.log
+
+# ---- Node / Vite ----
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+
+# ---- IDE ----
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.DS_Store
+
+# ---- 本地环境 ----
+.env
+.env.local
+application-local.yml
+
+# ---- 构建缓存 / 系统文件（Phase 1 扩展架构时补）----
+*.tsbuildinfo
+Thumbs.db

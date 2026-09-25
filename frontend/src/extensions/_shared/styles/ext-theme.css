@@ -1,0 +1,212 @@
+/* ============================================================================
+   扩展区主题：深色工具化（开发者工具风），但继承 Kingdom Studio 品牌
+   —— 金色作为 Accent、暗红作为状态色；作用域限定在 .ext-shell 内，
+   不改动主站既有的浅色页面样式。
+   ============================================================================ */
+.ext-shell {
+	--ext-bg: #14161a;
+	--ext-bg-soft: #1a1d22;
+	--ext-bg-raised: #21252b;
+	--ext-line: #2c3138;
+	--ext-line-soft: #23272d;
+	--ext-text: #e8eaed;
+	--ext-text-dim: #9aa1aa;
+	--ext-text-mute: #6d747d;
+	/* 品牌色：复用主站 :root 里的王国金与暗红 */
+	--ext-gold: var(--kingdom-gold);
+	--ext-gold-light: var(--kingdom-gold-light);
+	--ext-gold-soft: rgba(194, 150, 58, 0.14);
+	--ext-red: var(--kingdom-red);
+	--ext-red-soft: rgba(125, 20, 24, 0.26);
+	--ext-ok: #6f9f78;
+	--ext-radius: 10px;
+	--ext-font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+	background: var(--ext-bg);
+	color: var(--ext-text);
+	/* 扩展页是主站浅色布局里的一块深色工具面板，给个圆角与描边让它看起来是有意为之 */
+	border: 1px solid var(--ext-line);
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+.ext-head {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 16px 22px;
+	border-bottom: 1px solid var(--ext-line);
+	background: var(--ext-bg-soft);
+	flex: none;
+}
+
+.ext-head .ext-mark {
+	width: 30px;
+	height: 30px;
+	flex: none;
+	border-radius: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: linear-gradient(150deg, var(--ext-gold-light), var(--ext-gold));
+	color: #14161a;
+	font-weight: 700;
+	font-size: 14px;
+}
+
+.ext-head .ext-title {
+	font-size: 16px;
+	font-weight: 600;
+	letter-spacing: 0.01em;
+}
+
+.ext-head .ext-sub {
+	font-family: var(--ext-font-mono);
+	font-size: 11px;
+	color: var(--ext-text-mute);
+	margin-top: 4px;
+}
+
+.ext-head .ext-actions {
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.ext-body {
+	flex: 1;
+	min-height: 0;
+	display: grid;
+	grid-template-columns: 250px minmax(0, 1fr) 380px;
+}
+
+.ext-body.narrow {
+	grid-template-columns: 1fr;
+	overflow-y: auto;
+}
+
+.ext-col {
+	min-height: 0;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+}
+
+.ext-col + .ext-col {
+	border-left: 1px solid var(--ext-line);
+}
+
+.ext-body.narrow .ext-col + .ext-col {
+	border-left: 0;
+	border-top: 1px solid var(--ext-line);
+}
+
+.ext-panel {
+	border-bottom: 1px solid var(--ext-line-soft);
+	padding: 14px 16px 16px;
+}
+
+.ext-panel-title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-family: var(--ext-font-mono);
+	font-size: 10.5px;
+	letter-spacing: 0.14em;
+	color: var(--ext-text-mute);
+	margin-bottom: 11px;
+}
+
+.ext-panel-title::after {
+	content: '';
+	flex: 1;
+	height: 1px;
+	background: linear-gradient(90deg, var(--ext-line), transparent);
+}
+
+.ext-card {
+	border: 1px solid var(--ext-line);
+	border-radius: var(--ext-radius);
+	background: var(--ext-bg-soft);
+	padding: 14px 16px;
+}
+
+.ext-kv {
+	display: flex;
+	gap: 12px;
+	font-size: 12.5px;
+	line-height: 1.9;
+}
+
+.ext-kv .k {
+	font-family: var(--ext-font-mono);
+	font-size: 11px;
+	color: var(--ext-text-mute);
+	width: 74px;
+	flex: none;
+}
+
+.ext-kv .v {
+	color: var(--ext-text-dim);
+	word-break: break-all;
+}
+
+.ext-list {
+	margin: 0;
+	padding-left: 16px;
+	font-size: 12.5px;
+	line-height: 1.95;
+	color: var(--ext-text-dim);
+}
+
+.ext-list li::marker {
+	color: var(--ext-gold);
+}
+
+.ext-hint {
+	font-size: 12px;
+	line-height: 1.85;
+	color: var(--ext-text-mute);
+	margin-top: 10px;
+}
+
+.ext-btn {
+	font-family: var(--ext-font-mono);
+	font-size: 11.5px;
+	padding: 6px 12px;
+	border-radius: 8px;
+	border: 1px solid var(--ext-line);
+	background: var(--ext-bg-raised);
+	color: var(--ext-text-dim);
+	cursor: pointer;
+	transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+}
+
+.ext-btn:hover {
+	color: var(--ext-gold-light);
+	border-color: var(--ext-gold);
+}
+
+.ext-btn:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+.ext-col::-webkit-scrollbar {
+	width: 10px;
+}
+
+.ext-col::-webkit-scrollbar-thumb {
+	background: #2b3037;
+	border: 3px solid var(--ext-bg);
+	border-radius: 6px;
+}
+
+.ext-col::-webkit-scrollbar-track {
+	background: transparent;
+}

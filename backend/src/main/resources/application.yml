@@ -1,0 +1,108 @@
+server:
+  port: 8080
+  servlet:
+    # 统一前缀，前端只需要代理 /api 即可
+    context-path: /api
+
+spring:
+  application:
+    name: kingdom-studio
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/kingdom_studio?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 5000
+      pool-name: KingdomHikariPool
+
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      database: 0
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+  cache:
+    # 具体策略（TTL 30 分钟、key 前缀 kingdom:）在 RedisConfig#cacheManager 里定义。
+    # 这里不再重复写 spring.cache.redis.*——显式定义了 CacheManager Bean 时那些属性不生效，
+    # 两处都写会出现「改了 yml 却没变化」的排查陷阱。
+    type: redis
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    default-property-inclusion: non_null
+
+  # 静态资源不参与拦截（Phase 2 加 JWT 过滤器后仍需要放行的路径）
+  web:
+    resources:
+      add-mappings: true
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    # 开发期打印 SQL，生产可换成 org.apache.ibatis.logging.nologging.NoLoggingImpl
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  mapper-locations: classpath*:/mapper/**/*.xml
+  # type-aliases-package 等 Phase 2 有了 entity 包再打开，避免启动时报警告
+  # type-aliases-package: com.kingdomstudio.entity
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+  info:
+    env:
+      # Spring Boot 2.6 起默认关闭，不打开的话 /actuator/info 永远返回 {}
+      enabled: true
+
+# /actuator/info 暴露的应用元信息
+info:
+  app:
+    name: Kingdom Studio
+    version: v1.0.0
+    description: 个人开发者工作台 —— 项目王国 / 技术图鉴 / 成长时间线 / 代码知识库
+
+# 项目自定义配置
+kingdom:
+  jwt:
+    # ⚠️ 生产环境请通过环境变量 JWT_SECRET 覆盖（HS256 要求至少 32 字节）
+    secret: ${JWT_SECRET:kingdom-studio-v1-secret-key-please-change-in-production-2026}
+    expire-minutes: 120
+    header: Authorization
+    prefix: 'Bearer '
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+
+logging:
+  level:
+    root: info
+    com.kingdomstudio: debug
