@@ -17,7 +17,7 @@ const menus = [
 // 扩展模块单独成组：后续扩展会越来越多（AI Agent Lab、Prompt Tools 等），
 // 平铺进主菜单会把侧边栏挤爆，这里用子菜单收拢
 const extensionMenus = [
-	{ path: '/extensions/motion-lab', title: '动效基因库', icon: MagicStick },
+	{ path: '/extensions/motion-lab', title: '动效工作台', icon: MagicStick },
 	{ path: '/extensions/music-agent', title: '音乐 Agent', icon: Headset }
 ]
 
@@ -69,7 +69,7 @@ const { isNarrow } = useNarrowScreen()
 				</el-sub-menu>
 			</el-menu>
 
-			<div v-show="!isNarrow" class="sidebar-footer">v1.0.0 · Phase 1</div>
+			<div v-show="!isNarrow" class="sidebar-footer">v1.0.1</div>
 		</el-aside>
 
 		<el-container>

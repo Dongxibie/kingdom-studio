@@ -97,18 +97,19 @@ onMounted(loadHealth)
 				<div class="module-en">{{ item.en }}</div>
 				<div class="module-title">{{ item.title }}</div>
 				<div class="module-desc">{{ item.desc }}</div>
-				<el-tag size="small" type="info" effect="plain">待 Phase 3 实现</el-tag>
+				<el-tag size="small" type="info" effect="plain">规划中</el-tag>
 			</el-card>
 		</div>
 
 		<el-card shadow="never" class="panel">
-			<template #header><span>Phase 1 完成情况</span></template>
+			<template #header><span>工程进度</span></template>
 			<el-timeline>
 				<el-timeline-item type="success" timestamp="已完成" placement="top">Spring Boot 3 工程骨架、统一响应体、全局异常处理</el-timeline-item>
-				<el-timeline-item type="success" timestamp="已完成" placement="top">MySQL 建库建表 + 测试数据（5 张表）</el-timeline-item>
+				<el-timeline-item type="success" timestamp="已完成" placement="top">MySQL 建库建表 + 种子数据（主站 5 张表 + 扩展 5 张表）</el-timeline-item>
 				<el-timeline-item type="success" timestamp="已完成" placement="top">Redis 缓存配置、Swagger 文档、跨域配置</el-timeline-item>
 				<el-timeline-item type="success" timestamp="已完成" placement="top">Vue3 + TS + Element Plus 前端骨架与接口联调</el-timeline-item>
-				<el-timeline-item timestamp="下一阶段" placement="top">Phase 2：Entity / Mapper / Service / Controller 四模块后端接口</el-timeline-item>
+				<el-timeline-item type="success" timestamp="已完成" placement="top">扩展模块：动效基因库、音乐 Agent</el-timeline-item>
+				<el-timeline-item timestamp="规划中" placement="top">主站四个业务模块的后端接口与页面</el-timeline-item>
 			</el-timeline>
 		</el-card>
 	</div>

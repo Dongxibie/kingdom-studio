@@ -12,9 +12,9 @@ defineProps<{
 		<div class="subtitle">{{ subtitle }}</div>
 		<h2>{{ title }}</h2>
 		<p>{{ description }}</p>
-		<el-alert type="info" show-icon :closable="false" :title="`该模块将在 ${phase} 中实现`" />
+		<el-alert type="info" show-icon :closable="false" :title="`该模块的接口与页面将在${phase}实现`" />
 		<el-divider />
-		<p class="hint">当前处于 Phase 1（项目初始化），先完成工程骨架、数据库与前后端联通。</p>
+		<p class="hint">当前已完成工程骨架、数据库与前后端联通；这一页的功能尚未开发，先留作占位。</p>
 	</el-card>
 </template>
 

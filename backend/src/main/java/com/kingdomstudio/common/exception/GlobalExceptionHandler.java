@@ -4,6 +4,8 @@ import com.kingdomstudio.common.Result;
 import com.kingdomstudio.common.ResultCode;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.stream.Collectors;
@@ -91,6 +95,48 @@ public class GlobalExceptionHandler {
 	public Result<Void> handleAccessDenied(AccessDeniedException e) {
 		log.warn("访问被拒绝: {}", e.getMessage());
 		return Result.fail(ResultCode.FORBIDDEN);
+	}
+
+	/**
+	 * 上传文件超过大小上限。
+	 *
+	 * <p>上限在 application.yml 的 spring.servlet.multipart 里配置（当前 2MB，与前端选文件时的校验一致）。
+	 * 以前这类异常会落到兜底分支，用户只看到「服务器内部错误」，不知道是文件太大。
+	 */
+	@ExceptionHandler(MaxUploadSizeExceededException.class)
+	public Result<Void> handleMaxUploadSize(MaxUploadSizeExceededException e) {
+		log.warn("上传超过大小上限: {}", e.getMessage());
+		return Result.fail(ResultCode.BAD_REQUEST, "文件超过大小上限（单文件 2MB），请压缩或裁剪后再试");
+	}
+
+	/** 文件已收到但读取失败（连接中断、临时目录不可写等），与「文件太大」分开提示 */
+	@ExceptionHandler(MultipartException.class)
+	public Result<Void> handleMultipart(MultipartException e) {
+		log.warn("上传请求解析失败: {}", e.getMessage());
+		return Result.fail(ResultCode.BAD_REQUEST, "上传请求解析失败，请重新选择文件后再试");
+	}
+
+	/**
+	 * 唯一键冲突：多为「同一个资源重复提交」或「删除后又用相同的名称/来源新建」。
+	 *
+	 * <p>数据库唯一键是最后一道防线，命中说明业务层的前置判重没拦住（并发或逻辑删除后的重建），
+	 * 属于可预期的客户端问题，应当返回可读提示而不是 500。
+	 */
+	@ExceptionHandler(DuplicateKeyException.class)
+	public Result<Void> handleDuplicateKey(DuplicateKeyException e) {
+		log.warn("唯一键冲突: {}", e.getMessage());
+		return Result.fail(ResultCode.BAD_REQUEST, "已存在相同的记录（名称或来源重复），请修改后重试");
+	}
+
+	/**
+	 * 其他数据完整性错误：字段超长、取值不满足约束等。
+	 *
+	 * <p>把「库层面的约束」翻译成「用户能看懂的一句话」；具体是哪条约束只写进日志，不返给前端。
+	 */
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public Result<Void> handleDataIntegrity(DataIntegrityViolationException e) {
+		log.warn("数据完整性约束被违反: {}", e.getMostSpecificCause().getMessage());
+		return Result.fail(ResultCode.BAD_REQUEST, "数据不符合约束（字段过长或取值不合法），请检查后重试");
 	}
 
 	/** 兜底：未预期的异常，记录堆栈但不把细节返回给前端 */

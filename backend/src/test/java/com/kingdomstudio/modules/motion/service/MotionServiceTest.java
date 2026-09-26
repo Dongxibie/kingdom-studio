@@ -82,12 +82,13 @@ class MotionServiceTest {
 	}
 
 	@Test
-	@DisplayName("模块自检：能力清单与规划表不为空，阶段已推进到 Phase 2")
+	@DisplayName("模块自检：能力清单与数据表不为空，状态文案对应当前版本")
 	void moduleInfoShouldDescribeCurrentPhase() {
 		var info = motionService.moduleInfo();
 		assertEquals("motion", info.getModule());
 		assertEquals("动效基因库", info.getName());
-		assertTrue(info.getPhase().contains("Phase 2"));
+		assertTrue(info.getPhase().contains("v1.0.1"), "状态文案应写当前版本，而不是过程式的阶段编号：" + info.getPhase());
+		assertTrue(info.getPhase().contains("已上线"));
 		assertFalse(info.getCapabilities().isEmpty());
 		assertEquals(List.of("motion_resource", "motion_code"), info.getPlannedTables());
 	}

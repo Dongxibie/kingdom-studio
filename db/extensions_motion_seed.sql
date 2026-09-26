@@ -15,8 +15,8 @@ INSERT INTO `motion_resource`
 	(`name`, `description`, `category`, `technology`, `source_url`, `repo_url`, `preview_url`, `tags`, `license`, `code_path`, `content_hash`, `status`)
 VALUES (
 	'玻璃卡片错位入场', '一组玻璃卡片依次上浮出现，间隔 70ms，带轻微模糊收尾。', 'Entrance', 'CSS',
-	'https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#entrance', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', 'entrance,stagger,glass', 'MIT（自建示例）', 'docs/extensions-samples.md',
-	SHA1(CONCAT(LOWER(TRIM('玻璃卡片错位入场')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#entrance')), '|', 'Entrance')), 'READY'
+	'https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#entrance', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', 'entrance,stagger,glass', 'MIT（自建示例）', 'docs/extensions-samples.md',
+	SHA1(CONCAT(LOWER(TRIM('玻璃卡片错位入场')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#entrance')), '|', 'Entrance')), 'READY'
 )
 ON DUPLICATE KEY UPDATE
 	`description` = VALUES(`description`), `technology` = VALUES(`technology`),
@@ -74,7 +74,7 @@ const items = [1, 2, 3, 4]
   from{opacity:0;transform:translateY(22px);filter:blur(3px)}
   to{opacity:1;transform:none;filter:none}}', NULL
 FROM `motion_resource` r
-WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('玻璃卡片错位入场')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#entrance')), '|', 'Entrance'))
+WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('玻璃卡片错位入场')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#entrance')), '|', 'Entrance'))
 	AND NOT EXISTS (SELECT 1 FROM `motion_code` c WHERE c.`motion_id` = r.`id`);
 
 -- 2. Hover / 卡片光线扫过
@@ -82,8 +82,8 @@ INSERT INTO `motion_resource`
 	(`name`, `description`, `category`, `technology`, `source_url`, `repo_url`, `preview_url`, `tags`, `license`, `code_path`, `content_hash`, `status`)
 VALUES (
 	'卡片光线扫过', '鼠标悬停时一道斜向光线扫过卡片表面，同时轻微上浮。', 'Hover', 'CSS',
-	'https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#hover', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', 'hover,sweep,premium', 'MIT（自建示例）', 'docs/extensions-samples.md',
-	SHA1(CONCAT(LOWER(TRIM('卡片光线扫过')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#hover')), '|', 'Hover')), 'READY'
+	'https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#hover', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', 'hover,sweep,premium', 'MIT（自建示例）', 'docs/extensions-samples.md',
+	SHA1(CONCAT(LOWER(TRIM('卡片光线扫过')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#hover')), '|', 'Hover')), 'READY'
 )
 ON DUPLICATE KEY UPDATE
 	`description` = VALUES(`description`), `technology` = VALUES(`technology`),
@@ -127,7 +127,7 @@ SELECT r.`id`, '做一个高级感的卡片悬停动效：
   0%{transform:translateX(-130%)}
   55%,100%{transform:translateX(130%)}}', NULL
 FROM `motion_resource` r
-WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('卡片光线扫过')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#hover')), '|', 'Hover'))
+WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('卡片光线扫过')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#hover')), '|', 'Hover'))
 	AND NOT EXISTS (SELECT 1 FROM `motion_code` c WHERE c.`motion_id` = r.`id`);
 
 -- 3. Scroll / 滚动逐级点亮
@@ -135,8 +135,8 @@ INSERT INTO `motion_resource`
 	(`name`, `description`, `category`, `technology`, `source_url`, `repo_url`, `preview_url`, `tags`, `license`, `code_path`, `content_hash`, `status`)
 VALUES (
 	'滚动逐级点亮', '列表进入视口后依次点亮，滚动离开不影响已点亮状态。', 'Scroll', 'IntersectionObserver',
-	'https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#scroll', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', 'scroll,reveal,list', 'MIT（自建示例）', 'docs/extensions-samples.md',
-	SHA1(CONCAT(LOWER(TRIM('滚动逐级点亮')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#scroll')), '|', 'Scroll')), 'READY'
+	'https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#scroll', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', 'scroll,reveal,list', 'MIT（自建示例）', 'docs/extensions-samples.md',
+	SHA1(CONCAT(LOWER(TRIM('滚动逐级点亮')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#scroll')), '|', 'Scroll')), 'READY'
 )
 ON DUPLICATE KEY UPDATE
 	`description` = VALUES(`description`), `technology` = VALUES(`technology`),
@@ -186,7 +186,7 @@ onMounted(() => {
 .item:nth-child(4){animation-delay:.36s}
 @keyframes light{to{opacity:1;transform:none;border-color:rgba(194,150,58,.7)}}', NULL
 FROM `motion_resource` r
-WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('滚动逐级点亮')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#scroll')), '|', 'Scroll'))
+WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('滚动逐级点亮')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#scroll')), '|', 'Scroll'))
 	AND NOT EXISTS (SELECT 1 FROM `motion_code` c WHERE c.`motion_id` = r.`id`);
 
 -- 4. Text / 打字机标题
@@ -194,8 +194,8 @@ INSERT INTO `motion_resource`
 	(`name`, `description`, `category`, `technology`, `source_url`, `repo_url`, `preview_url`, `tags`, `license`, `code_path`, `content_hash`, `status`)
 VALUES (
 	'打字机标题', '一段文字逐字写出，末尾光标闪烁。', 'Text', 'JavaScript',
-	'https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#text', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', 'text,typing,cursor', 'MIT（自建示例）', 'docs/extensions-samples.md',
-	SHA1(CONCAT(LOWER(TRIM('打字机标题')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#text')), '|', 'Text')), 'READY'
+	'https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#text', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', 'text,typing,cursor', 'MIT（自建示例）', 'docs/extensions-samples.md',
+	SHA1(CONCAT(LOWER(TRIM('打字机标题')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#text')), '|', 'Text')), 'READY'
 )
 ON DUPLICATE KEY UPDATE
 	`description` = VALUES(`description`), `technology` = VALUES(`technology`),
@@ -233,7 +233,7 @@ onBeforeUnmount(() => {
 @keyframes type{to{width:18ch}}
 @keyframes caret{50%{border-color:transparent}}', NULL
 FROM `motion_resource` r
-WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('打字机标题')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#text')), '|', 'Text'))
+WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('打字机标题')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#text')), '|', 'Text'))
 	AND NOT EXISTS (SELECT 1 FROM `motion_code` c WHERE c.`motion_id` = r.`id`);
 
 -- 5. Particle / 粒子星野与近邻连线
@@ -241,8 +241,8 @@ INSERT INTO `motion_resource`
 	(`name`, `description`, `category`, `technology`, `source_url`, `repo_url`, `preview_url`, `tags`, `license`, `code_path`, `content_hash`, `status`)
 VALUES (
 	'粒子星野与近邻连线', '节点缓慢漂移，距离足够近时自动连线，鼠标附近会点亮。', 'Particle', 'Canvas',
-	'https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#particle', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', 'particle,links,starfield', 'MIT（自建示例）', 'docs/extensions-samples.md',
-	SHA1(CONCAT(LOWER(TRIM('粒子星野与近邻连线')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#particle')), '|', 'Particle')), 'READY'
+	'https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#particle', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', 'particle,links,starfield', 'MIT（自建示例）', 'docs/extensions-samples.md',
+	SHA1(CONCAT(LOWER(TRIM('粒子星野与近邻连线')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#particle')), '|', 'Particle')), 'READY'
 )
 ON DUPLICATE KEY UPDATE
 	`description` = VALUES(`description`), `technology` = VALUES(`technology`),
@@ -349,7 +349,7 @@ onMounted(() => {
 .star:nth-child(5){left:30%;top:76%;animation-delay:1s}
 @keyframes twinkle{0%,100%{opacity:.35;transform:scale(.8)}50%{opacity:1;transform:scale(1.3)}}', NULL
 FROM `motion_resource` r
-WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('粒子星野与近邻连线')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#particle')), '|', 'Particle'))
+WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('粒子星野与近邻连线')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#particle')), '|', 'Particle'))
 	AND NOT EXISTS (SELECT 1 FROM `motion_code` c WHERE c.`motion_id` = r.`id`);
 
 -- 6. 3D / 卡片 3D 倾斜
@@ -357,8 +357,8 @@ INSERT INTO `motion_resource`
 	(`name`, `description`, `category`, `technology`, `source_url`, `repo_url`, `preview_url`, `tags`, `license`, `code_path`, `content_hash`, `status`)
 VALUES (
 	'卡片 3D 倾斜', '鼠标在卡片上移动时整块轻微倾斜，带透视和抬升。', '3D', 'CSS 3D',
-	'https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#3d', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', '3d,tilt,perspective', 'MIT（自建示例）', 'docs/extensions-samples.md',
-	SHA1(CONCAT(LOWER(TRIM('卡片 3D 倾斜')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#3d')), '|', '3D')), 'READY'
+	'https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#3d', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', '3d,tilt,perspective', 'MIT（自建示例）', 'docs/extensions-samples.md',
+	SHA1(CONCAT(LOWER(TRIM('卡片 3D 倾斜')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#3d')), '|', '3D')), 'READY'
 )
 ON DUPLICATE KEY UPDATE
 	`description` = VALUES(`description`), `technology` = VALUES(`technology`),
@@ -424,7 +424,7 @@ window.addEventListener(''mousemove'', (event) => {
 
 renderer.setAnimationLoop(() => renderer.render(scene, camera))'
 FROM `motion_resource` r
-WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('卡片 3D 倾斜')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#3d')), '|', '3D'))
+WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('卡片 3D 倾斜')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#3d')), '|', '3D'))
 	AND NOT EXISTS (SELECT 1 FROM `motion_code` c WHERE c.`motion_id` = r.`id`);
 
 -- 7. Glass / 玻璃拟态面板
@@ -432,8 +432,8 @@ INSERT INTO `motion_resource`
 	(`name`, `description`, `category`, `technology`, `source_url`, `repo_url`, `preview_url`, `tags`, `license`, `code_path`, `content_hash`, `status`)
 VALUES (
 	'玻璃拟态面板', '半透明模糊面板，顶部有一道高光边，像玻璃的厚度。', 'Glass', 'CSS',
-	'https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#glass', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', 'glass,blur,border', 'MIT（自建示例）', 'docs/extensions-samples.md',
-	SHA1(CONCAT(LOWER(TRIM('玻璃拟态面板')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#glass')), '|', 'Glass')), 'READY'
+	'https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#glass', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', 'glass,blur,border', 'MIT（自建示例）', 'docs/extensions-samples.md',
+	SHA1(CONCAT(LOWER(TRIM('玻璃拟态面板')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#glass')), '|', 'Glass')), 'READY'
 )
 ON DUPLICATE KEY UPDATE
 	`description` = VALUES(`description`), `technology` = VALUES(`technology`),
@@ -469,7 +469,7 @@ SELECT r.`id`, '做一个玻璃拟态面板：
   animation:float 6s ease-in-out infinite}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}', NULL
 FROM `motion_resource` r
-WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('玻璃拟态面板')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#glass')), '|', 'Glass'))
+WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('玻璃拟态面板')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#glass')), '|', 'Glass'))
 	AND NOT EXISTS (SELECT 1 FROM `motion_code` c WHERE c.`motion_id` = r.`id`);
 
 -- 8. Cursor / 鼠标跟随柔光
@@ -477,8 +477,8 @@ INSERT INTO `motion_resource`
 	(`name`, `description`, `category`, `technology`, `source_url`, `repo_url`, `preview_url`, `tags`, `license`, `code_path`, `content_hash`, `status`)
 VALUES (
 	'鼠标跟随柔光', '一团柔光带阻尼地跟着鼠标走，停下即停，不硬跟。', 'Cursor', 'JavaScript',
-	'https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#cursor', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', 'cursor,glow,damp', 'MIT（自建示例）', 'docs/extensions-samples.md',
-	SHA1(CONCAT(LOWER(TRIM('鼠标跟随柔光')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#cursor')), '|', 'Cursor')), 'READY'
+	'https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#cursor', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', 'cursor,glow,damp', 'MIT（自建示例）', 'docs/extensions-samples.md',
+	SHA1(CONCAT(LOWER(TRIM('鼠标跟随柔光')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#cursor')), '|', 'Cursor')), 'READY'
 )
 ON DUPLICATE KEY UPDATE
 	`description` = VALUES(`description`), `technology` = VALUES(`technology`),
@@ -536,7 +536,7 @@ onMounted(() => {
   33%{transform:translate(40px,10px) scale(1.08)}
   66%{transform:translate(0,30px) scale(.95)}}', NULL
 FROM `motion_resource` r
-WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('鼠标跟随柔光')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#cursor')), '|', 'Cursor'))
+WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('鼠标跟随柔光')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#cursor')), '|', 'Cursor'))
 	AND NOT EXISTS (SELECT 1 FROM `motion_code` c WHERE c.`motion_id` = r.`id`);
 
 -- 9. Background / 透视网格背景
@@ -544,8 +544,8 @@ INSERT INTO `motion_resource`
 	(`name`, `description`, `category`, `technology`, `source_url`, `repo_url`, `preview_url`, `tags`, `license`, `code_path`, `content_hash`, `status`)
 VALUES (
 	'透视网格背景', '一层向下淡出的透视网格，用来做技术感背景。', 'Background', 'CSS',
-	'https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#background', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', 'background,grid,mask', 'MIT（自建示例）', 'docs/extensions-samples.md',
-	SHA1(CONCAT(LOWER(TRIM('透视网格背景')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#background')), '|', 'Background')), 'READY'
+	'https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#background', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', 'background,grid,mask', 'MIT（自建示例）', 'docs/extensions-samples.md',
+	SHA1(CONCAT(LOWER(TRIM('透视网格背景')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#background')), '|', 'Background')), 'READY'
 )
 ON DUPLICATE KEY UPDATE
 	`description` = VALUES(`description`), `technology` = VALUES(`technology`),
@@ -583,7 +583,7 @@ SELECT r.`id`, '做一个透视网格背景：
   animation:slide 6s linear infinite}
 @keyframes slide{to{background-position:0 64px,0 0}}', NULL
 FROM `motion_resource` r
-WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('透视网格背景')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#background')), '|', 'Background'))
+WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('透视网格背景')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#background')), '|', 'Background'))
 	AND NOT EXISTS (SELECT 1 FROM `motion_code` c WHERE c.`motion_id` = r.`id`);
 
 -- 10. Loading / 骨架屏微光
@@ -591,8 +591,8 @@ INSERT INTO `motion_resource`
 	(`name`, `description`, `category`, `technology`, `source_url`, `repo_url`, `preview_url`, `tags`, `license`, `code_path`, `content_hash`, `status`)
 VALUES (
 	'骨架屏微光', '占位骨架上一道微光反复扫过，比转圈更安静。', 'Loading', 'CSS',
-	'https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#loading', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', 'loading,skeleton,shimmer', 'MIT（自建示例）', 'docs/extensions-samples.md',
-	SHA1(CONCAT(LOWER(TRIM('骨架屏微光')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#loading')), '|', 'Loading')), 'READY'
+	'https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#loading', 'https://github.com/Dongxibie/kingdom-studio', 'inline:css', 'loading,skeleton,shimmer', 'MIT（自建示例）', 'docs/extensions-samples.md',
+	SHA1(CONCAT(LOWER(TRIM('骨架屏微光')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#loading')), '|', 'Loading')), 'READY'
 )
 ON DUPLICATE KEY UPDATE
 	`description` = VALUES(`description`), `technology` = VALUES(`technology`),
@@ -639,6 +639,6 @@ SELECT r.`id`, '做一个骨架屏微光：
   transform:translateX(-100%);animation:shimmer 1.6s ease-in-out infinite}
 @keyframes shimmer{to{transform:translateX(100%)}}', NULL
 FROM `motion_resource` r
-WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('骨架屏微光')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/main/docs/extensions-samples.md#loading')), '|', 'Loading'))
+WHERE r.`content_hash` = SHA1(CONCAT(LOWER(TRIM('骨架屏微光')), '|', LOWER(TRIM('https://github.com/Dongxibie/kingdom-studio/blob/master/docs/extensions-samples.md#loading')), '|', 'Loading'))
 	AND NOT EXISTS (SELECT 1 FROM `motion_code` c WHERE c.`motion_id` = r.`id`);
 

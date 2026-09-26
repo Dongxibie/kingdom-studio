@@ -8,11 +8,19 @@ spring:
   application:
     name: kingdom-studio
 
+  # 上传上限：前端在选文件时就按 2MB 拦一次，这里保持一致，避免「前端放过、后端拒绝」的错位。
+  # 超限由 GlobalExceptionHandler 的 MaxUploadSizeExceededException 分支转成中文提示，不再返回「服务器内部错误」。
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 4MB
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/kingdom_studio?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false}
     username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:root}
+    # 不设默认值：本地演示请用环境变量 DB_PASSWORD，或在启动参数里给 --spring.datasource.password
+    password: ${DB_PASSWORD:}
     hikari:
       maximum-pool-size: 10
       minimum-idle: 2
@@ -88,14 +96,15 @@ management:
 info:
   app:
     name: Kingdom Studio
-    version: v1.0.0
+    version: v1.0.1
     description: 个人开发者工作台 —— 项目王国 / 技术图鉴 / 成长时间线 / 代码知识库
 
 # 项目自定义配置
 kingdom:
   jwt:
-    # ⚠️ 生产环境请通过环境变量 JWT_SECRET 覆盖（HS256 要求至少 32 字节）
-    secret: ${JWT_SECRET:kingdom-studio-v1-secret-key-please-change-in-production-2026}
+    # 不设默认值：接入鉴权后必须由环境变量 JWT_SECRET 提供（HS256 要求至少 32 字节），
+    # 仓库里不留可用默认值，避免有人直接部署时沿用公开密钥
+    secret: ${JWT_SECRET:}
     expire-minutes: 120
     header: Authorization
     prefix: 'Bearer '

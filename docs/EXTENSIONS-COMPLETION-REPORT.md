@@ -15,8 +15,8 @@
 | Phase 5 | 演奏时间线：钢琴卷帘、按键轨、虚拟键盘、Demo 回放与按键动画 | 已完成 | 浏览器实测（含回放与定位） |
 | Phase 6 | Desktop Agent：WebSocket 协议 + 派发计划（模拟） | 已完成 | 单测 + 接口与界面实测 |
 
-**代码量**：后端扩展新增 66 个 Java 文件（57 个主代码 + 9 个测试类）、前端 `extensions/` 下 33 个文件、4 个 SQL 脚本、3 份文档。
-**测试**：后端 70 个单元测试全绿（0 失败 / 0 错误），前端 `vue-tsc --noEmit` 与 `npm run build` 均通过。
+**代码量**：后端新增 57 个主代码文件与 10 个测试类（合计 67 个 Java 文件）、前端 `extensions/` 下 33 个文件、4 个 SQL 脚本。
+**测试**：后端 73 个单元测试全绿（0 失败 / 0 错误），前端 `vue-tsc --noEmit` 与 `npm run build` 均通过。
 
 ## 二、Motion Lab（动效基因库）
 
@@ -152,6 +152,7 @@
 | `InstrumentMappingServiceTest` | 11 | 键位展开、三种策略、和弦归组、移调、导出文本、坏配置报错 |
 | `MusicTaskServiceTest` | 8 | 落库与音符数、空简谱拒绝、坏 MIDI 拒绝、404、级联删除、映射入参 |
 | `DesktopAgentServiceTest` | 10 | 命令成对、和弦同刻、重复按键顺延、时长上下限、非法键、空序列拒绝、排序 |
+| `GlobalExceptionHandlerTest` | 3 | 上传超限、唯一键冲突、字段超长：可预期的错误给可读中文提示而非「服务器内部错误」 |
 
 ## 七、怎么跑起来
 
