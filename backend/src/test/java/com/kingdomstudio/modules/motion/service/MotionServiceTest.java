@@ -87,7 +87,7 @@ class MotionServiceTest {
 		var info = motionService.moduleInfo();
 		assertEquals("motion", info.getModule());
 		assertEquals("动效基因库", info.getName());
-		assertTrue(info.getPhase().contains("v1.0.1"), "状态文案应写当前版本，而不是过程式的阶段编号：" + info.getPhase());
+		assertTrue(info.getPhase().contains("v1.1.0"), "状态文案应写当前版本，而不是过程式的阶段编号：" + info.getPhase());
 		assertTrue(info.getPhase().contains("已上线"));
 		assertFalse(info.getCapabilities().isEmpty());
 		assertEquals(List.of("motion_resource", "motion_code"), info.getPlannedTables());

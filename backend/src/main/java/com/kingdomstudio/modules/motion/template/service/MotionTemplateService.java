@@ -155,8 +155,8 @@ public class MotionTemplateService {
 		}
 		return switch (runtimeTier(template)) {
 			case "LIGHTWEIGHT" -> "纯合成属性动画（transform / opacity）：几乎无性能代价，可放心大面积使用。";
-			case "GPU_ENHANCED" -> "依赖 GPU 或逐像素计算：观感最好，低端设备/集显上可能掉帧。"
-					+ "建议开启硬件加速；移动端可减少粒子数、降低分辨率或按需启用。";
+			case "GPU_ENHANCED" -> "高级视觉效果：依赖 GPU 加速，推荐在桌面设备上查看与使用；"
+					+ "移动端启用时可适当减少粒子数量或降低分辨率。";
 			default -> "用到模糊、离屏合成或较大面积动画：桌面端无压力，低端移动端建议减少同时播放的元素数量。";
 		};
 	}

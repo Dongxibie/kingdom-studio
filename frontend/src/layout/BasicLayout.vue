@@ -69,7 +69,7 @@ const { isNarrow } = useNarrowScreen()
 				</el-sub-menu>
 			</el-menu>
 
-			<div v-show="!isNarrow" class="sidebar-footer">v1.0.1</div>
+			<div v-show="!isNarrow" class="sidebar-footer">v1.1.0</div>
 		</el-aside>
 
 		<el-container>

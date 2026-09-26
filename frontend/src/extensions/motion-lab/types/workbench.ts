@@ -197,7 +197,7 @@ export const FALLBACK_PARAMS: TemplateParam[] = [
 export const RUNTIME_TIER_META: Record<string, { label: string; tone: string; short: string }> = {
 	LIGHTWEIGHT: { label: '轻量', tone: 'light', short: '纯合成属性动画，几乎无性能代价' },
 	BALANCED: { label: '均衡', tone: 'balanced', short: '用到模糊或大面积动画，桌面端无压力' },
-	GPU_ENHANCED: { label: '依赖 GPU 加速', tone: 'gpu', short: '依赖 GPU / 逐像素计算，低端设备可能掉帧' },
+	GPU_ENHANCED: { label: '依赖 GPU 加速', tone: 'gpu', short: '高级视觉效果，依赖 GPU 加速，推荐桌面设备' },
 }
 
 /** 新手引导的场景选项：对应后端 scene 值 */

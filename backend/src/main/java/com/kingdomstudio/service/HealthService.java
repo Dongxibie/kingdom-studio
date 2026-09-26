@@ -24,7 +24,7 @@ public class HealthService {
 
 	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	private static final String APP_NAME = "kingdom-studio";
-	private static final String APP_VERSION = "v1.0.1";
+	private static final String APP_VERSION = "v1.1.0";
 	private static final int DETAIL_MAX_LENGTH = 120;
 
 	private final JdbcTemplate jdbcTemplate;

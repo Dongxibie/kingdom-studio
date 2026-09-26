@@ -2469,7 +2469,7 @@ export default function MotionDemo() {
   to { transform: translate3d(var(--m-distance), -3%, 0) scale(1.08); }
 }
 */', '', '做极光背景：两层径向渐变（青绿、紫、金 + 蓝、粉）叠加并 blur(24px)，两层以 14 秒与 22 秒不同周期、相反方向来回漂移与微缩放，形成缓慢流动的极光感，完全用 CSS。', 'aurora background', 'OFFICIAL', 'READY'),
-	('particle-network', '粒子星网', 'Particle Network', '粒子缓慢漂移，距离小于阈值时自动连线，指针附近粒子被点亮；节点数与连线阈值都可调。', '高级效果', 'AI SaaS', 'Cyber', 'Canvas', 3, 'AI 产品页,官网首页', 94, 86, 88, 80, 88, 'GPU_ENHANCED', '依赖 GPU 或逐像素计算：观感最好，但在低端设备/集显上可能掉帧。建议开启硬件加速；移动端可减少粒子数、降低分辨率或按需启用。', '[{"key": "--m-distance", "label": "连线距离", "unit": "px", "min": 60, "max": 200, "step": 10, "default": 120}, {"key": "--m-duration", "label": "粒子数", "unit": "", "min": 20, "max": 140, "step": 10, "default": 64}]', '', '<div class="motion-root motion-root--bleed">
+	('particle-network', '粒子星网', 'Particle Network', '粒子缓慢漂移，距离小于阈值时自动连线，指针附近粒子被点亮；节点数与连线阈值都可调。', '高级效果', 'AI SaaS', 'Cyber', 'Canvas', 3, 'AI 产品页,官网首页', 94, 86, 88, 80, 88, 'GPU_ENHANCED', '高级视觉效果：依赖 GPU 加速，推荐在桌面设备上查看与使用；移动端启用时可适当减少粒子数量或降低分辨率。', '[{"key": "--m-distance", "label": "连线距离", "unit": "px", "min": 60, "max": 200, "step": 10, "default": 120}, {"key": "--m-duration", "label": "粒子数", "unit": "", "min": 20, "max": 140, "step": 10, "default": 64}]', '', '<div class="motion-root motion-root--bleed">
   <canvas class="m-canvas"></canvas>
 </div>', 'var canvas = document.querySelector(''.m-canvas'');
 var ctx = canvas.getContext(''2d'');
@@ -3296,7 +3296,7 @@ export default function MotionDemo() {
   to { transform: translate3d(-160px, 90px, 0) scale(1.06); }
 }
 */', '', '做星系穿越背景：用五个不同大小与颜色的 radial-gradient 星点以 260px 平铺成星场，两层星场分别以 18 秒与 10.8 秒向对角缓慢平移并微缩放，形成视差穿越感，不使用任何图片。', 'galaxy background', 'OFFICIAL', 'READY'),
-	('shader-background', '着色器波纹', 'Shader Background', '用 Canvas 逐像素算正弦函数生成流动波纹（GLSL 着色器的等效 JS 版），可调频率与速度。', '高级效果', 'Game UI', 'Cyber', 'Canvas', 3, 'Game UI,AI 产品页', 95, 82, 84, 76, 85, 'GPU_ENHANCED', '依赖 GPU 或逐像素计算：观感最好，但在低端设备/集显上可能掉帧。建议开启硬件加速；移动端可减少粒子数、降低分辨率或按需启用。', '[{"key": "--m-duration", "label": "流动速度", "unit": "", "min": 0.2, "max": 3, "step": 0.1, "default": 1}, {"key": "--m-distance", "label": "波纹频率", "unit": "", "min": 2, "max": 16, "step": 1, "default": 7}]', '', '<div class="motion-root motion-root--bleed">
+	('shader-background', '着色器波纹', 'Shader Background', '用 Canvas 逐像素算正弦函数生成流动波纹（GLSL 着色器的等效 JS 版），可调频率与速度。', '高级效果', 'Game UI', 'Cyber', 'Canvas', 3, 'Game UI,AI 产品页', 95, 82, 84, 76, 85, 'GPU_ENHANCED', '高级视觉效果：依赖 GPU 加速，推荐在桌面设备上查看与使用；移动端启用时可适当减少粒子数量或降低分辨率。', '[{"key": "--m-duration", "label": "流动速度", "unit": "", "min": 0.2, "max": 3, "step": 0.1, "default": 1}, {"key": "--m-distance", "label": "波纹频率", "unit": "", "min": 2, "max": 16, "step": 1, "default": 7}]', '', '<div class="motion-root motion-root--bleed">
   <canvas class="m-shader"></canvas>
 </div>', 'var canvas = document.querySelector(''.m-shader'');
 var ctx = canvas.getContext(''2d'');
@@ -3444,7 +3444,7 @@ export default function MotionDemo() {
 .motion-root--bleed { padding: 0; }
 .m-shader { display: block; width: 100%; height: 100%; background: #05060a; }
 */', '', '用 Canvas 做流动波纹背景：按 1/6 分辨率逐像素计算三个正弦波叠加的值（频率 7、速度 0.02），映射到深蓝紫的 RGB 上再用 putImageData 放大绘制；用 requestAnimationFrame 驱动时间。', 'shader background', 'OFFICIAL', 'READY'),
-	('three-scene', '三维场景', 'Three.js Scene', '一组几何体在场景中自转与公转，带方向光与雾；这是 Three.js 类模板的骨架，可替换模型。', '高级效果', 'Game UI', 'Cyber', 'Three.js', 3, 'Game UI,官网首页', 96, 80, 84, 74, 85, 'GPU_ENHANCED', '依赖 GPU 或逐像素计算：观感最好，但在低端设备/集显上可能掉帧。建议开启硬件加速；移动端可减少粒子数、降低分辨率或按需启用。', '[{"key": "--m-duration", "label": "自转速度", "unit": "", "min": 0.2, "max": 3, "step": 0.1, "default": 1}]', '', '<div class="motion-root motion-root--bleed">
+	('three-scene', '三维场景', 'Three.js Scene', '一组几何体在场景中自转与公转，带方向光与雾；这是 Three.js 类模板的骨架，可替换模型。', '高级效果', 'Game UI', 'Cyber', 'Three.js', 3, 'Game UI,官网首页', 96, 80, 84, 74, 85, 'GPU_ENHANCED', '高级视觉效果：依赖 GPU 加速，推荐在桌面设备上查看与使用；移动端启用时可适当减少粒子数量或降低分辨率。', '[{"key": "--m-duration", "label": "自转速度", "unit": "", "min": 0.2, "max": 3, "step": 0.1, "default": 1}]', '', '<div class="motion-root motion-root--bleed">
   <div class="m-three"><span class="m-three-hint">Three.js</span></div>
 </div>', '// 预览用轻量等效实现：无 CDN 依赖，用 Canvas 画一组旋转的多面体线框，
 // 导出代码里给的是真正的 Three.js 版本（见「代码」页签）

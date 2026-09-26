@@ -1,5 +1,5 @@
 -- =====================================================================
--- Kingdom Studio · Motion Lab 升级（v1.1）建表脚本
+-- Kingdom Studio · Motion Lab 升级（v1.1.0）建表脚本
 -- MySQL 8.0.16+ / utf8mb4 / InnoDB
 --
 -- 三张新表：

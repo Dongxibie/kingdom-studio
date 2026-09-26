@@ -96,7 +96,7 @@ management:
 info:
   app:
     name: Kingdom Studio
-    version: v1.0.1
+    version: v1.1.0
     description: 个人开发者工作台 —— 项目王国 / 技术图鉴 / 成长时间线 / 代码知识库
 
 # 项目自定义配置

@@ -26,7 +26,7 @@ public class OpenApiConfig {
 				.info(new Info()
 						.title("Kingdom Studio API")
 						.description("个人开发者工作台 —— 项目王国 / 技术图鉴 / 成长时间线 / 代码知识库")
-						.version("v1.0.1")
+						.version("v1.1.0")
 						.license(new License().name("MIT"))
 						.contact(new Contact().name("Dongxibie").url("https://github.com/Dongxibie")))
 				.components(new Components().addSecuritySchemes("bearerAuth",

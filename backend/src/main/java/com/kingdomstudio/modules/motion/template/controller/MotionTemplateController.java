@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * Motion Lab 工作台接口（v1.1）。
+ * Motion Lab 工作台接口（v1.1.0）。
  *
  * <p>与既有的 {@code /motion}（资源 CRUD + 采集）分开：那套面向「资源管理」，
  * 这套面向「开发工作台」——模板、组合方案、发现方式与检索。
