@@ -62,6 +62,14 @@ public class MotionTemplateController {
 		return Result.success(assistantService.search(request));
 	}
 
+	@Operation(summary = "Motion Assistant（模型优先，失败回退检索）",
+			description = "理解自然语言需求 → 判断风格 → 从现有模板里挑 → 组一套组合方案并给参数建议。"
+					+ "不生成代码；未配置模型或模型失败时自动回退到内置检索，并在 source / fallbackReason 里说明")
+	@PostMapping("/assist")
+	public Result<MotionAssistantVO> assist(@Valid @RequestBody MotionSearchDTO request) {
+		return Result.success(assistantService.assist(request));
+	}
+
 	@Operation(summary = "组合方案列表", description = "按场景筛选；推荐指数为组成模板的加权平均")
 	@GetMapping("/recipes")
 	public Result<List<MotionRecipeVO>> recipes(@RequestParam(required = false) String scene) {

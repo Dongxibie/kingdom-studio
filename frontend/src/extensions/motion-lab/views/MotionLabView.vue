@@ -12,12 +12,12 @@ import MotionPreviewStage from '@/extensions/motion-lab/components/MotionPreview
 import MotionStageControls from '@/extensions/motion-lab/components/MotionStageControls.vue'
 import { fetchMotionModuleInfo } from '@/extensions/motion-lab/api/motion'
 import {
+	assistMotions,
 	fetchFacets,
 	getRecipe,
 	getTemplate,
 	listRecipes,
 	listTemplates,
-	searchMotions,
 } from '@/extensions/motion-lab/api/template'
 import type { ExtModuleInfo } from '@/extensions/_shared/types/common'
 import type {
@@ -26,9 +26,10 @@ import type {
 	MotionSearchResult,
 	MotionTemplateDetail,
 	MotionTemplateItem,
+	RecipeSuggestion,
 	TemplateQuery,
 } from '@/extensions/motion-lab/types/workbench'
-import { ONBOARDING_SCENES } from '@/extensions/motion-lab/types/workbench'
+import { ONBOARDING_SCENES, RUNTIME_TIER_META } from '@/extensions/motion-lab/types/workbench'
 
 const router = useRouter()
 
@@ -53,6 +54,8 @@ const searchLoading = ref(false)
 const searchResult = ref<MotionSearchResult | null>(null)
 
 const paramValues = ref<Record<string, number>>({})
+/** 模型给的参数建议：模板 key → 参数值；只影响「按模型方案预览」这一次 */
+const paramOverrides = ref<Record<string, Record<string, number>>>({})
 const playing = ref(true)
 const speed = ref(1)
 const scale = ref(1)
@@ -126,7 +129,16 @@ async function loadList() {
 	}
 }
 
-async function selectTemplate(templateKey: string) {
+/**
+ * 打开某个模板。
+ *
+ * <p>模型给的参数建议只属于「那一次组合方案」：手动挑别的模板就清掉，
+ * 点回方案里的成员则继续带着（keepOverrides）。
+ */
+async function selectTemplate(templateKey: string, keepOverrides = false) {
+	if (!keepOverrides) {
+		paramOverrides.value = {}
+	}
 	activeKey.value = templateKey
 	detailLoading.value = true
 	try {
@@ -153,10 +165,12 @@ async function selectRecipe(recipeKey: string) {
 	}
 }
 
-function onFacetSelect(field: 'scene' | 'style' | 'technology' | 'category' | 'difficulty', value: string) {
+function onFacetSelect(field: 'scene' | 'style' | 'technology' | 'category' | 'difficulty' | 'runtimeTier', value: string) {
 	const next: TemplateQuery = { ...query.value }
 	if (field === 'difficulty') {
 		next.difficulty = String(query.value.difficulty ?? '') === value ? undefined : Number(value)
+	} else if (field === 'runtimeTier') {
+		next.runtimeTier = query.value.runtimeTier === value ? undefined : value
 	} else if (query.value[field] === value) {
 		next[field] = undefined
 	} else {
@@ -191,12 +205,18 @@ function onQuickScene(scene: string) {
 async function onSearch(text: string) {
 	searchLoading.value = true
 	try {
-		searchResult.value = await searchMotions(text, 6)
+		// 模型优先，失败或未配置时后端回退到内置检索（返回里的 source 会说明）
+		searchResult.value = await assistMotions(text, 6)
 	} catch (error) {
 		ElMessage.error(error instanceof Error ? error.message : '检索失败')
 	} finally {
 		searchLoading.value = false
 	}
+}
+
+/** 组合方案卡片里点成员：模型的方案保留参数建议，库里的方案没有覆盖值 */
+function openMember(templateKey: string) {
+	void selectTemplate(templateKey, activeRecipe.value?.recipeKey === 'model-suggestion')
 }
 
 function onSearchPick(kind: 'TEMPLATE' | 'RECIPE', key: string) {
@@ -205,6 +225,66 @@ function onSearchPick(kind: 'TEMPLATE' | 'RECIPE', key: string) {
 	} else {
 		void selectTemplate(key)
 	}
+}
+
+/**
+ * 用模型给的组合方案直接预览。
+ *
+ * <p>不落库：这是「模型建议 + 现有模板」在界面上的临时组合，成员与参数都来自建议本身，
+ * 参数一并在预览里生效（作为该模板的参数覆盖值）。
+ */
+async function applySuggestion(suggestion: RecipeSuggestion) {
+	const memberKeys = suggestion.steps.map((step) => step.templateKey)
+	const members: MotionTemplateItem[] = []
+	const overrides: Record<string, Record<string, number>> = {}
+	for (const step of suggestion.steps) {
+		try {
+			const item = await getTemplate(step.templateKey)
+			members.push(item)
+			if (step.params) {
+				const numeric: Record<string, number> = {}
+				for (const [key, value] of Object.entries(step.params)) {
+					const parsed = typeof value === 'number' ? value : Number(value)
+					if (!Number.isNaN(parsed)) {
+						numeric[key] = parsed
+					}
+				}
+				if (Object.keys(numeric).length) {
+					overrides[step.templateKey] = numeric
+				}
+			}
+		} catch {
+			// 单个成员拉取失败就跳过，不影响整体预览
+		}
+	}
+	if (!members.length) {
+		ElMessage.warning('这套组合方案里的模板暂时取不到')
+		return
+	}
+	const score = Math.round(members.reduce((sum, item) => sum + item.score, 0) / members.length)
+	activeRecipe.value = {
+		id: 0,
+		recipeKey: 'model-suggestion',
+		name: suggestion.name,
+		description: suggestion.description,
+		scene: members[0].scene,
+		sceneLabel: members[0].sceneLabel,
+		style: members[0].style,
+		styleLabel: members[0].styleLabel,
+		bestFor: suggestion.bestFor ? suggestion.bestFor.split(',').map((item) => item.trim()) : [],
+		score,
+		stars: Math.round((score / 20) * 2) / 2,
+		grade: score >= 90 ? 'S' : score >= 80 ? 'A' : score >= 70 ? 'B' : 'C',
+		members,
+		memberKeys,
+		prompt: '',
+		manualScore: null,
+		manualReason: null,
+	}
+	// 先登记参数建议，再打开第一个成员：参数面板重建时就会用上模型给的值
+	paramOverrides.value = overrides
+	await selectTemplate(memberKeys[0], true)
+	ElMessage.success('已按模型的组合方案预览：第一个是「' + members[0].name + '」，成员可逐个点开')
 }
 
 function onRestart() {
@@ -263,7 +343,8 @@ onMounted(async () => {
 				:result="searchResult"
 				@search="onSearch"
 				@pick="onSearchPick"
-				@scene="startWith" />
+				@scene="startWith"
+				@apply-suggestion="applySuggestion" />
 		</template>
 
 		<template #left>
@@ -317,6 +398,7 @@ onMounted(async () => {
 
 				<MotionStageControls
 					:detail="detail"
+					:overrides="paramOverrides"
 					:playing="playing"
 					:speed="speed"
 					:scale="scale"
@@ -343,7 +425,7 @@ onMounted(async () => {
 							:key="member.templateKey"
 							class="mlab-member"
 							type="button"
-							@click="selectTemplate(member.templateKey)">
+							@click="openMember(member.templateKey)">
 							<span class="mlab-member-name">{{ member.name }}</span>
 							<span class="mlab-member-score">{{ member.score }}</span>
 						</button>
@@ -402,6 +484,10 @@ onMounted(async () => {
 					<div class="mlab-fit">
 						<span class="mlab-k">适合</span>
 						<span v-for="tag in detail.bestFor" :key="tag" class="mlab-chip">{{ tag }}</span>
+					</div>
+					<div class="mlab-tier" :class="'mlab-tier-' + (RUNTIME_TIER_META[detail.runtimeTier]?.tone ?? 'balanced')">
+						<span class="mlab-tier-name">{{ RUNTIME_TIER_META[detail.runtimeTier]?.label ?? detail.runtimeTierLabel }}</span>
+						<span class="mlab-tier-note">{{ detail.runtimeNote }}</span>
 					</div>
 					<div v-if="detail.manualScore" class="mlab-manual">人工评分 {{ detail.manualScore }} 星：{{ detail.manualReason }}</div>
 					<div v-if="detail.usedByRecipes.length" class="mlab-used">被「{{ detail.usedByRecipes.join('、') }}」用到</div>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { FacetOption, MotionFacets, MotionRecipe, TemplateQuery } from '@/extensions/motion-lab/types/workbench'
+import { RUNTIME_TIER_META } from '@/extensions/motion-lab/types/workbench'
 
 interface Props {
 	facets: MotionFacets | null
@@ -12,7 +13,7 @@ interface Props {
 const props = defineProps<Props>()
 const emit = defineEmits<{
 	/** 选择某个发现方式：按字段名与值筛选（再点一次取消） */
-	select: [field: 'scene' | 'style' | 'technology' | 'category' | 'difficulty', value: string]
+	select: [field: 'scene' | 'style' | 'technology' | 'category' | 'difficulty' | 'runtimeTier', value: string]
 	recipe: [recipeKey: string]
 	clear: []
 }>()
@@ -60,6 +61,23 @@ function difficultyActive(value: string) {
 					:title="`平均推荐指数 ${option.averageScore}`"
 					@click="emit('select', group.field, option.value)">
 					<span class="name">{{ option.label }}</span>
+					<span class="count">{{ option.count }}</span>
+				</button>
+			</div>
+		</div>
+
+		<div v-if="facets" class="group">
+			<div class="group-title">按性能成本</div>
+			<div class="options">
+				<button
+					v-for="option in facets.runtimeTiers"
+					:key="option.value"
+					class="option"
+					:class="{ on: query.runtimeTier === option.value }"
+					type="button"
+					:title="RUNTIME_TIER_META[option.value]?.short ?? ''"
+					@click="emit('select', 'runtimeTier', option.value)">
+					<span class="name">{{ RUNTIME_TIER_META[option.value]?.label ?? option.label }}</span>
 					<span class="count">{{ option.count }}</span>
 				</button>
 			</div>

@@ -8,16 +8,20 @@
 
 USE `kingdom_studio`;
 
+-- 连接字符集按 utf8mb4 显式设置：Windows 下 mysql 客户端默认可能是 GBK，
+-- 那样导入含中文的脚本会报 Incorrect string value，这里先把它定死，脚本换台机器也能直接跑。
+SET NAMES utf8mb4;
+
 -- ---------------------------------------------------------------------
 -- 1. 官方模板
 -- ---------------------------------------------------------------------
 INSERT INTO `motion_template`
 	(`template_key`, `name`, `name_en`, `description`, `category`, `scene`, `style`, `technology`,
 	 `difficulty`, `best_for`, `score_visual`, `score_code`, `score_reuse`, `score_perf`, `score`,
-	 `params`, `preview_url`, `preview_html`, `preview_js`, `css_code`, `vue_code`, `react_code`,
+	 `runtime_tier`, `runtime_note`,	 `params`, `preview_url`, `preview_html`, `preview_js`, `css_code`, `vue_code`, `react_code`,
 	 `three_code`, `prompt`, `tags`, `source`, `status`)
 VALUES
-	('smooth-fade', '柔和淡入', 'Smooth Fade', '最基础的入场：透明度 0 到 1，只配一条舒缓的缓动，不加位移与缩放，适合不想抢戏的内容区。', '基础交互', 'Landing Page', 'Minimal', 'CSS', 1, '官网首页,后台系统,个人作品集', 78, 96, 95, 98, 91, '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.3, "max": 3, "step": 0.1, "default": 0.9}, {"key": "--m-delay", "label": "延迟", "unit": "s", "min": 0, "max": 1.5, "step": 0.05, "default": 0}]', '', '<div class="motion-root">
+	('smooth-fade', '柔和淡入', 'Smooth Fade', '最基础的入场：透明度 0 到 1，只配一条舒缓的缓动，不加位移与缩放，适合不想抢戏的内容区。', '基础交互', 'Landing Page', 'Minimal', 'CSS', 1, '官网首页,后台系统,个人作品集', 78, 96, 95, 98, 91, 'LIGHTWEIGHT', '纯合成属性动画（transform / opacity）：几乎无性能代价，可放心大面积使用。', '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.3, "max": 3, "step": 0.1, "default": 0.9}, {"key": "--m-delay", "label": "延迟", "unit": "s", "min": 0, "max": 1.5, "step": 0.05, "default": 0}]', '', '<div class="motion-root">
   <div class="m-el"></div>
   <div class="m-el"></div>
   <div class="m-el"></div>
@@ -143,7 +147,7 @@ export default function MotionDemo() {
   to { opacity: 1; }
 }
 */', '', '用纯 CSS 实现一组元素的柔和淡入：元素从 opacity 0 过渡到 1，时长 0.9 秒、缓动 cubic-bezier(0.22,0.61,0.36,1)，三个元素依次延迟 0.12 秒出现。时长与延迟用 CSS 变量暴露，便于调参。', 'smooth fade', 'OFFICIAL', 'READY'),
-	('scale-reveal', '缩放揭示', 'Scale Reveal', '从 0.92 放大到 1 并同时淡入，比纯淡入更有「出现」的实感，适合卡片与产品图。', '基础交互', 'Portfolio', 'Luxury', 'CSS', 1, '官网首页,个人作品集', 84, 94, 92, 96, 91, '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.3, "max": 2, "step": 0.1, "default": 0.8}, {"key": "--m-scale", "label": "起始缩放", "unit": "", "min": 0.7, "max": 1, "step": 0.01, "default": 0.92}]', '', '<div class="motion-root">
+	('scale-reveal', '缩放揭示', 'Scale Reveal', '从 0.92 放大到 1 并同时淡入，比纯淡入更有「出现」的实感，适合卡片与产品图。', '基础交互', 'Portfolio', 'Luxury', 'CSS', 1, '官网首页,个人作品集', 84, 94, 92, 96, 91, 'LIGHTWEIGHT', '纯合成属性动画（transform / opacity）：几乎无性能代价，可放心大面积使用。', '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.3, "max": 2, "step": 0.1, "default": 0.8}, {"key": "--m-scale", "label": "起始缩放", "unit": "", "min": 0.7, "max": 1, "step": 0.01, "default": 0.92}]', '', '<div class="motion-root">
   <div class="m-el"></div>
   <div class="m-el"></div>
   <div class="m-el"></div>
@@ -272,7 +276,7 @@ export default function MotionDemo() {
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 */', '', '用纯 CSS 做缩放揭示：元素从 scale 0.92、透明度 0、下移 8px，过渡到原尺寸与原位置；时长 0.8 秒、缓动 ease-out 风格，三个元素依次延迟 0.1 秒。', 'scale reveal', 'OFFICIAL', 'READY'),
-	('slide-up', '向上滑入', 'Slide Up', '从下方 28px 滑入并淡入，最通用的入场方式；位移距离用变量控制，移动端可调小。', '基础交互', 'Landing Page', 'Minimal', 'CSS', 1, '官网首页,后台系统,个人作品集', 80, 96, 96, 98, 92, '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.3, "max": 2, "step": 0.1, "default": 0.85}, {"key": "--m-distance", "label": "位移", "unit": "px", "min": 8, "max": 80, "step": 2, "default": 28}]', '', '<div class="motion-root">
+	('slide-up', '向上滑入', 'Slide Up', '从下方 28px 滑入并淡入，最通用的入场方式；位移距离用变量控制，移动端可调小。', '基础交互', 'Landing Page', 'Minimal', 'CSS', 1, '官网首页,后台系统,个人作品集', 80, 96, 96, 98, 92, 'LIGHTWEIGHT', '纯合成属性动画（transform / opacity）：几乎无性能代价，可放心大面积使用。', '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.3, "max": 2, "step": 0.1, "default": 0.85}, {"key": "--m-distance", "label": "位移", "unit": "px", "min": 8, "max": 80, "step": 2, "default": 28}]', '', '<div class="motion-root">
   <div class="m-el"></div>
   <div class="m-el"></div>
   <div class="m-el"></div>
@@ -398,7 +402,7 @@ export default function MotionDemo() {
   to { opacity: 1; transform: translateY(0); }
 }
 */', '', '用纯 CSS 做向上滑入：元素从 translateY(28px)、opacity 0 进入，时长 0.85 秒，缓动使用带轻微回弹的 ease-out，多个元素依次延迟 0.1 秒。', 'slide up', 'OFFICIAL', 'READY'),
-	('blur-reveal', '模糊恢复', 'Blur Reveal', '从模糊 14px 逐渐对焦到清晰，配合淡入。看起来「更贵」，但 blur 开销较高，元素多时要节制。', '基础交互', 'AI SaaS', 'Glass', 'CSS', 2, '官网首页,AI 产品页', 88, 90, 88, 82, 87, '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.4, "max": 2.5, "step": 0.1, "default": 1.1}]', '', '<div class="motion-root">
+	('blur-reveal', '模糊恢复', 'Blur Reveal', '从模糊 14px 逐渐对焦到清晰，配合淡入。看起来「更贵」，但 blur 开销较高，元素多时要节制。', '基础交互', 'AI SaaS', 'Glass', 'CSS', 2, '官网首页,AI 产品页', 88, 90, 88, 82, 87, 'BALANCED', '用到模糊、离屏合成或较大面积动画：桌面端无压力，低端移动端建议减少同时播放的元素数量。', '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.4, "max": 2.5, "step": 0.1, "default": 1.1}]', '', '<div class="motion-root">
   <div class="m-el"></div>
   <div class="m-el"></div>
   <div class="m-el"></div>
@@ -527,7 +531,7 @@ export default function MotionDemo() {
   to { opacity: 1; filter: blur(0); transform: translateY(0); }
 }
 */', '', '用纯 CSS 做模糊恢复入场：从 filter blur(14px)、opacity 0、下移 10px，过渡到完全清晰；时长 1.1 秒，缓动 ease-out，元素之间错开 0.14 秒。注意只在少量元素上使用，避免性能问题。', 'blur reveal', 'OFFICIAL', 'READY'),
-	('magnetic-button', '磁吸按钮', 'Magnetic Button', '指针靠近时按钮向指针方向轻微位移并在离开时弹回，手感来自 JS 计算偏移 + CSS 过渡。', '基础交互', 'Landing Page', 'Cyber', 'CSS', 2, '官网首页,AI 产品页,个人作品集', 90, 88, 90, 90, 90, '[{"key": "--m-distance", "label": "吸力距离", "unit": "px", "min": 4, "max": 40, "step": 1, "default": 16}, {"key": "--m-duration", "label": "回弹时长", "unit": "s", "min": 0.1, "max": 1, "step": 0.02, "default": 0.35}]', '', '<div class="motion-root">
+	('magnetic-button', '磁吸按钮', 'Magnetic Button', '指针靠近时按钮向指针方向轻微位移并在离开时弹回，手感来自 JS 计算偏移 + CSS 过渡。', '基础交互', 'Landing Page', 'Cyber', 'CSS', 2, '官网首页,AI 产品页,个人作品集', 90, 88, 90, 90, 90, 'BALANCED', '用到模糊、离屏合成或较大面积动画：桌面端无压力，低端移动端建议减少同时播放的元素数量。', '[{"key": "--m-distance", "label": "吸力距离", "unit": "px", "min": 4, "max": 40, "step": 1, "default": 16}, {"key": "--m-duration", "label": "回弹时长", "unit": "s", "min": 0.1, "max": 1, "step": 0.02, "default": 0.35}]', '', '<div class="motion-root">
   <button class="m-magnet" type="button">Hover me</button>
 </div>', '.motion-root.addEventListener(''pointermove'', function (event) {
   var button = event.target.closest(''.m-magnet'');
@@ -654,7 +658,7 @@ export default function MotionDemo() {
 }
 .m-magnet.is-active { box-shadow: 0 20px 44px rgba(240, 205, 114, 0.45); }
 */', '', '做一个磁吸按钮：指针在按钮周围移动时，按钮朝指针方向最多偏移 16px（系数 0.35），离开后弹回原位；位移动画 0.35 秒、ease-out 缓动，激活时阴影加深。用 CSS 变量 --mx/--my 承载偏移。', 'magnetic button', 'OFFICIAL', 'READY'),
-	('glow-border', '流光描边', 'Glow Border', '用锥形渐变沿边框旋转形成流动光带，靠 mask 把渐变裁成 1px 描边，不额外增加 DOM。', '基础交互', 'AI SaaS', 'Cyber', 'CSS', 2, 'AI 产品页,后台系统', 92, 86, 88, 86, 88, '[{"key": "--m-duration", "label": "旋转周期", "unit": "s", "min": 1, "max": 8, "step": 0.5, "default": 3.6}, {"key": "--m-color", "label": "光带颜色", "unit": "", "min": 0, "max": 1, "step": 0.01, "default": 0.5}]', '', '<div class="motion-root">
+	('glow-border', '流光描边', 'Glow Border', '用锥形渐变沿边框旋转形成流动光带，靠 mask 把渐变裁成 1px 描边，不额外增加 DOM。', '基础交互', 'AI SaaS', 'Cyber', 'CSS', 2, 'AI 产品页,后台系统', 92, 86, 88, 86, 88, 'BALANCED', '用到模糊、离屏合成或较大面积动画：桌面端无压力，低端移动端建议减少同时播放的元素数量。', '[{"key": "--m-duration", "label": "旋转周期", "unit": "s", "min": 1, "max": 8, "step": 0.5, "default": 3.6}, {"key": "--m-color", "label": "光带颜色", "unit": "", "min": 0, "max": 1, "step": 0.01, "default": 0.5}]', '', '<div class="motion-root">
   <div class="m-ring"><span class="m-ring-label">AI SaaS</span></div>
 </div>', '', '.m-ring {
   position: relative;
@@ -762,7 +766,7 @@ export default function MotionDemo() {
   to { transform: rotate(1turn); }
 }
 */', '', '给卡片加流动的描边光带：用 conic-gradient 做一段高亮弧，再用 mask 的 xor 合成把渐变裁成 1px 边框，整体以 3.6 秒一圈旋转。不增加额外 DOM，边框随卡片圆角。', 'glow border', 'OFFICIAL', 'READY'),
-	('glass-card-hover', '玻璃卡片悬停', 'Glass Card Hover', '毛玻璃面板悬停时上浮、边框变亮、内部高光扫过；blur 只作用在卡片自身，代价可控。', '基础交互', 'Portfolio', 'Glass', 'CSS', 2, '个人作品集,官网首页,AI 产品页', 89, 92, 94, 84, 90, '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.2, "max": 1.2, "step": 0.05, "default": 0.45}, {"key": "--m-distance", "label": "上浮", "unit": "px", "min": 2, "max": 24, "step": 1, "default": 8}]', '', '<div class="motion-root">
+	('glass-card-hover', '玻璃卡片悬停', 'Glass Card Hover', '毛玻璃面板悬停时上浮、边框变亮、内部高光扫过；blur 只作用在卡片自身，代价可控。', '基础交互', 'Portfolio', 'Glass', 'CSS', 2, '个人作品集,官网首页,AI 产品页', 89, 92, 94, 84, 90, 'BALANCED', '用到模糊、离屏合成或较大面积动画：桌面端无压力，低端移动端建议减少同时播放的元素数量。', '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.2, "max": 1.2, "step": 0.05, "default": 0.45}, {"key": "--m-distance", "label": "上浮", "unit": "px", "min": 2, "max": 24, "step": 1, "default": 8}]', '', '<div class="motion-root">
   <div class="m-glass"><span>Glass</span></div>
 </div>', '', '.m-glass {
   position: relative;
@@ -873,7 +877,7 @@ export default function MotionDemo() {
 }
 .m-glass:hover::after { transform: translateX(120%); }
 */', '', '做一张玻璃拟态卡片：半透明背景 + backdrop-filter blur(14px) + 1px 亮边框；悬停时上浮 8px、边框变为金色，并有一道高光从左到右扫过。过渡 0.45 秒。', 'glass card hover', 'OFFICIAL', 'READY'),
-	('floating-card', '悬浮卡片', 'Floating Card', '极慢的上下浮动（6 秒一轮），给静态卡片一点呼吸感；位移很小，不影响阅读。', '基础交互', 'Portfolio', 'Organic', 'CSS', 1, '个人作品集,官网首页', 82, 94, 90, 94, 89, '[{"key": "--m-duration", "label": "浮动周期", "unit": "s", "min": 2, "max": 12, "step": 0.5, "default": 6}, {"key": "--m-distance", "label": "幅度", "unit": "px", "min": 2, "max": 24, "step": 1, "default": 10}]', '', '<div class="motion-root">
+	('floating-card', '悬浮卡片', 'Floating Card', '极慢的上下浮动（6 秒一轮），给静态卡片一点呼吸感；位移很小，不影响阅读。', '基础交互', 'Portfolio', 'Organic', 'CSS', 1, '个人作品集,官网首页', 82, 94, 90, 94, 89, 'LIGHTWEIGHT', '纯合成属性动画（transform / opacity）：几乎无性能代价，可放心大面积使用。', '[{"key": "--m-duration", "label": "浮动周期", "unit": "s", "min": 2, "max": 12, "step": 0.5, "default": 6}, {"key": "--m-distance", "label": "幅度", "unit": "px", "min": 2, "max": 24, "step": 1, "default": 10}]', '', '<div class="motion-root">
   <div class="m-el"></div>
   <div class="m-el"></div>
   <div class="m-el"></div>
@@ -999,7 +1003,7 @@ export default function MotionDemo() {
   50% { transform: translateY(calc(var(--m-distance) * -1)); }
 }
 */', '', '让几张卡片轻微悬浮：上下位移 10px、周期 6 秒、ease-in-out 循环，三个卡片用负延迟错开相位，看起来像各自在呼吸而不是整齐地一起动。', 'floating card', 'OFFICIAL', 'READY'),
-	('text-reveal', '文字揭示', 'Text Reveal', '遮罩从下往上抽出，文字像被「掀开」而不是淡入；用 clip-path 实现，无需逐字切分 DOM。', '基础交互', 'Landing Page', 'Minimal', 'CSS', 2, '官网首页,个人作品集', 86, 92, 88, 92, 89, '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.3, "max": 2, "step": 0.1, "default": 1}, {"key": "--m-delay", "label": "延迟", "unit": "s", "min": 0, "max": 1.5, "step": 0.05, "default": 0.1}]', '', '<div class="motion-root">
+	('text-reveal', '文字揭示', 'Text Reveal', '遮罩从下往上抽出，文字像被「掀开」而不是淡入；用 clip-path 实现，无需逐字切分 DOM。', '基础交互', 'Landing Page', 'Minimal', 'CSS', 2, '官网首页,个人作品集', 86, 92, 88, 92, 89, 'LIGHTWEIGHT', '纯合成属性动画（transform / opacity）：几乎无性能代价，可放心大面积使用。', '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.3, "max": 2, "step": 0.1, "default": 1}, {"key": "--m-delay", "label": "延迟", "unit": "s", "min": 0, "max": 1.5, "step": 0.05, "default": 0.1}]', '', '<div class="motion-root">
   <h2 class="m-title">Motion Lab</h2>
 </div>', '', '.m-title {
   margin: 0;
@@ -1062,7 +1066,7 @@ export default function MotionDemo() {
   to { clip-path: inset(0 0 -10% 0); transform: translateY(0); opacity: 1; }
 }
 */', '', '做一段标题揭示：用 clip-path 从底部向上展开（inset 的 bottom 从 100% 到 0），同时轻微上移 12px 并提升不透明度；时长 1 秒，延迟 0.1 秒，只需一个元素。', 'text reveal', 'OFFICIAL', 'READY'),
-	('cursor-follow', '光标跟随光斑', 'Cursor Follow', '一团柔光带阻尼地跟随指针（插值 0.12），停下即停，不硬跟；用 transform 与 will-change 控制开销。', '基础交互', 'Portfolio', 'Cyber', 'CSS', 2, '个人作品集,AI 产品页', 90, 86, 88, 80, 86, '[{"key": "--m-distance", "label": "光斑半径", "unit": "px", "min": 40, "max": 240, "step": 10, "default": 120}, {"key": "--m-duration", "label": "阻尼", "unit": "", "min": 0.04, "max": 0.4, "step": 0.01, "default": 0.12}]', '', '<div class="motion-root">
+	('cursor-follow', '光标跟随光斑', 'Cursor Follow', '一团柔光带阻尼地跟随指针（插值 0.12），停下即停，不硬跟；用 transform 与 will-change 控制开销。', '基础交互', 'Portfolio', 'Cyber', 'CSS', 2, '个人作品集,AI 产品页', 90, 86, 88, 80, 86, 'BALANCED', '用到模糊、离屏合成或较大面积动画：桌面端无压力，低端移动端建议减少同时播放的元素数量。', '[{"key": "--m-distance", "label": "光斑半径", "unit": "px", "min": 40, "max": 240, "step": 10, "default": 120}, {"key": "--m-duration", "label": "阻尼", "unit": "", "min": 0.04, "max": 0.4, "step": 0.01, "default": 0.12}]', '', '<div class="motion-root">
   <div class="m-glow"></div>
   <p class="m-hint">移动鼠标试试</p>
 </div>', 'var glow = document.querySelector(''.m-glow'');
@@ -1186,7 +1190,7 @@ export default function MotionDemo() {
 }
 .m-hint { color: rgba(232, 234, 237, 0.5); font: 500 13px/1 system-ui, "PingFang SC", sans-serif; }
 */', '', '做一团跟随鼠标的柔光：用 requestAnimationFrame 做插值跟随（系数 0.12），半径 120px 的径向渐变光斑，中心亮、边缘透明，指针停下后自然停住，不要硬贴。', 'cursor follow', 'OFFICIAL', 'READY'),
-	('hero-entrance', '首屏入场', 'Hero Entrance', '标题上移淡入 + 副标题延迟 + 按钮缩放出现，三段式错开；这是「高级感」最省力的来源。', '产品页面', 'Landing Page', 'Luxury', 'CSS', 2, '官网首页,AI 产品页', 94, 90, 92, 88, 91, '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.4, "max": 2, "step": 0.1, "default": 0.9}, {"key": "--m-distance", "label": "位移", "unit": "px", "min": 8, "max": 60, "step": 2, "default": 26}]', '', '<div class="motion-root motion-root--hero">
+	('hero-entrance', '首屏入场', 'Hero Entrance', '标题上移淡入 + 副标题延迟 + 按钮缩放出现，三段式错开；这是「高级感」最省力的来源。', '产品页面', 'Landing Page', 'Luxury', 'CSS', 2, '官网首页,AI 产品页', 94, 90, 92, 88, 91, 'BALANCED', '用到模糊、离屏合成或较大面积动画：桌面端无压力，低端移动端建议减少同时播放的元素数量。', '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.4, "max": 2, "step": 0.1, "default": 0.9}, {"key": "--m-distance", "label": "位移", "unit": "px", "min": 8, "max": 60, "step": 2, "default": 26}]', '', '<div class="motion-root motion-root--hero">
   <h1 class="m-hero-title">Build in motion</h1>
   <p class="m-hero-sub">动效不是装饰，是节奏。</p>
   <button class="m-hero-cta" type="button">开始体验</button>
@@ -1288,7 +1292,7 @@ export default function MotionDemo() {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 */', '', '做首屏入场动画：标题从下方 26px 上移淡入，副标题延迟 0.14 秒，按钮再延迟 0.14 秒并用 scale(0.98)→1 出现；整体 0.9 秒、缓动 cubic-bezier(0.22,0.61,0.36,1)，三段节奏递进而不是同时出现。', 'hero entrance', 'OFFICIAL', 'READY'),
-	('dashboard-counter', '数字滚动', 'Dashboard Counter', '数字从 0 递增到目标值，带千分位；用 JS 插值而不是 CSS counter，才能控制缓动与格式。', '产品页面', 'Dashboard', 'Minimal', 'CSS', 2, '后台系统,数据看板', 76, 92, 90, 96, 88, '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.4, "max": 4, "step": 0.1, "default": 1.6}]', '', '<div class="motion-root">
+	('dashboard-counter', '数字滚动', 'Dashboard Counter', '数字从 0 递增到目标值，带千分位；用 JS 插值而不是 CSS counter，才能控制缓动与格式。', '产品页面', 'Dashboard', 'Minimal', 'CSS', 2, '后台系统,数据看板', 76, 92, 90, 96, 88, 'LIGHTWEIGHT', '纯合成属性动画（transform / opacity）：几乎无性能代价，可放心大面积使用。', '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.4, "max": 4, "step": 0.1, "default": 1.6}]', '', '<div class="motion-root">
   <div class="m-stat">
     <div class="m-stat-value" data-target="128450">0</div>
     <div class="m-stat-label">本月访问</div>
@@ -1385,7 +1389,7 @@ export default function MotionDemo() {
 }
 .m-stat-label { margin-top: 8px; color: rgba(232, 234, 237, 0.55); font: 500 12px/1 system-ui, "PingFang SC", sans-serif; }
 */', '', '做一个数字滚动组件：从 0 递增到 128450，1.6 秒内完成，缓动为 easeOutCubic，过程中用千分位格式化，结束后停在最终值。用 requestAnimationFrame 而不是 setInterval 累加。', 'dashboard counter', 'OFFICIAL', 'READY'),
-	('card-stagger', '卡片错落入场', 'Card Stagger', '一排卡片依次浮现，延迟按序号递增；关键是「依次」而不是「同时」，节奏差就是质感差。', '产品页面', 'Landing Page', 'Minimal', 'CSS', 1, '官网首页,后台系统,个人作品集', 84, 96, 94, 96, 92, '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.2, "max": 1.5, "step": 0.05, "default": 0.6}, {"key": "--m-distance", "label": "位移", "unit": "px", "min": 4, "max": 40, "step": 1, "default": 16}]', '', '<div class="motion-root motion-root--row">
+	('card-stagger', '卡片错落入场', 'Card Stagger', '一排卡片依次浮现，延迟按序号递增；关键是「依次」而不是「同时」，节奏差就是质感差。', '产品页面', 'Landing Page', 'Minimal', 'CSS', 1, '官网首页,后台系统,个人作品集', 84, 96, 94, 96, 92, 'LIGHTWEIGHT', '纯合成属性动画（transform / opacity）：几乎无性能代价，可放心大面积使用。', '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.2, "max": 1.5, "step": 0.05, "default": 0.6}, {"key": "--m-distance", "label": "位移", "unit": "px", "min": 4, "max": 40, "step": 1, "default": 16}]', '', '<div class="motion-root motion-root--row">
   <div class="m-el"></div>
   <div class="m-el"></div>
   <div class="m-el"></div>
@@ -1517,7 +1521,7 @@ export default function MotionDemo() {
   to { opacity: 1; transform: translateY(0); }
 }
 */', '', '做卡片错落入场：三张卡片依次浮现，每张延迟 0.09 秒，单张时长 0.6 秒，从下方 16px 上移并淡入；延迟用 nth-child 写，避免为每个卡片加行内样式。', 'card stagger', 'OFFICIAL', 'READY'),
-	('page-transition', '页面转场', 'Page Transition', '新页面从右侧滑入并淡入，旧页面轻微左移淡出；让路由切换有方向感，而不是硬切。', '产品页面', 'Dashboard', 'Minimal', 'CSS', 2, '后台系统,官网首页', 78, 90, 88, 92, 86, '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.2, "max": 1.2, "step": 0.05, "default": 0.45}, {"key": "--m-distance", "label": "位移", "unit": "px", "min": 8, "max": 80, "step": 2, "default": 32}]', '', '<div class="motion-root">
+	('page-transition', '页面转场', 'Page Transition', '新页面从右侧滑入并淡入，旧页面轻微左移淡出；让路由切换有方向感，而不是硬切。', '产品页面', 'Dashboard', 'Minimal', 'CSS', 2, '后台系统,官网首页', 78, 90, 88, 92, 86, 'LIGHTWEIGHT', '纯合成属性动画（transform / opacity）：几乎无性能代价，可放心大面积使用。', '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.2, "max": 1.2, "step": 0.05, "default": 0.45}, {"key": "--m-distance", "label": "位移", "unit": "px", "min": 8, "max": 80, "step": 2, "default": 32}]', '', '<div class="motion-root">
   <div class="m-panel">页面内容</div>
 </div>', '', '.m-panel {
   width: min(320px, 80%);
@@ -1583,7 +1587,7 @@ export default function MotionDemo() {
   to { opacity: 1; transform: translateX(0); filter: blur(0); }
 }
 */', '', '做页面转场：新页面面板从右侧 32px 滑入并淡入，同时从 blur(2px) 变清晰，时长 0.45 秒；旧页面用反向的 translateX(-16px) + opacity 0 淡出，两者时间重叠形成交叠转场。', 'page transition', 'OFFICIAL', 'READY'),
-	('modal-morph', '弹窗形变', 'Modal Morph', '弹窗从触发按钮的位置放大出现（transform-origin 对准按钮），关闭时缩回，空间关系清楚。', '产品页面', 'Dashboard', 'Glass', 'CSS', 3, '后台系统,AI 产品页', 88, 84, 86, 88, 86, '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.2, "max": 1, "step": 0.05, "default": 0.36}, {"key": "--m-scale", "label": "起始缩放", "unit": "", "min": 0.6, "max": 1, "step": 0.01, "default": 0.86}]', '', '<div class="motion-root">
+	('modal-morph', '弹窗形变', 'Modal Morph', '弹窗从触发按钮的位置放大出现（transform-origin 对准按钮），关闭时缩回，空间关系清楚。', '产品页面', 'Dashboard', 'Glass', 'CSS', 3, '后台系统,AI 产品页', 88, 84, 86, 88, 86, 'BALANCED', '用到模糊、离屏合成或较大面积动画：桌面端无压力，低端移动端建议减少同时播放的元素数量。', '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.2, "max": 1, "step": 0.05, "default": 0.36}, {"key": "--m-scale", "label": "起始缩放", "unit": "", "min": 0.6, "max": 1, "step": 0.01, "default": 0.86}]', '', '<div class="motion-root">
   <button class="m-trigger" type="button">打开弹窗</button>
   <div class="m-modal" hidden>
     <div class="m-modal-body">
@@ -1752,7 +1756,7 @@ export default function MotionDemo() {
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 */', '', '做弹窗形变：弹窗从触发按钮方向放大出现（transform-origin 放在左下 20%/80%），从 scale 0.86、下移 12px、透明到原尺寸；时长 0.36 秒，关闭时反向缩回。遮罩用半透明 + blur(6px)。', 'modal morph', 'OFFICIAL', 'READY'),
-	('notification-popup', '通知弹入', 'Notification Popup', '右上角通知从右侧滑入并轻微回弹，自动消失前有一次「呼吸」提示；不打断操作。', '产品页面', 'Dashboard', 'Minimal', 'CSS', 2, '后台系统,AI 产品页', 80, 92, 90, 94, 88, '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.2, "max": 1, "step": 0.05, "default": 0.5}, {"key": "--m-distance", "label": "位移", "unit": "px", "min": 12, "max": 80, "step": 2, "default": 40}]', '', '<div class="motion-root">
+	('notification-popup', '通知弹入', 'Notification Popup', '右上角通知从右侧滑入并轻微回弹，自动消失前有一次「呼吸」提示；不打断操作。', '产品页面', 'Dashboard', 'Minimal', 'CSS', 2, '后台系统,AI 产品页', 80, 92, 90, 94, 88, 'LIGHTWEIGHT', '纯合成属性动画（transform / opacity）：几乎无性能代价，可放心大面积使用。', '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.2, "max": 1, "step": 0.05, "default": 0.5}, {"key": "--m-distance", "label": "位移", "unit": "px", "min": 12, "max": 80, "step": 2, "default": 40}]', '', '<div class="motion-root">
   <div class="m-toast">
     <span class="m-dot"></span>
     <div><strong>构建完成</strong><p>3 个动效模板已更新</p></div>
@@ -1884,7 +1888,7 @@ export default function MotionDemo() {
   50% { box-shadow: 0 0 0 8px rgba(126, 224, 162, 0.08); }
 }
 */', '', '做通知弹入：通知卡从右侧 40px 滑入，缓动用能产生轻微回弹的 cubic-bezier(0.16,1,0.3,1)，时长 0.5 秒；左侧状态点用呼吸光环循环提示，整体不遮挡主操作区。', 'notification popup', 'OFFICIAL', 'READY'),
-	('pricing-card-hover', '价格卡对比', 'Pricing Card Hover', '被选中的价格卡抬起、描边点亮，未选中的轻微变暗；用兄弟选择器做对比，突出推荐档位。', '产品页面', 'Landing Page', 'Minimal', 'CSS', 2, '官网首页,AI 产品页', 86, 92, 92, 92, 90, '[{"key": "--m-distance", "label": "抬起", "unit": "px", "min": 2, "max": 24, "step": 1, "default": 10}, {"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.2, "max": 1, "step": 0.05, "default": 0.4}]', '', '<div class="motion-root motion-root--row">
+	('pricing-card-hover', '价格卡对比', 'Pricing Card Hover', '被选中的价格卡抬起、描边点亮，未选中的轻微变暗；用兄弟选择器做对比，突出推荐档位。', '产品页面', 'Landing Page', 'Minimal', 'CSS', 2, '官网首页,AI 产品页', 86, 92, 92, 92, 90, 'LIGHTWEIGHT', '纯合成属性动画（transform / opacity）：几乎无性能代价，可放心大面积使用。', '[{"key": "--m-distance", "label": "抬起", "unit": "px", "min": 2, "max": 24, "step": 1, "default": 10}, {"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.2, "max": 1, "step": 0.05, "default": 0.4}]', '', '<div class="motion-root motion-root--row">
   <div class="m-plan"><b>基础</b><span>¥0</span></div>
   <div class="m-plan m-plan--hot"><b>专业</b><span>¥39</span></div>
   <div class="m-plan"><b>团队</b><span>¥99</span></div>
@@ -1980,7 +1984,7 @@ export default function MotionDemo() {
   box-shadow: 0 22px 46px rgba(0, 0, 0, 0.5);
 }
 */', '', '做价格卡对比交互：鼠标进入某张卡时它抬起 10px、描边点亮、阴影加深，同时其余卡片降到 0.62 不透明度；过渡 0.4 秒，推荐档位默认就抬高 6px。', 'pricing card hover', 'OFFICIAL', 'READY'),
-	('login-animation', '登录页入场', 'Login Animation', '登录卡片整体上浮淡入，输入框自上而下依次出现；顺序比动效本身更重要，视线跟着字段走。', '产品页面', 'Login', 'Glass', 'CSS', 2, '登录页,后台系统', 84, 90, 90, 90, 88, '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.3, "max": 1.6, "step": 0.1, "default": 0.7}, {"key": "--m-distance", "label": "位移", "unit": "px", "min": 8, "max": 48, "step": 2, "default": 20}]', '', '<div class="motion-root">
+	('login-animation', '登录页入场', 'Login Animation', '登录卡片整体上浮淡入，输入框自上而下依次出现；顺序比动效本身更重要，视线跟着字段走。', '产品页面', 'Login', 'Glass', 'CSS', 2, '登录页,后台系统', 84, 90, 90, 90, 88, 'BALANCED', '用到模糊、离屏合成或较大面积动画：桌面端无压力，低端移动端建议减少同时播放的元素数量。', '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.3, "max": 1.6, "step": 0.1, "default": 0.7}, {"key": "--m-distance", "label": "位移", "unit": "px", "min": 8, "max": 48, "step": 2, "default": 20}]', '', '<div class="motion-root">
   <form class="m-login">
     <div class="m-login-title">Welcome back</div>
     <div class="m-field"></div>
@@ -2124,7 +2128,7 @@ export default function MotionDemo() {
   to { opacity: 1; transform: translateY(0); }
 }
 */', '', '做登录卡片入场：卡片整体从下方 20px 上浮淡入（0.7 秒），卡片内两个输入框与提交按钮依次延迟 0.1 秒出现，形成自上而下的视线引导；卡片用玻璃拟态。', 'login animation', 'OFFICIAL', 'READY'),
-	('scroll-reveal', '滚动逐级点亮', 'Scroll Reveal', '元素进入视口时点亮（IntersectionObserver 触发一次），离开不重置；滚动叙事的基础件。', '产品页面', 'Landing Page', 'Minimal', 'CSS', 2, '官网首页,个人作品集', 88, 92, 94, 90, 91, '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.3, "max": 1.6, "step": 0.1, "default": 0.8}, {"key": "--m-distance", "label": "位移", "unit": "px", "min": 8, "max": 60, "step": 2, "default": 24}]', '', '<div class="motion-root motion-root--scroll">
+	('scroll-reveal', '滚动逐级点亮', 'Scroll Reveal', '元素进入视口时点亮（IntersectionObserver 触发一次），离开不重置；滚动叙事的基础件。', '产品页面', 'Landing Page', 'Minimal', 'CSS', 2, '官网首页,个人作品集', 88, 92, 94, 90, 91, 'BALANCED', '用到模糊、离屏合成或较大面积动画：桌面端无压力，低端移动端建议减少同时播放的元素数量。', '[{"key": "--m-duration", "label": "时长", "unit": "s", "min": 0.3, "max": 1.6, "step": 0.1, "default": 0.8}, {"key": "--m-distance", "label": "位移", "unit": "px", "min": 8, "max": 60, "step": 2, "default": 24}]', '', '<div class="motion-root motion-root--scroll">
   <section class="m-section">第一屏</section>
   <section class="m-section m-section--next">滚动到这里</section>
   <section class="m-section">第三屏</section>
@@ -2236,7 +2240,7 @@ export default function MotionDemo() {
 }
 .m-section.is-in { opacity: 1; transform: translateY(0); }
 */', '', '做滚动逐级点亮：用 IntersectionObserver（阈值 0.25）监听区块，进入视口后加 is-in 类，从下方 24px 上移淡入 0.8 秒，触发后即取消监听，滚回去不重置。', 'scroll reveal', 'OFFICIAL', 'READY'),
-	('image-parallax', '视差图层', 'Image Parallax', '鼠标移动时前后图层以不同幅度位移，形成纵深感；只用 transform，不触发布局。', '产品页面', 'Portfolio', 'Luxury', 'CSS', 2, '个人作品集,官网首页', 87, 88, 90, 84, 87, '[{"key": "--m-distance", "label": "位移幅度", "unit": "px", "min": 6, "max": 60, "step": 2, "default": 22}, {"key": "--m-duration", "label": "跟随时长", "unit": "s", "min": 0.1, "max": 1, "step": 0.05, "default": 0.4}]', '', '<div class="motion-root">
+	('image-parallax', '视差图层', 'Image Parallax', '鼠标移动时前后图层以不同幅度位移，形成纵深感；只用 transform，不触发布局。', '产品页面', 'Portfolio', 'Luxury', 'CSS', 2, '个人作品集,官网首页', 87, 88, 90, 84, 87, 'BALANCED', '用到模糊、离屏合成或较大面积动画：桌面端无压力，低端移动端建议减少同时播放的元素数量。', '[{"key": "--m-distance", "label": "位移幅度", "unit": "px", "min": 6, "max": 60, "step": 2, "default": 22}, {"key": "--m-duration", "label": "跟随时长", "unit": "s", "min": 0.1, "max": 1, "step": 0.05, "default": 0.4}]', '', '<div class="motion-root">
   <div class="m-layer m-layer--back"></div>
   <div class="m-layer m-layer--mid"></div>
   <div class="m-layer m-layer--front"></div>
@@ -2348,7 +2352,7 @@ export default function MotionDemo() {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
 }
 */', '', '做视差图层：三个图层随鼠标移动以 0.4 / 0.8 / 1.4 倍的不同幅度位移（最多 22px），用 transform 保证不触发布局重排，过渡 0.4 秒让跟随带一点滞后感。', 'image parallax', 'OFFICIAL', 'READY'),
-	('aurora-background', '极光背景', 'Aurora Background', '多层径向渐变以不同速度和方向缓慢漂移，形成极光流动；纯 CSS，无需 WebGL。', '高级效果', 'AI SaaS', 'Cyber', 'CSS', 2, 'AI 产品页,官网首页', 93, 92, 90, 82, 90, '[{"key": "--m-duration", "label": "漂移周期", "unit": "s", "min": 4, "max": 30, "step": 1, "default": 14}, {"key": "--m-distance", "label": "漂移幅度", "unit": "%", "min": 2, "max": 30, "step": 1, "default": 12}]', '', '<div class="motion-root motion-root--bleed">
+	('aurora-background', '极光背景', 'Aurora Background', '多层径向渐变以不同速度和方向缓慢漂移，形成极光流动；纯 CSS，无需 WebGL。', '高级效果', 'AI SaaS', 'Cyber', 'CSS', 2, 'AI 产品页,官网首页', 93, 92, 90, 82, 90, 'BALANCED', '用到模糊、离屏合成或较大面积动画：桌面端无压力，低端移动端建议减少同时播放的元素数量。', '[{"key": "--m-duration", "label": "漂移周期", "unit": "s", "min": 4, "max": 30, "step": 1, "default": 14}, {"key": "--m-distance", "label": "漂移幅度", "unit": "%", "min": 2, "max": 30, "step": 1, "default": 12}]', '', '<div class="motion-root motion-root--bleed">
   <div class="m-aurora"></div>
 </div>', '', '.motion-root--bleed { padding: 0; }
 .m-aurora {
@@ -2465,7 +2469,7 @@ export default function MotionDemo() {
   to { transform: translate3d(var(--m-distance), -3%, 0) scale(1.08); }
 }
 */', '', '做极光背景：两层径向渐变（青绿、紫、金 + 蓝、粉）叠加并 blur(24px)，两层以 14 秒与 22 秒不同周期、相反方向来回漂移与微缩放，形成缓慢流动的极光感，完全用 CSS。', 'aurora background', 'OFFICIAL', 'READY'),
-	('particle-network', '粒子星网', 'Particle Network', '粒子缓慢漂移，距离小于阈值时自动连线，指针附近粒子被点亮；节点数与连线阈值都可调。', '高级效果', 'AI SaaS', 'Cyber', 'Canvas', 3, 'AI 产品页,官网首页', 94, 86, 88, 80, 88, '[{"key": "--m-distance", "label": "连线距离", "unit": "px", "min": 60, "max": 200, "step": 10, "default": 120}, {"key": "--m-duration", "label": "粒子数", "unit": "", "min": 20, "max": 140, "step": 10, "default": 64}]', '', '<div class="motion-root motion-root--bleed">
+	('particle-network', '粒子星网', 'Particle Network', '粒子缓慢漂移，距离小于阈值时自动连线，指针附近粒子被点亮；节点数与连线阈值都可调。', '高级效果', 'AI SaaS', 'Cyber', 'Canvas', 3, 'AI 产品页,官网首页', 94, 86, 88, 80, 88, 'GPU_ENHANCED', '依赖 GPU 或逐像素计算：观感最好，但在低端设备/集显上可能掉帧。建议开启硬件加速；移动端可减少粒子数、降低分辨率或按需启用。', '[{"key": "--m-distance", "label": "连线距离", "unit": "px", "min": 60, "max": 200, "step": 10, "default": 120}, {"key": "--m-duration", "label": "粒子数", "unit": "", "min": 20, "max": 140, "step": 10, "default": 64}]', '', '<div class="motion-root motion-root--bleed">
   <canvas class="m-canvas"></canvas>
 </div>', 'var canvas = document.querySelector(''.m-canvas'');
 var ctx = canvas.getContext(''2d'');
@@ -2676,7 +2680,7 @@ export default function MotionDemo() {
 .motion-root--bleed { padding: 0; }
 .m-canvas { display: block; width: 100%; height: 100%; background: radial-gradient(120% 100% at 50% 0%, #0b0d14, #05060a 70%); }
 */', '', '用 Canvas 做粒子星网：64 个粒子以 0.35 的初速度漂移并碰壁反弹，距离小于 120px 的粒子间画一条随距离衰减的细线；指针 140px 内的粒子放大并变为金色。用 requestAnimationFrame 绘制，尺寸变化时重建。', 'particle network', 'OFFICIAL', 'READY'),
-	('tilt-card-3d', '三维倾斜卡', '3D Tilt Card', '卡片随指针做透视倾斜，并有高光跟随；倾斜角度与透视距离可调，离开时回正。', '高级效果', 'Portfolio', 'Luxury', 'CSS', 2, '个人作品集,官网首页', 92, 90, 92, 86, 90, '[{"key": "--m-distance", "label": "倾斜角度", "unit": "deg", "min": 4, "max": 24, "step": 1, "default": 12}, {"key": "--m-duration", "label": "回正时长", "unit": "s", "min": 0.1, "max": 1, "step": 0.05, "default": 0.4}]', '', '<div class="motion-root">
+	('tilt-card-3d', '三维倾斜卡', '3D Tilt Card', '卡片随指针做透视倾斜，并有高光跟随；倾斜角度与透视距离可调，离开时回正。', '高级效果', 'Portfolio', 'Luxury', 'CSS', 2, '个人作品集,官网首页', 92, 90, 92, 86, 90, 'BALANCED', '用到模糊、离屏合成或较大面积动画：桌面端无压力，低端移动端建议减少同时播放的元素数量。', '[{"key": "--m-distance", "label": "倾斜角度", "unit": "deg", "min": 4, "max": 24, "step": 1, "default": 12}, {"key": "--m-duration", "label": "回正时长", "unit": "s", "min": 0.1, "max": 1, "step": 0.05, "default": 0.4}]', '', '<div class="motion-root">
   <div class="m-tilt"><span class="m-tilt-shine"></span><strong>3D Tilt</strong></div>
 </div>', 'var card = document.querySelector(''.m-tilt'');
 var shine = document.querySelector(''.m-tilt-shine'');
@@ -2827,7 +2831,7 @@ export default function MotionDemo() {
 }
 .m-tilt strong { position: relative; z-index: 1; }
 */', '', '做三维倾斜卡：指针在卡片上移动时按归一化坐标计算 rotateX/rotateY（最大 12 度），父容器 perspective 900px；同时有一团高光跟指针走，离开时 0.4 秒回正。', 'tilt card 3d', 'OFFICIAL', 'READY'),
-	('liquid-gradient', '流体质感渐变', 'Liquid Gradient', '背景渐变的色标位置缓慢游走，像液体在流动；用 background-position 动画，几乎零开销。', '高级效果', 'Landing Page', 'Organic', 'CSS', 2, '官网首页,个人作品集', 89, 92, 88, 88, 89, '[{"key": "--m-duration", "label": "周期", "unit": "s", "min": 2, "max": 20, "step": 1, "default": 9}]', '', '<div class="motion-root motion-root--bleed">
+	('liquid-gradient', '流体质感渐变', 'Liquid Gradient', '背景渐变的色标位置缓慢游走，像液体在流动；用 background-position 动画，几乎零开销。', '高级效果', 'Landing Page', 'Organic', 'CSS', 2, '官网首页,个人作品集', 89, 92, 88, 88, 89, 'BALANCED', '用到模糊、离屏合成或较大面积动画：桌面端无压力，低端移动端建议减少同时播放的元素数量。', '[{"key": "--m-duration", "label": "周期", "unit": "s", "min": 2, "max": 20, "step": 1, "default": 9}]', '', '<div class="motion-root motion-root--bleed">
   <div class="m-liquid"></div>
 </div>', '', '.motion-root--bleed { padding: 0; }
 .m-liquid {
@@ -2914,7 +2918,7 @@ export default function MotionDemo() {
   100% { background-position: 0% 50%; }
 }
 */', '', '做流体渐变背景：五段深色渐变（紫、墨绿、棕、蓝）以 300% 的尺寸铺开，background-position 在 9 秒内 0%→100%→0% 来回移动，边缘再加一层径向暗角压住视线。', 'liquid gradient', 'OFFICIAL', 'READY'),
-	('noise-texture', '噪点质感', 'Noise Texture', '用内联 SVG 的 feTurbulence 做细颗粒噪点，叠在纯色上消除塑料感；静态零开销。', '高级效果', 'Portfolio', 'Organic', 'CSS', 1, '个人作品集,官网首页', 78, 96, 92, 94, 89, '[{"key": "--m-distance", "label": "颗粒强度", "unit": "%", "min": 4, "max": 40, "step": 2, "default": 14}]', '', '<div class="motion-root motion-root--bleed">
+	('noise-texture', '噪点质感', 'Noise Texture', '用内联 SVG 的 feTurbulence 做细颗粒噪点，叠在纯色上消除塑料感；静态零开销。', '高级效果', 'Portfolio', 'Organic', 'CSS', 1, '个人作品集,官网首页', 78, 96, 92, 94, 89, 'LIGHTWEIGHT', '纯合成属性动画（transform / opacity）：几乎无性能代价，可放心大面积使用。', '[{"key": "--m-distance", "label": "颗粒强度", "unit": "%", "min": 4, "max": 40, "step": 2, "default": 14}]', '', '<div class="motion-root motion-root--bleed">
   <div class="m-noise"></div>
 </div>', '', '.motion-root--bleed { padding: 0; }
 .m-noise {
@@ -2980,7 +2984,7 @@ export default function MotionDemo() {
   background-image: url("data:image/svg+xml,%3Csvg xmlns=''http://www.w3.org/2000/svg'' width=''160'' height=''160''%3E%3Cfilter id=''n''%3E%3CfeTurbulence type=''fractalNoise'' baseFrequency=''0.85'' numOctaves=''3''/%3E%3C/filter%3E%3Crect width=''160'' height=''160'' filter=''url(%23n)''/%3E%3C/svg%3E");
 }
 */', '', '给深色背景加细颗粒噪点：用内联 SVG 的 feTurbulence（baseFrequency 0.85、3 个八度）生成噪点，以 0.16 不透明度和 overlay 混合模式叠加，消除纯色背景的塑料感。', 'noise texture', 'OFFICIAL', 'READY'),
-	('mesh-gradient', '网格渐变', 'Mesh Gradient', '多个色块在网格上错位缩放，形成类似 Figma Mesh 的多点渐变；比单点径向渐变更有层次。', '高级效果', 'AI SaaS', 'Cyber', 'CSS', 2, 'AI 产品页,官网首页', 90, 92, 90, 86, 90, '[{"key": "--m-duration", "label": "周期", "unit": "s", "min": 4, "max": 30, "step": 1, "default": 16}, {"key": "--m-scale", "label": "色块缩放", "unit": "", "min": 1, "max": 1.8, "step": 0.05, "default": 1.35}]', '', '<div class="motion-root motion-root--bleed">
+	('mesh-gradient', '网格渐变', 'Mesh Gradient', '多个色块在网格上错位缩放，形成类似 Figma Mesh 的多点渐变；比单点径向渐变更有层次。', '高级效果', 'AI SaaS', 'Cyber', 'CSS', 2, 'AI 产品页,官网首页', 90, 92, 90, 86, 90, 'BALANCED', '用到模糊、离屏合成或较大面积动画：桌面端无压力，低端移动端建议减少同时播放的元素数量。', '[{"key": "--m-duration", "label": "周期", "unit": "s", "min": 4, "max": 30, "step": 1, "default": 16}, {"key": "--m-scale", "label": "色块缩放", "unit": "", "min": 1, "max": 1.8, "step": 0.05, "default": 1.35}]', '', '<div class="motion-root motion-root--bleed">
   <div class="m-mesh"></div>
 </div>', '', '.motion-root--bleed { padding: 0; }
 .m-mesh {
@@ -3094,7 +3098,7 @@ export default function MotionDemo() {
   to { transform: scale(var(--m-scale)) translate3d(2%, 2%, 0); }
 }
 */', '', '做网格渐变背景：两层各含 3-5 个径向色斑（蓝、金、紫、青、玫红），两层以 16 秒与 21 秒相反方向缓慢缩放（最大 1.35 倍）与位移，做出 Figma Mesh 那种多点流动感。', 'mesh gradient', 'OFFICIAL', 'READY'),
-	('floating-orb', '浮动光球', 'Floating Orb', '一颗带内发光与投影的球体在三维空间里缓慢漂浮旋转，适合做视觉焦点或加载态。', '高级效果', 'AI SaaS', 'Luxury', 'CSS', 1, 'AI 产品页,个人作品集', 85, 94, 90, 90, 90, '[{"key": "--m-distance", "label": "漂移幅度", "unit": "px", "min": 6, "max": 40, "step": 2, "default": 18}, {"key": "--m-duration", "label": "周期", "unit": "s", "min": 2, "max": 14, "step": 1, "default": 8}]', '', '<div class="motion-root">
+	('floating-orb', '浮动光球', 'Floating Orb', '一颗带内发光与投影的球体在三维空间里缓慢漂浮旋转，适合做视觉焦点或加载态。', '高级效果', 'AI SaaS', 'Luxury', 'CSS', 1, 'AI 产品页,个人作品集', 85, 94, 90, 90, 90, 'BALANCED', '用到模糊、离屏合成或较大面积动画：桌面端无压力，低端移动端建议减少同时播放的元素数量。', '[{"key": "--m-distance", "label": "漂移幅度", "unit": "px", "min": 6, "max": 40, "step": 2, "default": 18}, {"key": "--m-duration", "label": "周期", "unit": "s", "min": 2, "max": 14, "step": 1, "default": 8}]', '', '<div class="motion-root">
   <div class="m-orb"></div>
 </div>', '', '.m-orb {
   width: 130px;
@@ -3172,7 +3176,7 @@ export default function MotionDemo() {
   to { transform: translate3d(var(--m-distance), calc(var(--m-distance) * 0.5), 0) rotate(8deg); }
 }
 */', '', '做一颗浮动光球：用三层 radial-gradient 叠出球体的高光、暗部与反光，外加金色外发光；以 8 秒周期左右漂移 ±18px 并轻微自转，缓动 ease-in-out 往返。', 'floating orb', 'OFFICIAL', 'READY'),
-	('galaxy-background', '星系背景', 'Galaxy Background', '多层星点以不同速度横向掠过，形成星际穿越感；用 repeating-radial-gradient 生成星场，无需图片。', '高级效果', 'Landing Page', 'Cyber', 'CSS', 2, '官网首页,Game UI', 88, 90, 86, 88, 88, '[{"key": "--m-duration", "label": "穿越周期", "unit": "s", "min": 6, "max": 40, "step": 2, "default": 18}, {"key": "--m-distance", "label": "星密度", "unit": "%", "min": 6, "max": 30, "step": 2, "default": 14}]', '', '<div class="motion-root motion-root--bleed">
+	('galaxy-background', '星系背景', 'Galaxy Background', '多层星点以不同速度横向掠过，形成星际穿越感；用 repeating-radial-gradient 生成星场，无需图片。', '高级效果', 'Landing Page', 'Cyber', 'CSS', 2, '官网首页,Game UI', 88, 90, 86, 88, 88, 'BALANCED', '用到模糊、离屏合成或较大面积动画：桌面端无压力，低端移动端建议减少同时播放的元素数量。', '[{"key": "--m-duration", "label": "穿越周期", "unit": "s", "min": 6, "max": 40, "step": 2, "default": 18}, {"key": "--m-distance", "label": "星密度", "unit": "%", "min": 6, "max": 30, "step": 2, "default": 14}]', '', '<div class="motion-root motion-root--bleed">
   <div class="m-galaxy"></div>
 </div>', '', '.motion-root--bleed { padding: 0; }
 .m-galaxy {
@@ -3292,7 +3296,7 @@ export default function MotionDemo() {
   to { transform: translate3d(-160px, 90px, 0) scale(1.06); }
 }
 */', '', '做星系穿越背景：用五个不同大小与颜色的 radial-gradient 星点以 260px 平铺成星场，两层星场分别以 18 秒与 10.8 秒向对角缓慢平移并微缩放，形成视差穿越感，不使用任何图片。', 'galaxy background', 'OFFICIAL', 'READY'),
-	('shader-background', '着色器波纹', 'Shader Background', '用 Canvas 逐像素算正弦函数生成流动波纹（GLSL 着色器的等效 JS 版），可调频率与速度。', '高级效果', 'Game UI', 'Cyber', 'Canvas', 3, 'Game UI,AI 产品页', 95, 82, 84, 76, 85, '[{"key": "--m-duration", "label": "流动速度", "unit": "", "min": 0.2, "max": 3, "step": 0.1, "default": 1}, {"key": "--m-distance", "label": "波纹频率", "unit": "", "min": 2, "max": 16, "step": 1, "default": 7}]', '', '<div class="motion-root motion-root--bleed">
+	('shader-background', '着色器波纹', 'Shader Background', '用 Canvas 逐像素算正弦函数生成流动波纹（GLSL 着色器的等效 JS 版），可调频率与速度。', '高级效果', 'Game UI', 'Cyber', 'Canvas', 3, 'Game UI,AI 产品页', 95, 82, 84, 76, 85, 'GPU_ENHANCED', '依赖 GPU 或逐像素计算：观感最好，但在低端设备/集显上可能掉帧。建议开启硬件加速；移动端可减少粒子数、降低分辨率或按需启用。', '[{"key": "--m-duration", "label": "流动速度", "unit": "", "min": 0.2, "max": 3, "step": 0.1, "default": 1}, {"key": "--m-distance", "label": "波纹频率", "unit": "", "min": 2, "max": 16, "step": 1, "default": 7}]', '', '<div class="motion-root motion-root--bleed">
   <canvas class="m-shader"></canvas>
 </div>', 'var canvas = document.querySelector(''.m-shader'');
 var ctx = canvas.getContext(''2d'');
@@ -3440,7 +3444,7 @@ export default function MotionDemo() {
 .motion-root--bleed { padding: 0; }
 .m-shader { display: block; width: 100%; height: 100%; background: #05060a; }
 */', '', '用 Canvas 做流动波纹背景：按 1/6 分辨率逐像素计算三个正弦波叠加的值（频率 7、速度 0.02），映射到深蓝紫的 RGB 上再用 putImageData 放大绘制；用 requestAnimationFrame 驱动时间。', 'shader background', 'OFFICIAL', 'READY'),
-	('three-scene', '三维场景', 'Three.js Scene', '一组几何体在场景中自转与公转，带方向光与雾；这是 Three.js 类模板的骨架，可替换模型。', '高级效果', 'Game UI', 'Cyber', 'Three.js', 3, 'Game UI,官网首页', 96, 80, 84, 74, 85, '[{"key": "--m-duration", "label": "自转速度", "unit": "", "min": 0.2, "max": 3, "step": 0.1, "default": 1}]', '', '<div class="motion-root motion-root--bleed">
+	('three-scene', '三维场景', 'Three.js Scene', '一组几何体在场景中自转与公转，带方向光与雾；这是 Three.js 类模板的骨架，可替换模型。', '高级效果', 'Game UI', 'Cyber', 'Three.js', 3, 'Game UI,官网首页', 96, 80, 84, 74, 85, 'GPU_ENHANCED', '依赖 GPU 或逐像素计算：观感最好，但在低端设备/集显上可能掉帧。建议开启硬件加速；移动端可减少粒子数、降低分辨率或按需启用。', '[{"key": "--m-duration", "label": "自转速度", "unit": "", "min": 0.2, "max": 3, "step": 0.1, "default": 1}]', '', '<div class="motion-root motion-root--bleed">
   <div class="m-three"><span class="m-three-hint">Three.js</span></div>
 </div>', '// 预览用轻量等效实现：无 CDN 依赖，用 Canvas 画一组旋转的多面体线框，
 // 导出代码里给的是真正的 Three.js 版本（见「代码」页签）
@@ -3728,7 +3732,7 @@ ON DUPLICATE KEY UPDATE
 	`technology` = VALUES(`technology`), `difficulty` = VALUES(`difficulty`), `best_for` = VALUES(`best_for`),
 	`score_visual` = VALUES(`score_visual`), `score_code` = VALUES(`score_code`),
 	`score_reuse` = VALUES(`score_reuse`), `score_perf` = VALUES(`score_perf`), `score` = VALUES(`score`),
-	`params` = VALUES(`params`), `preview_html` = VALUES(`preview_html`), `preview_js` = VALUES(`preview_js`),
+	`runtime_tier` = VALUES(`runtime_tier`), `runtime_note` = VALUES(`runtime_note`), 	`params` = VALUES(`params`), `preview_html` = VALUES(`preview_html`), `preview_js` = VALUES(`preview_js`),
 	`css_code` = VALUES(`css_code`), `vue_code` = VALUES(`vue_code`), `react_code` = VALUES(`react_code`),
 	`three_code` = VALUES(`three_code`), `prompt` = VALUES(`prompt`), `tags` = VALUES(`tags`);
 

@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 搜索栏的回答。
@@ -36,6 +37,58 @@ public class MotionAssistantVO {
 
 	@Schema(description = "一句话建议")
 	private String advice;
+
+	@Schema(description = "结果来源：MODEL 由模型分析 / RULE 由内置检索兜底")
+	private String source;
+
+	@Schema(description = "模型名（source=MODEL 时有值）")
+	private String modelName;
+
+	@Schema(description = "模型给出的组合方案：用已有模板拼一套，不生成代码")
+	private RecipeSuggestion recipeSuggestion;
+
+	@Schema(description = "兜底原因（source=RULE 且因为模型失败时有值）")
+	private String fallbackReason;
+
+	@Data
+	@Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@Schema(description = "由模型给出的组合方案（成员全部来自现有模板）")
+	public static class RecipeSuggestion {
+
+		@Schema(description = "方案名")
+		private String name;
+
+		@Schema(description = "为什么这么组")
+		private String description;
+
+		@Schema(description = "适用场景，逗号分隔")
+		private String bestFor;
+
+		@Schema(description = "按应用顺序排列的成员")
+		private List<Step> steps;
+	}
+
+	@Data
+	@Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@Schema(description = "组合方案的一个步骤")
+	public static class Step {
+
+		@Schema(description = "模板 key，必须来自现有模板")
+		private String templateKey;
+
+		@Schema(description = "模板名（服务端按 key 回填）")
+		private String templateName;
+
+		@Schema(description = "这一步的作用，例如「铺背景氛围」")
+		private String role;
+
+		@Schema(description = "参数建议：CSS 变量名 → 建议值")
+		private Map<String, Object> params;
+	}
 
 	@Data
 	@Builder

@@ -22,6 +22,9 @@ public class MotionFacetVO {
 	private List<FacetOption> categories;
 	private List<FacetOption> difficulties;
 
+	@Schema(description = "按运行档位（性能成本）分面")
+	private List<FacetOption> runtimeTiers;
+
 	@Schema(description = "模板总数")
 	private Long total;
 

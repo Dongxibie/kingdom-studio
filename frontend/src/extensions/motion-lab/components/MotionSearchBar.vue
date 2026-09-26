@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { ONBOARDING_SCENES, type MotionSearchResult } from '@/extensions/motion-lab/types/workbench'
+import { ONBOARDING_SCENES, type MotionSearchResult, type RecipeSuggestion } from '@/extensions/motion-lab/types/workbench'
 
 interface Props {
 	loading: boolean
@@ -12,6 +12,8 @@ const emit = defineEmits<{
 	search: [query: string]
 	pick: [kind: 'TEMPLATE' | 'RECIPE', key: string]
 	scene: [scene: string]
+	/** 用模型给的组合方案直接预览（成员与参数都在建议里） */
+	applySuggestion: [suggestion: RecipeSuggestion]
 }>()
 
 const text = ref('')
@@ -60,8 +62,28 @@ function submit() {
 
 		<div v-if="result" class="answer">
 			<div class="intent">
-				<span class="badge">识别到</span>
+				<span class="badge" :class="{ model: result.source === 'MODEL' }">
+					{{ result.source === 'MODEL' ? '模型分析 · ' + (result.modelName ?? '') : '内置检索' }}
+				</span>
 				<span class="note">{{ result.intent.note }}</span>
+			</div>
+			<div v-if="result.fallbackReason" class="fallback">{{ result.fallbackReason }}</div>
+
+			<div v-if="result.recipeSuggestion" class="group">
+				<div class="group-title">
+					模型给的组合方案：{{ result.recipeSuggestion.name }}
+					<button class="apply" type="button" @click="emit('applySuggestion', result.recipeSuggestion!)">按这个组合预览</button>
+				</div>
+				<div class="suggestion-why">{{ result.recipeSuggestion.description }}</div>
+				<div class="steps">
+					<div v-for="step in result.recipeSuggestion.steps" :key="step.templateKey" class="step">
+						<span class="step-name">{{ step.templateName }}</span>
+						<span class="step-role">{{ step.role }}</span>
+						<span v-if="step.params" class="step-params">
+							{{ Object.entries(step.params).map(([k, v]) => k + '=' + v).join('  ') }}
+						</span>
+					</div>
+				</div>
 			</div>
 
 			<div v-if="result.recipes.length" class="group">
@@ -249,6 +271,62 @@ function submit() {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+.suggestion-why {
+	font-size: 11px;
+	color: var(--ext-text-mute);
+	line-height: 1.7;
+	margin-bottom: 6px;
+}
+
+.steps {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.step {
+	display: grid;
+	grid-template-columns: minmax(80px, 130px) 1fr auto;
+	gap: 8px;
+	align-items: baseline;
+	font-size: 11px;
+	color: var(--ext-text-dim);
+	padding: 4px 8px;
+	border-radius: 8px;
+	background: rgba(255, 255, 255, 0.03);
+}
+
+.step-name { color: var(--ext-text); }
+.step-role { color: var(--ext-text-mute); }
+.step-params {
+	font-family: var(--ext-font-mono);
+	font-size: 10px;
+	color: var(--ext-neon-cyan);
+}
+
+.apply {
+	margin-left: 8px;
+	border: 1px solid var(--ext-gold);
+	background: var(--ext-gold-soft);
+	color: var(--ext-gold-light);
+	border-radius: 999px;
+	font-size: 10.5px;
+	padding: 1px 8px;
+	cursor: pointer;
+}
+
+.badge.model {
+	background: rgba(240, 205, 114, 0.16);
+	color: var(--ext-gold-light);
+}
+
+.fallback {
+	margin-top: 6px;
+	font-size: 11px;
+	color: var(--ext-text-mute);
+	line-height: 1.7;
 }
 
 .empty {

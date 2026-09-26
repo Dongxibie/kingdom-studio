@@ -96,6 +96,7 @@ public class MotionAssistantService {
 	private final MotionRecipeMapper recipeMapper;
 	private final MotionTemplateService templateService;
 	private final MotionRecipeService recipeService;
+	private final MotionModelClient modelClient;
 
 	public MotionAssistantVO search(MotionSearchDTO request) {
 		String query = request.getQuery().trim();
@@ -250,6 +251,120 @@ public class MotionAssistantService {
 
 	/** 命中权重 + 推荐指数：临时结构，只用来排序 */
 	private record Scored(int weight, MotionAssistantVO.Match match) {
+	}
+
+
+	/**
+	 * Motion Assistant：先用模型理解需求并给出组合方案，模型不可用就回退到内置检索。
+	 *
+	 * <p>回退不是「出错就算了」：返回里会带 {@code source} 与 {@code fallbackReason}，
+	 * 界面能明确告诉用户这次是模型分析的还是内置检索的结果——不假装成模型的结果。
+	 */
+	public MotionAssistantVO assist(MotionSearchDTO request) {
+		String query = request.getQuery().trim();
+		int limit = request.getLimit() == null ? 6 : Math.min(Math.max(1, request.getLimit()), 20);
+		List<MotionTemplate> all = templateMapper.selectList(new LambdaQueryWrapper<>());
+
+		if (modelClient.enabled()) {
+			MotionModelClient.ModelAnswer answer = modelClient.analyze(query, all);
+			if (answer != null) {
+				MotionAssistantVO fromModel = fromModel(answer, all, query, limit);
+				if (fromModel != null) {
+					return fromModel;
+				}
+			}
+			MotionAssistantVO fallback = search(request);
+			fallback.setSource("RULE");
+			fallback.setFallbackReason("模型本次没有返回可用结果（超时、格式不合法或服务不可用），已改用内置检索。");
+			return fallback;
+		}
+
+		MotionAssistantVO fallback = search(request);
+		fallback.setSource("RULE");
+		fallback.setFallbackReason("未配置模型（MOTION_LLM_BASE_URL / MOTION_LLM_API_KEY / MOTION_LLM_MODEL），当前使用内置检索。");
+		return fallback;
+	}
+
+	/**
+	 * 把模型结果转成对外结构。
+	 *
+	 * <p>两道校验：模板 key 一律回库核对（模型杜撰的直接丢掉），
+	 * 方案里少于一个有效成员就当没给方案。模型说什么不算数，库里有的才算数。
+	 */
+	MotionAssistantVO fromModel(MotionModelClient.ModelAnswer answer, List<MotionTemplate> all,
+			String query, int limit) {
+		Map<String, MotionTemplate> byKey = new LinkedHashMap<>();
+		all.forEach(template -> byKey.put(template.getTemplateKey(), template));
+
+		List<MotionAssistantVO.Match> matches = new ArrayList<>();
+		for (MotionModelClient.Match match : answer.matches()) {
+			MotionTemplate template = byKey.get(match.templateKey());
+			if (template == null) {
+				continue;
+			}
+			int score = templateService.recommendScore(template);
+			List<String> reasons = new ArrayList<>();
+			if (!match.reason().isBlank()) {
+				reasons.add(match.reason());
+			}
+			reasons.add("模型分析");
+			matches.add(MotionAssistantVO.Match.builder()
+					.key(template.getTemplateKey())
+					.name(template.getName())
+					.kind("TEMPLATE")
+					.scene(template.getScene())
+					.style(template.getStyle())
+					.technology(template.getTechnology())
+					.score(score)
+					.stars(templateService.stars(score))
+					.grade(templateService.grade(score))
+					.reasons(reasons)
+					.build());
+		}
+		if (matches.isEmpty() && answer.recipe() == null) {
+			return null;
+		}
+		if (matches.size() > limit) {
+			matches = new ArrayList<>(matches.subList(0, limit));
+		}
+
+		MotionAssistantVO.RecipeSuggestion suggestion = null;
+		if (answer.recipe() != null) {
+			List<MotionAssistantVO.Step> steps = modelClient.toSteps(answer.recipe(), byKey);
+			if (!steps.isEmpty()) {
+				suggestion = MotionAssistantVO.RecipeSuggestion.builder()
+						.name(answer.recipe().name())
+						.description(answer.recipe().description())
+						.bestFor(answer.recipe().bestFor())
+						.steps(steps)
+						.build();
+			}
+		}
+
+		MotionModelClient.Intent modelIntent = answer.intent();
+		String scene = modelClient.sceneOf(modelIntent.scene());
+		String style = modelClient.styleOf(modelIntent.style());
+		String technology = modelClient.technologyOf(modelIntent.technology());
+		String note = modelIntent.summary().isBlank() ? "模型已完成需求分析。" : modelIntent.summary();
+
+		return MotionAssistantVO.builder()
+				.query(query)
+				.source("MODEL")
+				.modelName(modelClient.modelName())
+				.intent(MotionAssistantVO.Intent.builder()
+						.scene(scene)
+						.sceneLabel(scene == null ? "" : templateService.sceneLabel(scene))
+						.style(style)
+						.styleLabel(style == null ? "" : templateService.styleLabel(style))
+						.technology(technology)
+						.keywords(modelIntent.keywords())
+						.note(note)
+						.build())
+				.matches(matches)
+				.recipes(List.of())
+				.recipeSuggestion(suggestion)
+				.advice(answer.advice())
+				.build();
 	}
 
 	private String matchHint(String lowerQuery, Map<String, List<String>> hints) {

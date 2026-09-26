@@ -58,6 +58,17 @@ public class MotionTemplate {
 	/** 推荐指数 0-100 */
 	private Integer score;
 
+	/**
+	 * 运行档位：LIGHTWEIGHT 轻量 / BALANCED 均衡 / GPU_ENHANCED 依赖 GPU 加速。
+	 *
+	 * <p>这一列由服务端的规则算出（见 MotionTemplateService#runtimeTier），
+	 * 这里存一份只是为了在 SQL 层按档位筛选 —— 判断规则只在代码里维护一处。
+	 */
+	private String runtimeTier;
+
+	/** 运行建议：这一档的代价在哪、怎么降级 */
+	private String runtimeNote;
+
 	/** 可调参数 JSON：[{key,label,unit,min,max,step,default}] */
 	private String params;
 

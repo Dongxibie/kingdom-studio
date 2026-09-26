@@ -14,6 +14,10 @@
 
 USE `kingdom_studio`;
 
+-- 连接字符集按 utf8mb4 显式设置：Windows 下 mysql 客户端默认可能是 GBK，
+-- 那样导入含中文的脚本会报 Incorrect string value，这里先把它定死，脚本换台机器也能直接跑。
+SET NAMES utf8mb4;
+
 -- ---------------------------------------------------------------------
 -- 1. motion_template 官方动效模板
 -- ---------------------------------------------------------------------
@@ -34,8 +38,12 @@ CREATE TABLE IF NOT EXISTS `motion_template` (
 	`score_reuse`   TINYINT      NOT NULL DEFAULT 80     COMMENT '复用价值 0-100（权重 25%）',
 	`score_perf`    TINYINT      NOT NULL DEFAULT 80     COMMENT '性能表现 0-100（权重 20%）',
 	`score`         TINYINT      NOT NULL DEFAULT 80     COMMENT '推荐指数 = 加权合成（由四项子分算出，不在代码里手写）',
+	`runtime_tier`  VARCHAR(16)  NOT NULL DEFAULT 'BALANCED' COMMENT '运行档位：LIGHTWEIGHT 轻量 / BALANCED 均衡 / GPU_ENHANCED 依赖 GPU 加速',
+	`runtime_note`  VARCHAR(300) NOT NULL DEFAULT ''     COMMENT '运行建议：这一档的代价在哪、怎么降级（空则按档位给通用建议）',
 	`params`        VARCHAR(1200) NOT NULL DEFAULT '[]'  COMMENT '可调参数 JSON：[{key,label,unit,min,max,step,default}]，右侧「参数」页签据此生成控件',
 	`preview_url`   VARCHAR(500) NOT NULL DEFAULT ''     COMMENT '外部预览地址（官方模板留空，用内置预览）',
+	`preview_html`  MEDIUMTEXT   NOT NULL                COMMENT '预览用的 DOM 结构（模板自带，代码生成也复用它）',
+	`preview_js`    MEDIUMTEXT   NOT NULL                COMMENT '预览用的脚本（仅需要交互的模板非空）',
 	`css_code`      MEDIUMTEXT   NOT NULL                COMMENT '样式实现（可调参数以 CSS 变量暴露）',
 	`vue_code`      MEDIUMTEXT   NOT NULL                COMMENT 'Vue 3 单文件组件',
 	`react_code`    MEDIUMTEXT   NOT NULL                COMMENT 'React 组件',
@@ -58,6 +66,65 @@ CREATE TABLE IF NOT EXISTS `motion_template` (
 	CONSTRAINT `chk_motion_template_status` CHECK (`status` IN ('READY', 'DRAFT', 'ARCHIVED')),
 	CONSTRAINT `chk_motion_template_source` CHECK (`source` IN ('OFFICIAL', 'IMPORTED'))
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = 'Motion Lab：官方动效模板';
+
+-- ---------------------------------------------------------------------
+-- 1.1 老库补列：运行档位（v1.1 起新增）
+--     CREATE TABLE IF NOT EXISTS 不会改动已存在的表，所以这里单独补一次。
+--     MySQL 8 没有 ADD COLUMN IF NOT EXISTS，用 information_schema 判断后执行，
+--     保证本脚本仍然可以重复跑。
+-- ---------------------------------------------------------------------
+SET @ks_schema := DATABASE();
+
+SET @ks_sql := (
+	SELECT IF(COUNT(*) = 0,
+		'ALTER TABLE `motion_template` ADD COLUMN `runtime_tier` VARCHAR(16) NOT NULL DEFAULT ''BALANCED'' COMMENT ''运行档位：LIGHTWEIGHT 轻量 / BALANCED 均衡 / GPU_ENHANCED 依赖 GPU 加速'' AFTER `score`',
+		'DO 0')
+	FROM information_schema.COLUMNS
+	WHERE TABLE_SCHEMA = @ks_schema AND TABLE_NAME = 'motion_template' AND COLUMN_NAME = 'runtime_tier');
+PREPARE ks_stmt FROM @ks_sql;
+EXECUTE ks_stmt;
+DEALLOCATE PREPARE ks_stmt;
+
+SET @ks_sql := (
+	SELECT IF(COUNT(*) = 0,
+		'ALTER TABLE `motion_template` ADD COLUMN `runtime_note` VARCHAR(300) NOT NULL DEFAULT '''' COMMENT ''运行建议：这一档的代价在哪、怎么降级'' AFTER `runtime_tier`',
+		'DO 0')
+	FROM information_schema.COLUMNS
+	WHERE TABLE_SCHEMA = @ks_schema AND TABLE_NAME = 'motion_template' AND COLUMN_NAME = 'runtime_note');
+PREPARE ks_stmt FROM @ks_sql;
+EXECUTE ks_stmt;
+DEALLOCATE PREPARE ks_stmt;
+
+SET @ks_sql := (
+	SELECT IF(COUNT(*) = 0,
+		'ALTER TABLE `motion_template` ADD COLUMN `preview_html` MEDIUMTEXT NOT NULL COMMENT ''预览用的 DOM 结构（模板自带，代码生成也复用它）'' AFTER `preview_url`',
+		'DO 0')
+	FROM information_schema.COLUMNS
+	WHERE TABLE_SCHEMA = @ks_schema AND TABLE_NAME = 'motion_template' AND COLUMN_NAME = 'preview_html');
+PREPARE ks_stmt FROM @ks_sql;
+EXECUTE ks_stmt;
+DEALLOCATE PREPARE ks_stmt;
+
+SET @ks_sql := (
+	SELECT IF(COUNT(*) = 0,
+		'ALTER TABLE `motion_template` ADD COLUMN `preview_js` MEDIUMTEXT NOT NULL COMMENT ''预览用的脚本（仅需要交互的模板非空）'' AFTER `preview_html`',
+		'DO 0')
+	FROM information_schema.COLUMNS
+	WHERE TABLE_SCHEMA = @ks_schema AND TABLE_NAME = 'motion_template' AND COLUMN_NAME = 'preview_js');
+PREPARE ks_stmt FROM @ks_sql;
+EXECUTE ks_stmt;
+DEALLOCATE PREPARE ks_stmt;
+
+-- 按运行档位筛选（左栏「按性能成本」）走这条索引
+SET @ks_sql := (
+	SELECT IF(COUNT(*) = 0,
+		'ALTER TABLE `motion_template` ADD KEY `idx_motion_template_runtime_tier` (`runtime_tier`, `deleted`)',
+		'DO 0')
+	FROM information_schema.STATISTICS
+	WHERE TABLE_SCHEMA = @ks_schema AND TABLE_NAME = 'motion_template' AND INDEX_NAME = 'idx_motion_template_runtime_tier');
+PREPARE ks_stmt FROM @ks_sql;
+EXECUTE ks_stmt;
+DEALLOCATE PREPARE ks_stmt;
 
 -- ---------------------------------------------------------------------
 -- 2. motion_recipe 动效组合方案

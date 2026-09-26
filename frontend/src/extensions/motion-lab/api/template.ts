@@ -27,6 +27,14 @@ export function searchMotions(query: string, limit = 6): Promise<MotionSearchRes
 	return http.post<MotionSearchResult>(TEMPLATE_BASE + '/search', { query, limit })
 }
 
+/**
+ * Motion Assistant：优先由模型分析需求并给组合方案，模型不可用时后端自动回退到内置检索。
+ * 返回里的 source 字段说明这次结果来自模型还是检索。
+ */
+export function assistMotions(query: string, limit = 6): Promise<MotionSearchResult> {
+	return http.post<MotionSearchResult>(TEMPLATE_BASE + '/assist', { query, limit })
+}
+
 /** 组合方案列表 */
 export function listRecipes(scene?: string): Promise<MotionRecipe[]> {
 	return http.get<MotionRecipe[]>(TEMPLATE_BASE + '/recipes', scene ? { scene } : undefined)

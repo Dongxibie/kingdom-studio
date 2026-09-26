@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { MotionTemplateItem } from '@/extensions/motion-lab/types/workbench'
+import { RUNTIME_TIER_META } from '@/extensions/motion-lab/types/workbench'
 
 interface Props {
 	items: MotionTemplateItem[]
@@ -45,9 +46,14 @@ function stars(value: number) {
 				<span class="stars" :title="`推荐指数 ${item.score}`">{{ stars(item.stars) }}</span>
 				<span class="score">{{ item.score }}</span>
 			</div>
-			<div class="sub">{{ item.sceneLabel }} · {{ item.technology }} · {{ item.difficultyLabel }}</div>
-			<div class="why">
-				<span v-for="tag in item.bestFor.slice(0, 2)" :key="tag" class="fit">{{ tag }}</span>
+			<div class="sub">{{ item.sceneLabel }} · {{ item.technology }}</div>
+			<div class="metrics">
+				<span class="metric" title="视觉效果评分">视觉 {{ item.scoreVisual }}</span>
+				<span class="metric" title="性能表现评分：越高越省">性能 {{ item.scorePerf }}</span>
+				<span class="metric" title="实现难度">难度 {{ item.difficultyLabel }}</span>
+			</div>
+			<div class="tier" :class="'tier-' + (RUNTIME_TIER_META[item.runtimeTier]?.tone ?? 'balanced')" :title="item.runtimeNote">
+				{{ RUNTIME_TIER_META[item.runtimeTier]?.label ?? item.runtimeTierLabel }}
 			</div>
 		</button>
 
@@ -142,20 +148,31 @@ function stars(value: number) {
 	color: var(--ext-text-mute);
 }
 
-.why {
+.metrics {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 4px;
+	gap: 8px;
 	margin-top: 7px;
 }
 
-.fit {
+.metric {
+	font-family: var(--ext-font-mono);
 	font-size: 10px;
-	padding: 1px 6px;
-	border-radius: 999px;
-	background: rgba(94, 234, 212, 0.1);
-	color: var(--ext-neon-cyan);
+	color: var(--ext-text-mute);
 }
+
+.tier {
+	display: inline-block;
+	margin-top: 7px;
+	font-size: 10px;
+	padding: 1px 7px;
+	border-radius: 999px;
+	border: 1px solid currentColor;
+}
+
+.tier-light { color: #7ee0a2; }
+.tier-balanced { color: var(--ext-neon-cyan); }
+.tier-gpu { color: var(--ext-neon-violet); }
 
 .pager {
 	grid-column: 1 / -1;

@@ -39,6 +39,10 @@ public class MotionTemplateDetailVO {
 	private Integer scorePerf;
 	private List<String> tags;
 
+	private String runtimeTier;
+	private String runtimeTierLabel;
+	private String runtimeNote;
+
 	/** 预览结构与脚本：前端把它们塞进沙箱 iframe */
 	private String previewHtml;
 	private String previewJs;

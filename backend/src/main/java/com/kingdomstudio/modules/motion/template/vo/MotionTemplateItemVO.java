@@ -40,6 +40,15 @@ public class MotionTemplateItemVO {
 
 	private List<String> bestFor;
 
+	@Schema(description = "运行档位：LIGHTWEIGHT 轻量 / BALANCED 均衡 / GPU_ENHANCED 依赖 GPU 加速")
+	private String runtimeTier;
+
+	@Schema(description = "档位中文名，如「依赖 GPU 加速」")
+	private String runtimeTierLabel;
+
+	@Schema(description = "运行建议")
+	private String runtimeNote;
+
 	@Schema(description = "推荐指数 0-100")
 	private Integer score;
 

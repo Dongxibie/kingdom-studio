@@ -40,6 +40,12 @@ export interface MotionTemplateItem {
 	scoreReuse: number
 	scorePerf: number
 	tags: string[]
+	/** 运行档位：LIGHTWEIGHT 轻量 / BALANCED 均衡 / GPU_ENHANCED 依赖 GPU 加速 */
+	runtimeTier: 'LIGHTWEIGHT' | 'BALANCED' | 'GPU_ENHANCED'
+	/** 档位中文名 */
+	runtimeTierLabel: string
+	/** 运行建议：这一档的代价在哪、怎么降级 */
+	runtimeNote: string
 }
 
 /** 可调参数：key 就是 CSS 变量名 */
@@ -105,8 +111,27 @@ export interface MotionFacets {
 	technologies: FacetOption[]
 	categories: FacetOption[]
 	difficulties: FacetOption[]
+	/** 按运行档位（性能成本）分面 */
+	runtimeTiers: FacetOption[]
 	total: number
 	recipeTotal: number
+}
+
+/** 模型给出的组合方案（成员全部来自现有模板） */
+export interface RecipeSuggestionStep {
+	templateKey: string
+	templateName: string
+	/** 这一步的作用 */
+	role: string
+	/** 参数建议：CSS 变量名 → 建议值 */
+	params: Record<string, number | string> | null
+}
+
+export interface RecipeSuggestion {
+	name: string
+	description: string
+	bestFor: string
+	steps: RecipeSuggestionStep[]
 }
 
 /** 检索命中的一条 */
@@ -138,6 +163,14 @@ export interface MotionSearchResult {
 	matches: SearchMatch[]
 	recipes: SearchMatch[]
 	advice: string
+	/** MODEL 由模型分析 / RULE 由内置检索兜底 */
+	source: 'MODEL' | 'RULE'
+	/** 模型名（source=MODEL 时有值） */
+	modelName: string | null
+	/** 模型给出的组合方案 */
+	recipeSuggestion: RecipeSuggestion | null
+	/** 兜底原因（source=RULE 时有值） */
+	fallbackReason: string | null
 }
 
 /** 模板检索条件 */
@@ -147,6 +180,7 @@ export interface TemplateQuery {
 	style?: string
 	technology?: string
 	difficulty?: number
+	runtimeTier?: string
 	keyword?: string
 	sort?: 'SCORE' | 'NAME' | 'DIFFICULTY'
 	page?: number
@@ -158,6 +192,13 @@ export const FALLBACK_PARAMS: TemplateParam[] = [
 	{ key: '--m-duration', label: '时长', unit: 's', min: 0.2, max: 3, step: 0.05, defaultValue: 1 },
 	{ key: '--m-delay', label: '延迟', unit: 's', min: 0, max: 2, step: 0.05, defaultValue: 0 },
 ]
+
+/** 运行档位的展示信息：徽章文案、颜色键、一句话解释 */
+export const RUNTIME_TIER_META: Record<string, { label: string; tone: string; short: string }> = {
+	LIGHTWEIGHT: { label: '轻量', tone: 'light', short: '纯合成属性动画，几乎无性能代价' },
+	BALANCED: { label: '均衡', tone: 'balanced', short: '用到模糊或大面积动画，桌面端无压力' },
+	GPU_ENHANCED: { label: '依赖 GPU 加速', tone: 'gpu', short: '依赖 GPU / 逐像素计算，低端设备可能掉帧' },
+}
 
 /** 新手引导的场景选项：对应后端 scene 值 */
 export const ONBOARDING_SCENES: { value: string; label: string; hint: string }[] = [

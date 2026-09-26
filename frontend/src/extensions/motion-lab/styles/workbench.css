@@ -350,3 +350,48 @@
 	opacity: 0.32;
 	cursor: default;
 }
+
+/* ---------- 运行档位（性能成本） ---------- */
+.mlab-tier {
+	margin-top: 10px;
+	padding: 9px 11px;
+	border-radius: 12px;
+	border: 1px solid var(--ext-line);
+	background: rgba(255, 255, 255, 0.03);
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.mlab-tier-name {
+	font-size: 11.5px;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+}
+
+.mlab-tier-note {
+	font-size: 11px;
+	line-height: 1.7;
+	color: var(--ext-text-mute);
+}
+
+.mlab-tier-light {
+	border-color: rgba(126, 224, 162, 0.4);
+	background: rgba(126, 224, 162, 0.08);
+}
+
+.mlab-tier-light .mlab-tier-name { color: #7ee0a2; }
+
+.mlab-tier-balanced {
+	border-color: rgba(94, 234, 212, 0.4);
+	background: rgba(94, 234, 212, 0.08);
+}
+
+.mlab-tier-balanced .mlab-tier-name { color: var(--ext-neon-cyan); }
+
+.mlab-tier-gpu {
+	border-color: rgba(167, 139, 250, 0.45);
+	background: rgba(167, 139, 250, 0.1);
+}
+
+.mlab-tier-gpu .mlab-tier-name { color: var(--ext-neon-violet); }

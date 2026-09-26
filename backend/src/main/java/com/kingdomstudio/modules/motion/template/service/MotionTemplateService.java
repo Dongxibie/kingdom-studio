@@ -108,6 +108,59 @@ public class MotionTemplateService {
 		return Math.round(score / 20.0 * 2) / 2.0;
 	}
 
+
+	/**
+	 * 运行档位：告诉用户「这个动效的性能代价有多大」，而不是把高级效果藏起来。
+	 *
+	 * <p>规则刻意简单、可解释：
+	 * <ol>
+	 *   <li>Three.js 与 Canvas 一律 GPU_ENHANCED —— 它们要么走 WebGL，要么逐像素/逐帧计算，
+	 *       观感最好也最吃硬件，标注清楚比悄悄降级更有用；</li>
+	 *   <li>纯 CSS 按性能子分分档：92 分以上是纯合成属性动画（transform / opacity），
+	 *       算 LIGHTWEIGHT；80-91 分常用到模糊、离屏合成或大面积动画，算 BALANCED；
+	 *       低于 80 分的 CSS 实现（例如多层 blur 叠加）同样归入 GPU_ENHANCED。</li>
+	 * </ol>
+	 */
+	public String runtimeTier(MotionTemplate template) {
+		String technology = template.getTechnology() == null ? "" : template.getTechnology();
+		if ("Three.js".equals(technology) || "Canvas".equals(technology)) {
+			return "GPU_ENHANCED";
+		}
+		int perf = nz(template.getScorePerf());
+		if (perf >= 92) {
+			return "LIGHTWEIGHT";
+		}
+		if (perf >= 80) {
+			return "BALANCED";
+		}
+		return "GPU_ENHANCED";
+	}
+
+	/** 档位中文名 */
+	public String runtimeTierLabel(String tier) {
+		if ("LIGHTWEIGHT".equals(tier)) {
+			return "轻量";
+		}
+		if ("GPU_ENHANCED".equals(tier)) {
+			return "依赖 GPU 加速";
+		}
+		return "均衡";
+	}
+
+	/** 运行建议：库里存过就用库里的，没存过按档位给一句通用建议 */
+	public String runtimeNote(MotionTemplate template) {
+		String stored = template.getRuntimeNote();
+		if (stored != null && !stored.isBlank()) {
+			return stored;
+		}
+		return switch (runtimeTier(template)) {
+			case "LIGHTWEIGHT" -> "纯合成属性动画（transform / opacity）：几乎无性能代价，可放心大面积使用。";
+			case "GPU_ENHANCED" -> "依赖 GPU 或逐像素计算：观感最好，低端设备/集显上可能掉帧。"
+					+ "建议开启硬件加速；移动端可减少粒子数、降低分辨率或按需启用。";
+			default -> "用到模糊、离屏合成或较大面积动画：桌面端无压力，低端移动端建议减少同时播放的元素数量。";
+		};
+	}
+
 	public PageVO<MotionTemplateItemVO> page(TemplateQueryDTO query) {
 		long current = query.getPage() == null ? 1 : Math.max(1, query.getPage());
 		long size = query.getSize() == null ? 12 : Math.min(Math.max(1, query.getSize()), 100);
@@ -117,7 +170,8 @@ public class MotionTemplateService {
 				.eq(notBlank(query.getScene()), MotionTemplate::getScene, query.getScene())
 				.eq(notBlank(query.getStyle()), MotionTemplate::getStyle, query.getStyle())
 				.eq(notBlank(query.getTechnology()), MotionTemplate::getTechnology, query.getTechnology())
-				.eq(query.getDifficulty() != null, MotionTemplate::getDifficulty, query.getDifficulty());
+				.eq(query.getDifficulty() != null, MotionTemplate::getDifficulty, query.getDifficulty())
+				.eq(notBlank(query.getRuntimeTier()), MotionTemplate::getRuntimeTier, query.getRuntimeTier());
 		if (notBlank(query.getKeyword())) {
 			String like = query.getKeyword().trim();
 			wrapper.and(inner -> inner.like(MotionTemplate::getName, like)
@@ -139,6 +193,22 @@ public class MotionTemplateService {
 			case "DIFFICULTY" -> wrapper.orderByAsc(MotionTemplate::getDifficulty).orderByDesc(MotionTemplate::getScoreVisual);
 			default -> wrapper.orderByDesc(MotionTemplate::getScore).orderByAsc(MotionTemplate::getId);
 		}
+	}
+
+
+	/** 按运行档位分面：让用户一眼看到「有多少是轻量的、多少要 GPU」 */
+	private List<MotionFacetVO.FacetOption> tierFacet(List<MotionTemplate> all) {
+		List<MotionFacetVO.FacetOption> options = new ArrayList<>();
+		for (String tier : List.of("LIGHTWEIGHT", "BALANCED", "GPU_ENHANCED")) {
+			List<MotionTemplate> same = all.stream().filter(template -> tier.equals(runtimeTier(template))).toList();
+			options.add(MotionFacetVO.FacetOption.builder()
+					.value(tier)
+					.label(runtimeTierLabel(tier))
+					.count((long) same.size())
+					.averageScore((int) Math.round(same.stream().mapToInt(this::recommendScore).average().orElse(0)))
+					.build());
+		}
+		return options;
 	}
 
 	public MotionTemplateDetailVO detail(String templateKey) {
@@ -163,6 +233,9 @@ public class MotionTemplateService {
 				.difficulty(template.getDifficulty())
 				.difficultyLabel(DIFFICULTY_LABELS.getOrDefault(nz(template.getDifficulty()), "入门"))
 				.bestFor(split(template.getBestFor()))
+				.runtimeTier(runtimeTier(template))
+				.runtimeTierLabel(runtimeTierLabel(runtimeTier(template)))
+				.runtimeNote(runtimeNote(template))
 				.score(recommendScore(template))
 				.stars(stars(recommendScore(template)))
 				.grade(grade(recommendScore(template)))
@@ -194,6 +267,7 @@ public class MotionTemplateService {
 				.technologies(facet(all, MotionTemplate::getTechnology, Map.of()))
 				.categories(facet(all, MotionTemplate::getCategory, Map.of()))
 				.difficulties(difficultyFacet(all))
+				.runtimeTiers(tierFacet(all))
 				.total((long) all.size())
 				.recipeTotal(recipeMapper.selectCount(new LambdaQueryWrapper<>()))
 				.build();
@@ -285,6 +359,9 @@ public class MotionTemplateService {
 				.difficulty(template.getDifficulty())
 				.difficultyLabel(DIFFICULTY_LABELS.getOrDefault(nz(template.getDifficulty()), "入门"))
 				.bestFor(split(template.getBestFor()))
+				.runtimeTier(runtimeTier(template))
+				.runtimeTierLabel(runtimeTierLabel(runtimeTier(template)))
+				.runtimeNote(runtimeNote(template))
 				.score(score)
 				.stars(stars(score))
 				.grade(grade(score))

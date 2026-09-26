@@ -8,6 +8,8 @@ interface Props {
 	playing: boolean
 	speed: number
 	scale: number
+	/** 参数覆盖值：按模板 key 分组，来自「模型给的组合方案」；只覆盖该模板确实有的参数 */
+	overrides?: Record<string, Record<string, number>>
 }
 
 const props = defineProps<Props>()
@@ -29,14 +31,26 @@ const params = computed<TemplateParam[]>(() => {
 	return list.length ? list : FALLBACK_PARAMS
 })
 
-// 换模板时把参数重置为该模板的默认值
+/**
+ * 换模板、或模型给了新的参数建议时，重建参数值：
+ * 该模板有覆盖值就用覆盖值，没有才回到默认值。
+ */
+function buildValues() {
+	const next: Record<string, number> = {}
+	const override = props.detail ? props.overrides?.[props.detail.templateKey] : undefined
+	for (const param of params.value) {
+		const suggested = override?.[param.key]
+		next[param.key] = typeof suggested === 'number' && !Number.isNaN(suggested)
+			? suggested
+			: param.defaultValue ?? param.min ?? 0
+	}
+	return next
+}
+
 watch(
-	() => props.detail?.templateKey,
+	[() => props.detail?.templateKey, () => props.overrides],
 	() => {
-		const next: Record<string, number> = {}
-		for (const param of params.value) {
-			next[param.key] = param.defaultValue ?? param.min ?? 0
-		}
+		const next = buildValues()
 		values.value = next
 		emit('change', { ...next })
 	},
@@ -78,12 +92,14 @@ function display(param: TemplateParam, value: number | undefined) {
 
 		<div class="zoom">
 			<span class="k">缩放</span>
+			<!-- 顺序要紧：先把 type / min / max / step 定好，再给 :value，
+			     否则浏览器会拿默认步长（1）把初始值取整 -->
 			<input
-				:value="scale"
 				type="range"
 				min="0.5"
 				max="1.4"
 				step="0.05"
+				:value="scale"
 				@input="emit('update:scale', Number(($event.target as HTMLInputElement).value))" />
 			<span class="v">{{ scale.toFixed(2) }}×</span>
 		</div>
@@ -93,11 +109,11 @@ function display(param: TemplateParam, value: number | undefined) {
 		<div v-for="param in params" :key="param.key" class="param-row">
 			<span class="name" :title="param.key">{{ param.label }}</span>
 			<input
-				:value="values[param.key]"
 				type="range"
 				:min="param.min ?? 0"
 				:max="param.max ?? 1"
 				:step="param.step ?? 0.01"
+				:value="values[param.key]"
 				@input="updateParam(param.key, Number(($event.target as HTMLInputElement).value))" />
 			<span class="value">{{ display(param, values[param.key]) }}</span>
 		</div>

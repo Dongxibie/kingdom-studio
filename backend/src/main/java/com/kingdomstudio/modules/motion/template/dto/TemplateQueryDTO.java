@@ -28,6 +28,9 @@ public class TemplateQueryDTO {
 	@Schema(description = "难度：1 入门 / 2 进阶 / 3 高阶")
 	private Integer difficulty;
 
+	@Schema(description = "运行档位：LIGHTWEIGHT / BALANCED / GPU_ENHANCED")
+	private String runtimeTier;
+
 	@Schema(description = "关键词，匹配名称、说明、标签、适合场景")
 	private String keyword;
 
