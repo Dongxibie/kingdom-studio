@@ -210,3 +210,8 @@
 .ext-col::-webkit-scrollbar-track {
 	background: transparent;
 }
+
+/* 三栏之上的通栏区域（工作台的搜索栏用）：默认不占空间，只有传了 #top 插槽才渲染 */
+.ext-top {
+  margin-bottom: 14px;
+}

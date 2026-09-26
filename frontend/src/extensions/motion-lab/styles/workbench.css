@@ -1,0 +1,352 @@
+/**
+ * 动效工作台的布局样式。
+ *
+ * 为什么不用 <style scoped>：工作台的主要标记是交给 ExtShell 的具名插槽渲染的，
+ * 这些插槽内容在运行时拿不到视图自己的 scoped 样式 id（实测：规则存在但不匹配），
+ * 于是样式整体失效。这里改成带 mlab- 前缀的普通类名 + 单独样式表：
+ * 前缀保证不与主站、其它扩展冲突，也不依赖编译期的作用域机制。
+ */
+
+/* ---------- 中栏：工作台 ---------- */
+.mlab-workbench {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.mlab-stage-head {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.mlab-stage-title {
+	display: flex;
+	align-items: baseline;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.mlab-stage-title .mlab-name {
+	font-size: 17px;
+	font-weight: 600;
+	color: var(--ext-text);
+}
+
+.mlab-stage-title .mlab-meta {
+	font-family: var(--ext-font-mono);
+	font-size: 11px;
+	color: var(--ext-text-mute);
+}
+
+.mlab-recipe-badge {
+	font-size: 10.5px;
+	padding: 2px 8px;
+	border-radius: 999px;
+	background: rgba(167, 139, 250, 0.14);
+	color: var(--ext-neon-violet);
+}
+
+.mlab-stage-score .mlab-stars {
+	color: var(--ext-gold);
+	font-size: 13px;
+	letter-spacing: 0.08em;
+}
+
+.mlab-stage-score .mlab-value {
+	margin-left: 8px;
+	font-family: var(--ext-font-mono);
+	font-size: 12px;
+	color: var(--ext-gold-light);
+}
+
+.mlab-recipe-box {
+	border-radius: var(--ext-radius);
+	border: 1px solid rgba(167, 139, 250, 0.35);
+	background: rgba(167, 139, 250, 0.08);
+	padding: 12px 14px;
+}
+
+.mlab-recipe-title {
+	font-size: 12.5px;
+	color: var(--ext-neon-violet);
+	margin-bottom: 8px;
+}
+
+.mlab-recipe-members {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.mlab-member {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	border: 1px solid var(--ext-line);
+	background: rgba(255, 255, 255, 0.05);
+	color: var(--ext-text-dim);
+	border-radius: 999px;
+	font-size: 11.5px;
+	padding: 3px 10px;
+	cursor: pointer;
+	transition: border-color 0.18s ease, color 0.18s ease;
+}
+
+.mlab-member:hover {
+	border-color: var(--ext-neon-violet);
+	color: var(--ext-text);
+}
+
+.mlab-member .mlab-member-score {
+	font-family: var(--ext-font-mono);
+	font-size: 10px;
+	color: var(--ext-gold-light);
+}
+
+.mlab-recipe-why,
+.mlab-recipe-prompt {
+	margin-top: 9px;
+	font-size: 11.5px;
+	line-height: 1.8;
+	color: var(--ext-text-mute);
+}
+
+.mlab-list-head {
+	display: flex;
+	align-items: baseline;
+	gap: 10px;
+}
+
+.mlab-list-head .mlab-t {
+	font-size: 13.5px;
+	font-weight: 600;
+	color: var(--ext-text);
+}
+
+.mlab-list-head .mlab-s {
+	font-size: 11.5px;
+	color: var(--ext-text-mute);
+}
+
+/* ---------- 新手引导 ---------- */
+.mlab-guide {
+	padding: 26px 22px 30px;
+	border-radius: var(--ext-radius);
+	border: 1px solid var(--ext-line);
+	background: linear-gradient(170deg, rgba(28, 31, 42, 0.7), rgba(10, 12, 17, 0.6));
+	backdrop-filter: blur(18px);
+	-webkit-backdrop-filter: blur(18px);
+}
+
+.mlab-guide-title {
+	margin: 0;
+	font-size: 22px;
+	letter-spacing: -0.01em;
+	color: var(--ext-text);
+}
+
+.mlab-guide-sub {
+	margin: 8px 0 18px;
+	font-size: 12.5px;
+	color: var(--ext-text-mute);
+}
+
+.mlab-guide-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: 10px;
+}
+
+.mlab-guide-card {
+	text-align: left;
+	padding: 16px 14px;
+	border-radius: 14px;
+	border: 1px solid var(--ext-line);
+	background: rgba(255, 255, 255, 0.03);
+	color: var(--ext-text);
+	cursor: pointer;
+	transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.mlab-guide-card:hover {
+	transform: translateY(-3px);
+	border-color: var(--ext-gold);
+	box-shadow: 0 16px 34px rgba(240, 205, 114, 0.12);
+}
+
+.mlab-guide-name {
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.mlab-guide-hint {
+	margin-top: 6px;
+	font-size: 11.5px;
+	color: var(--ext-text-mute);
+}
+
+.mlab-guide-skip {
+	margin-top: 16px;
+	border: 0;
+	background: transparent;
+	color: var(--ext-text-mute);
+	font-size: 12px;
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+/* ---------- 右栏：推荐指数 ---------- */
+.mlab-score-card {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.mlab-score-main {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+}
+
+.mlab-score-main .mlab-num {
+	font-family: var(--ext-font-mono);
+	font-size: 30px;
+	line-height: 1;
+	color: var(--ext-gold);
+}
+
+.mlab-score-main .mlab-of {
+	font-size: 11px;
+	color: var(--ext-text-mute);
+}
+
+.mlab-score-main .mlab-grade {
+	margin-left: auto;
+	font-family: var(--ext-font-mono);
+	font-size: 11px;
+	padding: 2px 8px;
+	border-radius: 6px;
+	border: 1px solid currentColor;
+}
+
+.mlab-grade-S { color: var(--ext-gold); }
+.mlab-grade-A { color: var(--ext-neon-cyan); }
+.mlab-grade-B { color: var(--ext-neon-violet); }
+.mlab-grade-C { color: var(--ext-text-mute); }
+
+.mlab-score-bars {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.mlab-bar-row {
+	display: grid;
+	grid-template-columns: 58px 1fr 30px;
+	align-items: center;
+	gap: 8px;
+	font-size: 11px;
+	color: var(--ext-text-mute);
+}
+
+.mlab-bar-row .mlab-k {
+	white-space: nowrap;
+}
+
+.mlab-track {
+	height: 6px;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.08);
+	overflow: hidden;
+}
+
+.mlab-track i {
+	display: block;
+	height: 100%;
+	border-radius: 999px;
+	background: linear-gradient(90deg, var(--ext-neon-cyan), var(--ext-gold));
+}
+
+.mlab-bar-row .mlab-v {
+	font-family: var(--ext-font-mono);
+	text-align: right;
+	color: var(--ext-text-dim);
+}
+
+.mlab-fit {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+	font-size: 11px;
+	color: var(--ext-text-mute);
+}
+
+.mlab-fit .mlab-chip {
+	font-size: 10.5px;
+	padding: 2px 8px;
+	border-radius: 999px;
+	background: rgba(94, 234, 212, 0.1);
+	color: var(--ext-neon-cyan);
+}
+
+.mlab-manual,
+.mlab-used {
+	font-size: 11px;
+	line-height: 1.7;
+	color: var(--ext-text-mute);
+}
+
+/* ---------- 右栏：输出页签 ---------- */
+.mlab-tabs {
+	display: flex;
+	gap: 4px;
+	margin-bottom: 10px;
+}
+
+.mlab-tab {
+	border: 1px solid var(--ext-line);
+	background: rgba(255, 255, 255, 0.035);
+	color: var(--ext-text-dim);
+	border-radius: 999px;
+	font-size: 11.5px;
+	padding: 4px 12px;
+	cursor: pointer;
+	transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+}
+
+.mlab-tab.on {
+	border-color: var(--ext-gold);
+	background: var(--ext-gold-soft);
+	color: var(--ext-gold-light);
+}
+
+.mlab-subtabs {
+	display: flex;
+	gap: 4px;
+	margin-bottom: 8px;
+	flex-wrap: wrap;
+}
+
+.mlab-subtab {
+	border: 0;
+	background: transparent;
+	color: var(--ext-text-mute);
+	font-size: 11.5px;
+	padding: 2px 8px;
+	border-radius: 8px;
+	cursor: pointer;
+}
+
+.mlab-subtab.on {
+	background: rgba(255, 255, 255, 0.07);
+	color: var(--ext-text);
+}
+
+.mlab-subtab:disabled {
+	opacity: 0.32;
+	cursor: default;
+}

@@ -19,7 +19,7 @@ const routes: RouteRecordRaw[] = [
 			title: '项目王国',
 			subtitle: 'Project Kingdom',
 			description: '管理个人项目：名称、技术栈、完成度、GitHub 地址。每个项目都是一座建筑。',
-			phase: 'Phase 2 后端接口 + Phase 3 前端页面'
+			phase: '后续版本'
 		},
 		meta: { title: '项目王国', icon: 'OfficeBuilding' }
 	},
@@ -31,7 +31,7 @@ const routes: RouteRecordRaw[] = [
 			title: '技术图鉴',
 			subtitle: 'Technology Library',
 			description: '记录学习中的技术：分类、掌握程度、学习日期，形成自己的技能卡片墙。',
-			phase: 'Phase 2 后端接口 + Phase 3 前端页面'
+			phase: '后续版本'
 		},
 		meta: { title: '技术图鉴', icon: 'Collection' }
 	},
@@ -43,7 +43,7 @@ const routes: RouteRecordRaw[] = [
 			title: '成长时间线',
 			subtitle: 'Royal Journey',
 			description: '按年份记录成长节点：Java Apprentice → Backend Knight → AI Kingdom Builder。',
-			phase: 'Phase 2 后端接口 + Phase 3 前端页面'
+			phase: '后续版本'
 		},
 		meta: { title: '成长时间线', icon: 'Clock' }
 	},
@@ -55,7 +55,7 @@ const routes: RouteRecordRaw[] = [
 			title: '代码知识库',
 			subtitle: 'Code Library',
 			description: '沉淀常用代码片段：Java / SQL / JavaScript，支持新增、查看、删除。',
-			phase: 'Phase 2 后端接口 + Phase 3 前端页面'
+			phase: '后续版本'
 		},
 		meta: { title: '代码知识库', icon: 'Document' }
 	},
@@ -65,7 +65,15 @@ const routes: RouteRecordRaw[] = [
 		path: '/extensions/motion-lab',
 		name: 'KingdomMotionLab',
 		component: () => import('@/extensions/motion-lab/views/MotionLabView.vue'),
-		meta: { title: '动效基因库', icon: 'MagicStick' }
+		meta: { title: '动效工作台', icon: 'MagicStick' }
+	},
+	{
+		// 动效资源页：工作台之外的「我的资源」（自建与采集的资源）。
+		// 从工作台右上角进入，不占侧边栏菜单位，避免两个入口互相抢注意力。
+		path: '/extensions/motion-lab/resources',
+		name: 'KingdomMotionResources',
+		component: () => import('@/extensions/motion-lab/views/MotionResourceView.vue'),
+		meta: { title: '我的资源', icon: 'MagicStick' }
 	},
 	{
 		path: '/extensions/music-agent',
