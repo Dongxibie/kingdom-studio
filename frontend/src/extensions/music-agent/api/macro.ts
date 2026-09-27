@@ -18,8 +18,9 @@ export function generatePerformancePlan(
 	taskId: number,
 	profileId: number,
 	strategy?: string,
+	presetId?: number | null,
 ): Promise<PerformancePlan> {
-	return http.post<PerformancePlan>(BASE(taskId), { profileId, strategy })
+	return http.post<PerformancePlan>(BASE(taskId) + (presetId ? '?presetId=' + presetId : ''), { profileId, strategy })
 }
 
 /** 最近一次生成的计划 */

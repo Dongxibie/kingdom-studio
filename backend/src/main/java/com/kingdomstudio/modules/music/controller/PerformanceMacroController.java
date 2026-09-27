@@ -43,11 +43,13 @@ public class PerformanceMacroController {
 	private final ExecutionService executionService;
 
 	@Operation(summary = "生成演奏计划",
-			description = "按键序列 → 校验过的命令流 → 按键事件流；同一份计划可反复导出三种格式")
+			description = "按键序列 → 校验过的命令流 → 按键事件流；同一份计划可反复导出三种格式。"
+					+ "带 presetId 时按演奏方案执行（方案里的档案 / 策略 / 速度倍率 / 最小间隔会生效）")
 	@PostMapping
 	public Result<PerformancePlanVO> generate(@PathVariable Long taskId,
-			@Valid @RequestBody MappingRequestDTO request) {
-		return Result.success(macroService.generate(taskId, request));
+			@Valid @RequestBody MappingRequestDTO request,
+			@RequestParam(required = false) Long presetId) {
+		return Result.success(macroService.generate(taskId, request, presetId));
 	}
 
 	@Operation(summary = "最近一次演奏计划", description = "事件流可能被截断，完整内容走导出接口")

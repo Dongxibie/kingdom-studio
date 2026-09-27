@@ -3,7 +3,6 @@ import { computed, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { ExtCodeBlock } from '@/extensions/_shared/components'
 import { exportMacro, generatePerformancePlan } from '@/extensions/music-agent/api/macro'
-import { formatDuration, formatMs } from '@/extensions/music-agent/utils/note-format'
 import { MACRO_FORMATS, type MacroExport, type PerformancePlan } from '@/extensions/music-agent/types/macro'
 
 /**
@@ -16,12 +15,15 @@ interface Props {
 	taskId: number | null
 	profileId: number | null
 	strategy?: string
+	/** 当前演奏方案：生成计划时按它执行（档案 / 策略 / 速度倍率 / 最小间隔） */
+	presetId?: number | null
 	/** 紧凑模式：嵌在编排台右栏时只留卡片与预览 */
 	embedded?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
 	strategy: '',
+	presetId: null,
 	embedded: false,
 })
 
@@ -39,10 +41,10 @@ const metrics = computed(() => {
 		return []
 	}
 	return [
-		{ label: '按键动作', value: String(value.noteCount) },
+		{ label: '按键事件', value: String(value.noteCount) + ' events' },
+		{ label: '时长', value: (value.duration / 1000).toFixed(1) + ' 秒' },
 		{ label: '按键组', value: String(value.strokeCount) },
 		{ label: '用到的键', value: String(value.keyCount) },
-		{ label: '时长', value: formatDuration(value.duration) },
 	]
 })
 
@@ -63,7 +65,7 @@ async function build() {
 	loading.value = true
 	error.value = ''
 	try {
-		plan.value = await generatePerformancePlan(taskId, profileId, props.strategy || undefined)
+		plan.value = await generatePerformancePlan(taskId, profileId, props.strategy || undefined, props.presetId)
 		await loadExports()
 	} catch (e) {
 		error.value = e instanceof Error ? e.message : '生成演奏计划失败'
@@ -115,7 +117,7 @@ function download() {
 }
 
 watch(
-	() => [props.taskId, props.profileId, props.strategy],
+	() => [props.taskId, props.profileId, props.strategy, props.presetId],
 	() => {
 		plan.value = null
 		exports.value = {}
@@ -143,6 +145,13 @@ watch(
 
 		<p v-if="error" class="ec-error">{{ error }}</p>
 		<p v-if="!taskId" class="ec-hint">先选一首曲子，这里会给出它的演奏脚本。</p>
+
+		<div v-if="plan" class="ec-supported">
+			<span class="st-label">支持导出</span>
+			<span v-for="item in MACRO_FORMATS" :key="item.value" class="ec-supported-item">
+				✓ {{ item.label }}<span class="ec-supported-size">{{ exports[item.value] ? (exports[item.value].size / 1024).toFixed(1) + ' KB' : '—' }}</span>
+			</span>
+		</div>
 
 		<div v-if="plan" class="ec-formats">
 			<button
@@ -185,7 +194,7 @@ watch(
 		<p v-if="plan && !activeExport" class="ec-hint">这个格式暂时拿不到内容，换一个试试。</p>
 
 		<p v-if="plan" class="ec-hint">
-			计划覆盖 {{ formatMs(plan.duration) }}，共 {{ plan.strokeCount }} 组按键；
+			演奏计划：{{ plan.noteCount }} 个事件、{{ (plan.duration / 1000).toFixed(1) }} 秒、{{ plan.strokeCount }} 组按键。
 			{{ embedded ? '' : '导出的是按键动作，不会自动在后台运行。' }}
 		</p>
 	</div>
@@ -210,6 +219,31 @@ watch(
 	display: flex;
 	gap: 8px;
 	flex-wrap: wrap;
+}
+
+.ec-supported {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	border: 1px solid var(--st-edge);
+	border-radius: 10px;
+	padding: 8px 11px;
+	background: var(--st-glass);
+}
+
+.ec-supported-item {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 6px;
+	font-family: var(--ext-font-mono);
+	font-size: 11px;
+	color: #7ed6a5;
+}
+
+.ec-supported-size {
+	font-size: 9.5px;
+	color: var(--ext-text-mute);
 }
 
 .ec-formats {

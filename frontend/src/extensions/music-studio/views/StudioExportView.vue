@@ -4,9 +4,11 @@ import { useRouter } from 'vue-router'
 import { ExtEmpty } from '@/extensions/_shared/components'
 import MusicStudioLayout from '@/extensions/music-studio/components/MusicStudioLayout.vue'
 import ExportCenter from '@/extensions/music-studio/components/ExportCenter.vue'
+import PerformancePresetBar from '@/extensions/music-studio/components/PerformancePresetBar.vue'
 import TimelineEditor from '@/extensions/music-studio/components/TimelineEditor.vue'
 import { formatDuration } from '@/extensions/music-agent/utils/note-format'
 import { useStudioSession } from '@/extensions/music-studio/composables/useStudioSession'
+import type { PerformancePreset } from '@/extensions/music-studio/types/studio'
 
 /**
  * 导出中心（Export Center）。
@@ -15,7 +17,19 @@ import { useStudioSession } from '@/extensions/music-studio/composables/useStudi
  * 计划本身仍由后端从原有映射结果算出（这一层只展示与下载）。
  */
 const router = useRouter()
-const { state, loadTasks, selectTask } = useStudioSession()
+const { state, loadTasks, selectTask, applyPreset, savePreset, deletePresetById } = useStudioSession()
+
+function onApplyPreset(preset: PerformancePreset) {
+	void applyPreset(preset)
+}
+
+function onSavePreset(name: string) {
+	void savePreset(name)
+}
+
+function onRemovePreset(preset: PerformancePreset) {
+	void deletePresetById(preset)
+}
 
 const formats = [
 	{ name: 'AutoHotkey', value: 'AHK', accent: 'violet', use: '本机按键脚本，含暂停与急停键' },
@@ -34,6 +48,7 @@ const summary = computed(() => {
 		{ label: '时长', value: formatDuration(task.durationMs) },
 		{ label: '乐器档案', value: state.sequence?.profileName ?? '未映射' },
 		{ label: '按键组', value: String(state.sequence?.strokes.length ?? 0) },
+		{ label: '当前方案', value: state.presets.find((item) => item.id === state.activePresetId)?.name ?? '未选方案' },
 	]
 })
 
@@ -93,11 +108,23 @@ onMounted(async () => {
 			</div>
 
 			<div class="st-glass">
+				<PerformancePresetBar
+					:presets="state.presets"
+					:active-id="state.activePresetId"
+					:current-profile-name="state.sequence?.profileName ?? ''"
+					:busy="state.mapping"
+					@apply="onApplyPreset"
+					@save="onSavePreset"
+					@remove="onRemovePreset" />
+			</div>
+
+			<div class="st-glass">
 				<div class="st-title">演奏脚本<span class="st-sub">生成 → 预览 → 复制或下载</span></div>
 				<ExportCenter
 					:task-id="state.task.id"
 					:profile-id="state.profileId"
-					:strategy="state.strategy" />
+					:strategy="state.strategy"
+					:preset-id="state.activePresetId" />
 			</div>
 
 			<div class="st-glass">

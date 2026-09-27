@@ -1,13 +1,28 @@
 import { computed, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
+	createPreset,
+	deletePreset,
+	fetchOptimization,
+	fetchSongAnalysis,
 	getMusicTask,
 	listInstruments,
 	listMusicTasks,
+	listPresets,
 	mapTaskKeys,
+	mapWithPreset,
+	toggleFavorite,
+	updatePreset,
 } from '@/extensions/music-agent/api/music'
 import { buildPlayEvents, play, type PlayHandle } from '@/extensions/music-agent/utils/demo-player'
 import { formatMs, midiToNoteName } from '@/extensions/music-agent/utils/note-format'
+import type {
+	OptimizationFix,
+	OptimizationReport,
+	PerformancePreset,
+	PerformancePresetPayload,
+	SongAnalysis,
+} from '@/extensions/music-studio/types/studio'
 import type {
 	InstrumentProfile,
 	KeySequence,
@@ -34,6 +49,7 @@ const state = reactive({
 	page: 1,
 	size: 12,
 	keyword: '',
+	favoriteOnly: false,
 	tasksLoading: false,
 
 	/** 当前曲目 */
@@ -46,6 +62,15 @@ const state = reactive({
 	strategy: '' as '' | UnmappedStrategy,
 	sequence: null as KeySequence | null,
 	mapping: false,
+
+	/** 曲目洞察：分析卡与优化建议 */
+	analysis: null as SongAnalysis | null,
+	optimization: null as OptimizationReport | null,
+	insightLoading: false,
+
+	/** 演奏方案 */
+	presets: [] as PerformancePreset[],
+	activePresetId: null as number | null,
 
 	/** 播放 */
 	playing: false,
@@ -96,14 +121,15 @@ const progress = computed(() => {
 
 // ------------------------------------------------------------------ 曲库
 
-async function loadTasks(page = state.page, keyword = state.keyword) {
+async function loadTasks(page = state.page, keyword = state.keyword, favoriteOnly = state.favoriteOnly) {
 	state.tasksLoading = true
 	try {
-		const result = await listMusicTasks(keyword, page, state.size)
+		const result = await listMusicTasks(keyword, page, state.size, favoriteOnly)
 		state.tasks = result.records
 		state.total = result.total
 		state.page = page
 		state.keyword = keyword
+		state.favoriteOnly = favoriteOnly
 	} catch (error) {
 		ElMessage.error(error instanceof Error ? error.message : '读取曲库失败')
 	} finally {
@@ -125,6 +151,209 @@ async function loadProfiles() {
 	}
 }
 
+/** 收藏 / 取消收藏：先在本地翻转（点了就有反馈），再以后端返回为准 */
+async function switchFavorite(taskId: number) {
+	const item = state.tasks.find((task) => task.id === taskId)
+	const before = item?.favorite ?? 0
+	if (item) {
+		item.favorite = before === 1 ? 0 : 1
+	}
+	try {
+		const next = await toggleFavorite(taskId)
+		if (item) {
+			item.favorite = next ? 1 : 0
+		}
+		if (state.favoriteOnly && !next) {
+			state.tasks = state.tasks.filter((task) => task.id !== taskId)
+			state.total = Math.max(0, state.total - 1)
+		}
+		ElMessage.success(next ? '已收藏「' + (item?.name ?? '') + '」' : '已取消收藏')
+	} catch (error) {
+		if (item) {
+			item.favorite = before
+		}
+		ElMessage.error(error instanceof Error ? error.message : '收藏失败')
+	}
+}
+
+/** 曲目洞察：分析卡与优化建议一起取，两者都依赖当前档案 */
+async function loadInsight() {
+	const task = state.task
+	if (!task) {
+		state.analysis = null
+		state.optimization = null
+		return
+	}
+	state.insightLoading = true
+	try {
+		state.analysis = await fetchSongAnalysis(task.id, state.profileId)
+		if (state.profileId !== null && state.sequence) {
+			state.optimization = await fetchOptimization(
+				task.id,
+				state.profileId,
+				state.strategy || undefined,
+				state.activePresetId,
+			)
+		} else {
+			state.optimization = null
+		}
+	} catch (error) {
+		ElMessage.error(error instanceof Error ? error.message : '读取曲目分析失败')
+	} finally {
+		state.insightLoading = false
+	}
+}
+
+/** 方案列表：后端会在首次访问时补齐内置的三套 */
+async function loadPresets() {
+	const task = state.task
+	if (!task) {
+		state.presets = []
+		state.activePresetId = null
+		return
+	}
+	try {
+		state.presets = await listPresets(task.id)
+		if (state.activePresetId === null && state.presets.length) {
+			state.activePresetId = state.presets[0].id
+		}
+	} catch (error) {
+		ElMessage.error(error instanceof Error ? error.message : '读取演奏方案失败')
+	}
+}
+
+/**
+ * 把当前设置另存为一套方案。
+ *
+ * 名字重复时后端会拒绝（并说明已经有同名方案），这里直接把原因透给用户 ——
+ * 重名会让「方案」这件事失去意义，静默改名反而更难解释。
+ */
+async function savePreset(name: string) {
+	const task = state.task
+	if (!task || state.profileId === null) {
+		ElMessage.warning('先选一首曲子和乐器档案')
+		return
+	}
+	try {
+		const saved = await createPreset(task.id, {
+			name: name.trim(),
+			profileId: state.profileId,
+			strategy: state.strategy || null,
+			speedScale: 1,
+			minGapMs: 0,
+			note: '手动保存的方案',
+		})
+		await loadPresets()
+		await applyPreset(saved)
+		ElMessage.success('已保存方案「' + saved.name + '」')
+	} catch (error) {
+		ElMessage.error(error instanceof Error ? error.message : '保存方案失败')
+	}
+}
+
+/** 删除方案（内置方案也能删；删完可以再存） */
+async function deletePresetById(preset: PerformancePreset) {
+	const task = state.task
+	if (!task) {
+		return
+	}
+	try {
+		await deletePreset(task.id, preset.id)
+		if (state.activePresetId === preset.id) {
+			state.activePresetId = null
+		}
+		await loadPresets()
+		ElMessage.success('已删除方案「' + preset.name + '」')
+	} catch (error) {
+		ElMessage.error(error instanceof Error ? error.message : '删除方案失败')
+	}
+}
+
+/** 应用方案：按方案的档案与策略重新映射（速度与间隔在生成计划时生效） */
+async function applyPreset(preset: PerformancePreset) {
+	if (!state.task) {
+		return
+	}
+	state.activePresetId = preset.id
+	state.mapping = true
+	try {
+		state.profileId = preset.profileId
+		state.strategy = (preset.strategy as '' | UnmappedStrategy) ?? ''
+		state.sequence = await mapWithPreset(state.task.id, preset.id)
+		await loadInsight()
+	} catch (error) {
+		ElMessage.error(error instanceof Error ? error.message : '应用方案失败')
+	} finally {
+		state.mapping = false
+	}
+}
+
+/**
+ * 把优化建议写进方案。
+ *
+ * 内置方案（原版 / 简单版 / 快速版）是基准，不该被建议改掉 —— 改掉之后就再也回不到原样了。
+ * 所以规则是：当前用的是内置方案时，**新建一份「优化版」**承接这次调整；用的是自己存的方案时，
+ * 就地更新它。
+ */
+async function applyFix(fix: OptimizationFix, label = '优化版') {
+	const task = state.task
+	if (!task) {
+		return
+	}
+	const active = state.presets.find((preset) => preset.id === state.activePresetId) ?? null
+	const current = active && !active.builtin ? active : null
+	const payload: PerformancePresetPayload = {
+		name: current ? current.name : nextPresetName(label),
+		profileId: fix.profileId ?? current?.profileId ?? state.profileId ?? 0,
+		strategy: fix.strategy ?? current?.strategy ?? (state.strategy || null),
+		speedScale: fix.speedScale ?? current?.speedScale ?? 1,
+		minGapMs: fix.minGapMs ?? current?.minGapMs ?? 0,
+		note: current?.note ?? '按优化建议生成：' + describeFix(fix),
+	}
+	try {
+		const saved = current
+			? await updatePreset(task.id, current.id, payload)
+			: await createPreset(task.id, payload)
+		await loadPresets()
+		await applyPreset(saved)
+		ElMessage.success('已生成方案「' + saved.name + '」，生成计划与导出都会按它执行')
+	} catch (error) {
+		ElMessage.error(error instanceof Error ? error.message : '应用建议失败')
+	}
+}
+
+/** 新方案名：优化版 / 优化版 2 / 优化版 3 …（重名后端会拒，所以先自己避重） */
+function nextPresetName(base: string) {
+	const taken = new Set(state.presets.map((preset) => preset.name))
+	if (!taken.has(base)) {
+		return base
+	}
+	for (let index = 2; index < 20; index++) {
+		const candidate = base + ' ' + index
+		if (!taken.has(candidate)) {
+			return candidate
+		}
+	}
+	return base + ' ' + Date.now()
+}
+
+function describeFix(fix: OptimizationFix) {
+	const parts: string[] = []
+	if (fix.minGapMs) {
+		parts.push('同键间隔 ' + fix.minGapMs + 'ms')
+	}
+	if (fix.speedScale) {
+		parts.push('速度 ×' + fix.speedScale)
+	}
+	if (fix.strategy) {
+		parts.push('策略 ' + fix.strategy)
+	}
+	if (fix.profileName) {
+		parts.push('档案 ' + fix.profileName)
+	}
+	return parts.join('、') || '按优化建议'
+}
+
 /** 选中一首曲子：详情 + 乐器档案 + 重新映射（映射失败不影响看谱） */
 async function selectTask(id: number, options: { silent?: boolean } = {}) {
 	stop()
@@ -134,7 +363,9 @@ async function selectTask(id: number, options: { silent?: boolean } = {}) {
 		state.currentMs = 0
 		state.activeStroke = null
 		await loadProfiles()
+		await loadPresets()
 		await remap()
+		await loadInsight()
 		if (!options.silent) {
 			ElMessage.success('已打开「' + state.task.name + '」')
 		}
@@ -167,7 +398,9 @@ async function setProfile(profileId: number) {
 		return
 	}
 	state.profileId = profileId
+	state.activePresetId = null
 	await remap()
+	await loadInsight()
 }
 
 async function setStrategy(strategy: '' | UnmappedStrategy) {
@@ -175,7 +408,9 @@ async function setStrategy(strategy: '' | UnmappedStrategy) {
 		return
 	}
 	state.strategy = strategy
+	state.activePresetId = null
 	await remap()
+	await loadInsight()
 }
 
 /** 新曲子解析出来后：刷新曲库并直接打开它 */
@@ -320,6 +555,13 @@ export function useStudioSession() {
 		progress,
 		loadTasks,
 		loadProfiles,
+		switchFavorite,
+		loadInsight,
+		loadPresets,
+		applyPreset,
+		savePreset,
+		deletePresetById,
+		applyFix,
 		selectTask,
 		remap,
 		setProfile,

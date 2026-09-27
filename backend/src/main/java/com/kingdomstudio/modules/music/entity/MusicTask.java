@@ -46,6 +46,9 @@ public class MusicTask {
 
 	private String status;
 
+	/** 收藏标记：1 收藏 / 0 普通。曲库可以只看收藏 */
+	private Integer favorite;
+
 	@TableLogic
 	private Integer deleted;
 

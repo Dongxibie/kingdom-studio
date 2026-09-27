@@ -65,13 +65,39 @@ public class PerformanceMacroService {
 	private final MusicTaskService musicTaskService;
 	private final DesktopAgentService desktopAgentService;
 	private final PerformancePlanMapper planMapper;
+	private final PerformancePresetService presetService;
 	private final MacroScriptGenerator generator;
 	private final List<ExecutionAdapter> adapters;
 
 	/** 生成（或重新生成）演奏计划：按键序列 → 校验过的命令流 → 事件流 → 落库 */
 	@Transactional
 	public PerformancePlanVO generate(Long taskId, MappingRequestDTO request) {
-		KeySequenceVO sequence = musicTaskService.mapKeys(taskId, request);
+		return generate(taskId, request, null);
+	}
+
+	/**
+	 * 生成演奏计划。
+	 *
+	 * <p>presetId 不为空时按方案执行：用方案里的乐器档案与策略做映射，再按速度倍率缩放、
+	 * 给同键重按留出最小间隔。两个变换都发生在**序列**上，之后仍然走同一条
+	 * {@code DesktopAgentService.plan} 校验（最短按住 40ms、重按间隔、命令数上限都不绕开）。
+	 * presetId 为空时行为与之前完全一致。
+	 */
+	@Transactional
+	public PerformancePlanVO generate(Long taskId, MappingRequestDTO request, Long presetId) {
+		MappingRequestDTO effective = request;
+		double speedScale = 1.0;
+		int minGapMs = 0;
+		if (presetId != null) {
+			PerformancePresetService.Resolution resolution = presetService.resolve(taskId, presetId);
+			if (resolution.mapping() != null) {
+				effective = resolution.mapping();
+			}
+			speedScale = resolution.speedScale();
+			minGapMs = resolution.minGapMs();
+		}
+		KeySequenceVO sequence = musicTaskService.mapKeys(taskId, effective);
+		sequence = PerformanceTempo.applyMinGap(PerformanceTempo.scale(sequence, speedScale), minGapMs);
 		DispatchPlanVO dispatch = desktopAgentService.plan(sequence, "macro-export");
 		List<MacroScriptGenerator.Event> events = toEvents(dispatch.getCommands());
 		PerformancePlan entity = new PerformancePlan();

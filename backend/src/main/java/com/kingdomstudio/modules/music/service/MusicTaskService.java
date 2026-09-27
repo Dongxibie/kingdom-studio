@@ -12,6 +12,7 @@ import com.kingdomstudio.modules.music.entity.MusicNote;
 import com.kingdomstudio.modules.music.entity.MusicTask;
 import com.kingdomstudio.modules.music.mapper.InstrumentProfileMapper;
 import com.kingdomstudio.modules.music.mapper.MusicNoteMapper;
+import com.kingdomstudio.modules.music.analysis.DifficultyRule;
 import com.kingdomstudio.modules.music.mapper.MusicTaskMapper;
 import com.kingdomstudio.modules.music.parser.JianpuParser;
 import com.kingdomstudio.modules.music.parser.MidiParser;
@@ -146,6 +147,11 @@ public class MusicTaskService {
 	}
 
 	public PageVO<MusicTaskListItemVO> page(String keyword, long page, long size) {
+		return page(keyword, page, size, false);
+	}
+
+	/** 分页：keyword 匹配曲名与来源；favoriteOnly 只看收藏 */
+	public PageVO<MusicTaskListItemVO> page(String keyword, long page, long size, boolean favoriteOnly) {
 		long current = Math.max(1, page);
 		long pageSize = Math.min(Math.max(1, size), 100);
 		LambdaQueryWrapper<MusicTask> wrapper = new LambdaQueryWrapper<>();
@@ -154,9 +160,29 @@ public class MusicTaskService {
 			wrapper.and(query -> query.like(MusicTask::getName, like)
 					.or().like(MusicTask::getSourceRef, like));
 		}
-		wrapper.orderByDesc(MusicTask::getId);
+		wrapper.eq(favoriteOnly, MusicTask::getFavorite, 1);
+		wrapper.orderByDesc(MusicTask::getFavorite).orderByDesc(MusicTask::getId);
 		Page<MusicTask> result = musicTaskMapper.selectPage(new Page<>(current, pageSize), wrapper);
 		return PageVO.of(result, this::toListItem);
+	}
+
+	/** 取曲目实体，不存在就报 404（分析、优化、方案都先过这一关） */
+	public MusicTask require(Long id) {
+		MusicTask task = musicTaskMapper.selectById(id);
+		if (task == null) {
+			throw new BusinessException(ResultCode.NOT_FOUND, "曲目不存在（id=" + id + "）");
+		}
+		return task;
+	}
+
+	/** 收藏 / 取消收藏：返回切换后的状态 */
+	@Transactional
+	public boolean toggleFavorite(Long id) {
+		MusicTask task = require(id);
+		boolean next = task.getFavorite() == null || task.getFavorite() == 0;
+		task.setFavorite(next ? 1 : 0);
+		musicTaskMapper.updateById(task);
+		return next;
 	}
 
 	public MusicTaskDetailVO detail(Long id) {
@@ -221,8 +247,22 @@ public class MusicTaskService {
 				.durationMs(task.getDurationMs())
 				.pitchRange(range(task.getPitchLow(), task.getPitchHigh()))
 				.status(task.getStatus())
+				.favorite(task.getFavorite() == null ? 0 : task.getFavorite())
+				.difficultyStars(difficulty(task).stars())
+				.difficultyLabel(difficulty(task).label())
 				.createTime(task.getCreateTime())
 				.build();
+	}
+
+	/** 难度：与曲目分析卡共用同一条规则，所以列表上的星级和卡片里的星级永远一致 */
+	DifficultyRule.Result difficulty(MusicTask task) {
+		return DifficultyRule.evaluate(new DifficultyRule.Input(
+				nz(task.getNoteCount()), nz(task.getDurationMs()), nz(task.getTempoBpm()),
+				nz(task.getPitchLow()), nz(task.getPitchHigh())));
+	}
+
+	private int nz(Integer number) {
+		return number == null ? 0 : number;
 	}
 
 	private MusicTaskDetailVO toDetail(MusicTask task) {

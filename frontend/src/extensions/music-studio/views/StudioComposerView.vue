@@ -1,15 +1,20 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ExtEmpty, ExtStatusTag } from '@/extensions/_shared/components'
 import MusicStudioLayout from '@/extensions/music-studio/components/MusicStudioLayout.vue'
 import TimelineEditor from '@/extensions/music-studio/components/TimelineEditor.vue'
 import PerformanceKeyboard from '@/extensions/music-studio/components/PerformanceKeyboard.vue'
 import AIAssistantPanel from '@/extensions/music-studio/components/AIAssistantPanel.vue'
+import PerformanceOptimizerPanel from '@/extensions/music-studio/components/PerformanceOptimizerPanel.vue'
+import PerformancePresetBar from '@/extensions/music-studio/components/PerformancePresetBar.vue'
+import ShowModeOverlay from '@/extensions/music-studio/components/ShowModeOverlay.vue'
+import SongAnalysisCard from '@/extensions/music-studio/components/SongAnalysisCard.vue'
 import PerformanceControlPanel from '@/extensions/music-agent/components/PerformanceControlPanel.vue'
 import { formatDuration } from '@/extensions/music-agent/utils/note-format'
 import { useStudioSession } from '@/extensions/music-studio/composables/useStudioSession'
 import { STRATEGY_LABELS, type MusicTaskListItem } from '@/extensions/music-agent/types/music'
+import type { OptimizationFix, PerformancePreset } from '@/extensions/music-studio/types/studio'
 
 /**
  * 编排台（Composer）—— 工作室的核心页面。
@@ -18,7 +23,42 @@ import { STRATEGY_LABELS, type MusicTaskListItem } from '@/extensions/music-agen
  * 下面是键盘（手要放的地方），右边是助手与演奏控制。
  */
 const router = useRouter()
-const { state, activeProfile, currentNote, keyNoteNames, loadTasks, selectTask, setProfile, setStrategy } = useStudioSession()
+const {
+	state,
+	activeProfile,
+	currentNote,
+	keyNoteNames,
+	loadTasks,
+	selectTask,
+	setProfile,
+	setStrategy,
+	loadInsight,
+	applyPreset,
+	savePreset,
+	applyFix,
+	deletePresetById,
+} = useStudioSession()
+
+const showMode = ref(false)
+const presetBusy = computed(() => state.mapping)
+
+/** 用「备选键位」按钮换档案：等价于在左边下拉里换一套 */
+function pickProfile(profileId: number) {
+	void setProfile(profileId)
+}
+
+function onApplyFix(fix: OptimizationFix, label: string) {
+	void applyFix(fix, label)
+}
+
+function onApplyPreset(preset: PerformancePreset) {
+	void applyPreset(preset)
+}
+
+/** 另存为方案：名字重复时后端会说明原因 */
+function onSavePreset(name: string) {
+	void savePreset(name)
+}
 
 const STRATEGY_OPTIONS: { value: '' | 'SKIP' | 'NEAREST' | 'SHIFT_OCTAVE'; label: string }[] = [
 	{ value: '', label: '按档案默认' },
@@ -68,6 +108,8 @@ onMounted(async () => {
 			<ExtStatusTag
 				:text="state.sequence ? `已映射 ${state.sequence.mappedCount} / ${state.sequence.noteCount} 个音` : '尚未映射'"
 				:tone="unmappedCount ? 'gold' : state.sequence ? 'ok' : 'mute'" />
+			<button class="st-btn" type="button" @click="loadInsight">重新分析</button>
+			<button class="st-btn st-btn--primary" type="button" @click="showMode = true">演示模式</button>
 			<button class="st-btn" type="button" @click="router.push('/extensions/music-studio/replay')">进入演奏回放</button>
 		</template>
 
@@ -164,6 +206,17 @@ onMounted(async () => {
 			</div>
 
 			<div class="st-glass">
+				<PerformancePresetBar
+					:presets="state.presets"
+					:active-id="state.activePresetId"
+					:current-profile-name="state.sequence?.profileName ?? ''"
+					:busy="presetBusy"
+					@apply="onApplyPreset"
+					@save="onSavePreset"
+					@remove="(preset: PerformancePreset) => deletePresetById(preset)" />
+			</div>
+
+			<div class="st-glass">
 				<div class="st-title">
 					演奏时间线
 					<span class="st-sub">点或拖动定位 · 点音符跳到它的起点</span>
@@ -194,6 +247,23 @@ onMounted(async () => {
 
 		<template #right>
 			<div class="st-glass">
+				<div class="st-title">曲目分析<span class="st-sub">难度 · 音域 · 推荐键位</span></div>
+				<SongAnalysisCard
+					:analysis="state.analysis"
+					:loading="state.insightLoading"
+					@pick-profile="pickProfile" />
+			</div>
+
+			<div class="st-glass">
+				<div class="st-title">演奏优化<span class="st-sub">连按 · 超范围 · 密度</span></div>
+				<PerformanceOptimizerPanel
+					:report="state.optimization"
+					:loading="state.insightLoading"
+					@apply="onApplyFix"
+					@refresh="loadInsight" />
+			</div>
+
+			<div class="st-glass">
 				<div class="st-title">AI 助手<span class="st-sub">分析 · 难度 · 键位 · 建议</span></div>
 				<AIAssistantPanel
 					:task-id="state.task?.id ?? null"
@@ -209,6 +279,8 @@ onMounted(async () => {
 			</div>
 		</template>
 	</MusicStudioLayout>
+
+	<ShowModeOverlay v-if="showMode" @close="showMode = false" />
 </template>
 
 <style scoped>

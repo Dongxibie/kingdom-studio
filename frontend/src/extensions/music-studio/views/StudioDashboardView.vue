@@ -4,11 +4,14 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ExtEmpty, ExtStatusTag } from '@/extensions/_shared/components'
 import MusicStudioLayout from '@/extensions/music-studio/components/MusicStudioLayout.vue'
+import SongAnalysisCard from '@/extensions/music-studio/components/SongAnalysisCard.vue'
+import ShowModeOverlay from '@/extensions/music-studio/components/ShowModeOverlay.vue'
 import MusicUploadPanel from '@/extensions/music-agent/components/MusicUploadPanel.vue'
 import { fetchMusicModuleInfo, parseJianpu, deleteMusicTask } from '@/extensions/music-agent/api/music'
 import { formatDuration } from '@/extensions/music-agent/utils/note-format'
 import { useStudioSession } from '@/extensions/music-studio/composables/useStudioSession'
 import { DEMO_SONGS, type DemoSong } from '@/extensions/music-studio/types/demo'
+import { starsText } from '@/extensions/music-studio/types/studio'
 import type { ExtModuleInfo } from '@/extensions/_shared/types/common'
 import type { MusicTaskDetail } from '@/extensions/music-agent/types/music'
 
@@ -19,13 +22,30 @@ import type { MusicTaskDetail } from '@/extensions/music-agent/types/music'
  * 所以这一页不用表格：曲目是卡片墙（带音域、时长、来源），导入与演示各占一块。
  */
 const router = useRouter()
-const { state, loadTasks, selectTask, adopt } = useStudioSession()
+const { state, loadTasks, selectTask, adopt, switchFavorite } = useStudioSession()
+
+/** 演示模式：全屏铺开的 Show Mode */
+const showMode = ref(false)
+/** 只看收藏 */
+const favoriteOnly = ref(false)
+
+function toggleFavoriteOnly() {
+	favoriteOnly.value = !favoriteOnly.value
+	void loadTasks(1, keyword.value.trim(), favoriteOnly.value)
+}
+
+/** 卡片上的创建时间只留日期，列表里不需要秒 */
+function dayOf(value: string) {
+	return value ? value.slice(0, 10) : ''
+}
 
 const info = ref<ExtModuleInfo | null>(null)
 const importing = ref('')
 const keyword = ref('')
 
 const recent = computed(() => state.tasks)
+const analysisHint = computed(() =>
+	state.task ? '「' + state.task.name + '」的难度、音域与推荐键位都在这里。' : '点一张曲目卡片，这里会给出它的分析卡。')
 
 async function loadInfo() {
 	try {
@@ -90,6 +110,10 @@ onMounted(async () => {
 		mark="♪">
 		<template #actions>
 			<ExtStatusTag :text="info ? '模块已就绪 · ' + info.phase : '模块状态未知'" :tone="info ? 'ok' : 'mute'" />
+			<button class="st-btn" type="button" :class="{ 'st-btn--primary': favoriteOnly }" @click="toggleFavoriteOnly">
+				{{ favoriteOnly ? '只看收藏 · 开' : '只看收藏' }}
+			</button>
+			<button class="st-btn st-btn--primary" type="button" @click="showMode = true">演示模式</button>
 			<button class="st-btn" type="button" @click="loadTasks(1)">刷新曲库</button>
 		</template>
 
@@ -109,6 +133,11 @@ onMounted(async () => {
 						<span class="demo-action">{{ importing === song.name ? '导入中…' : '导入这首' }}</span>
 					</button>
 				</div>
+			</div>
+
+			<div class="st-glass">
+				<div class="st-title">曲目分析<span class="st-sub">难度 · 音域 · 推荐键位</span></div>
+				<SongAnalysisCard :analysis="state.analysis" :loading="state.insightLoading" :hint="analysisHint" />
 			</div>
 
 			<div class="st-glass">
@@ -152,6 +181,14 @@ onMounted(async () => {
 						:class="{ on: state.task?.id === song.id }"
 						@click="open(song.id)">
 						<header class="song-head">
+							<button
+								class="song-star"
+								:class="{ on: song.favorite === 1 }"
+								type="button"
+								:title="song.favorite === 1 ? '取消收藏' : '收藏这首'"
+								@click.stop="switchFavorite(song.id)">
+								{{ song.favorite === 1 ? '★' : '☆' }}
+							</button>
 							<span class="song-name">{{ song.name }}</span>
 							<span class="st-chip">{{ song.sourceType === 'MIDI' ? 'MIDI' : '简谱' }}</span>
 						</header>
@@ -166,6 +203,11 @@ onMounted(async () => {
 							<span class="song-range">{{ song.pitchRange }}</span>
 							<span class="song-duration">{{ formatDuration(song.durationMs) }}</span>
 						</div>
+						<div class="song-difficulty">
+							<span class="song-stars" :title="song.difficultyLabel">{{ starsText(song.difficultyStars) }}</span>
+							<span class="song-difficulty-label">{{ song.difficultyLabel }}</span>
+							<span class="song-day">{{ dayOf(song.createTime) }}</span>
+						</div>
 						<div class="song-actions">
 							<button class="st-btn st-btn--ghost" type="button" @click.stop="open(song.id)">打开编排台</button>
 							<button class="st-btn st-btn--ghost" type="button" @click.stop="remove(song.id, song.name)">删除</button>
@@ -175,6 +217,8 @@ onMounted(async () => {
 			</div>
 		</div>
 	</MusicStudioLayout>
+
+	<ShowModeOverlay v-if="showMode" @close="showMode = false" />
 </template>
 
 <style scoped>
@@ -254,6 +298,43 @@ onMounted(async () => {
 	align-items: center;
 	justify-content: space-between;
 	gap: 8px;
+}
+
+.song-star {
+	border: 0;
+	background: transparent;
+	color: var(--ext-text-mute);
+	font-size: 14px;
+	cursor: pointer;
+	padding: 0;
+	line-height: 1;
+	transition: color 0.18s ease, transform 0.18s ease;
+}
+
+.song-star:hover {
+	transform: scale(1.15);
+}
+
+.song-star.on {
+	color: var(--ext-gold-light);
+}
+
+.song-difficulty {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	font-size: 10.5px;
+	color: var(--ext-text-mute);
+}
+
+.song-stars {
+	color: var(--ext-gold-light);
+	letter-spacing: 1px;
+}
+
+.song-day {
+	margin-left: auto;
+	font-family: var(--ext-font-mono);
 }
 
 .song-name {

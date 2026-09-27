@@ -26,6 +26,12 @@ export interface MusicTaskListItem {
 	/** 音域，如 C4–C6；没有音符时是「—」 */
 	pitchRange: string
 	status: string
+	/** 收藏标记：1 收藏 / 0 普通 */
+	favorite: number
+	/** 难度星级 1-5（与曲目分析卡同一套规则） */
+	difficultyStars: number
+	/** 难度文字：入门 / 简单 / 进阶 / 较难 / 挑战 */
+	difficultyLabel: string
 	createTime: string
 }
 

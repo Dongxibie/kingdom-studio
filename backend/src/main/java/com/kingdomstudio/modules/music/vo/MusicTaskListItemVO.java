@@ -39,5 +39,14 @@ public class MusicTaskListItemVO {
 
 	private String status;
 
+	@Schema(description = "收藏标记：1 收藏 / 0 普通")
+	private Integer favorite;
+
+	@Schema(description = "难度星级 1-5（与详情卡同一套规则）")
+	private Integer difficultyStars;
+
+	@Schema(description = "难度文字：入门 / 简单 / 进阶 / 较难 / 挑战")
+	private String difficultyLabel;
+
 	private LocalDateTime createTime;
 }

@@ -10,6 +10,12 @@ import type {
 	PageResult,
 	UnmappedStrategy,
 } from '@/extensions/music-agent/types/music'
+import type {
+	OptimizationReport,
+	PerformancePreset,
+	PerformancePresetPayload,
+	SongAnalysis,
+} from '@/extensions/music-studio/types/studio'
 
 /** Music Agent 的接口前缀（后端 context-path 是 /api，由 Vite 代理） */
 export const MUSIC_API_BASE = '/music'
@@ -39,8 +45,18 @@ export function parseJianpu(name: string, jianpu: string): Promise<MusicTaskDeta
 	return http.post<MusicTaskDetail>(TASK_BASE + '/jianpu', { name, jianpu })
 }
 
-export function listMusicTasks(keyword: string, page: number, size: number): Promise<PageResult<MusicTaskListItem>> {
-	return http.get<PageResult<MusicTaskListItem>>(TASK_BASE, { keyword, page, size })
+export function listMusicTasks(
+	keyword: string,
+	page: number,
+	size: number,
+	favoriteOnly = false,
+): Promise<PageResult<MusicTaskListItem>> {
+	return http.get<PageResult<MusicTaskListItem>>(TASK_BASE, { keyword, page, size, favorite: favoriteOnly })
+}
+
+/** 收藏 / 取消收藏：返回切换后的状态 */
+export function toggleFavorite(taskId: number): Promise<boolean> {
+	return http.post<boolean>(TASK_BASE + '/' + taskId + '/favorite')
 }
 
 export function getMusicTask(id: number): Promise<MusicTaskDetail> {
@@ -54,6 +70,46 @@ export function deleteMusicTask(id: number): Promise<void> {
 /** 按键映射：把音符交给指定乐器档案，拿到按键序列 */
 export function mapTaskKeys(id: number, profileId: number, strategy?: UnmappedStrategy): Promise<KeySequence> {
 	return http.post<KeySequence>(TASK_BASE + '/' + id + '/keys', { profileId, strategy })
+}
+
+/**
+ * 曲目分析：难度星级、速度、音域、预计演奏时长与推荐键位。
+ * 推荐是后端把每套乐器档案真实试算一遍得出的；不传 profileId 就用推荐档案。
+ */
+export function fetchSongAnalysis(taskId: number, profileId?: number | null): Promise<SongAnalysis> {
+	return http.get<SongAnalysis>(TASK_BASE + '/' + taskId + '/analysis', profileId ? { profileId } : undefined)
+}
+
+/** 演奏优化：连按冲突 / 超出音域 / 和弦 / 密度 / 长按，每条建议都带可应用的参数 */
+export function fetchOptimization(
+	taskId: number,
+	profileId: number,
+	strategy?: string,
+	presetId?: number | null,
+): Promise<OptimizationReport> {
+	return http.get<OptimizationReport>(TASK_BASE + '/' + taskId + '/optimize', { profileId, strategy, presetId })
+}
+
+/** 演奏方案列表：首次访问会补齐「原版 / 简单版 / 快速版」三套内置方案 */
+export function listPresets(taskId: number): Promise<PerformancePreset[]> {
+	return http.get<PerformancePreset[]>(TASK_BASE + '/' + taskId + '/presets')
+}
+
+export function createPreset(taskId: number, payload: PerformancePresetPayload): Promise<PerformancePreset> {
+	return http.post<PerformancePreset>(TASK_BASE + '/' + taskId + '/presets', payload)
+}
+
+export function updatePreset(taskId: number, presetId: number, payload: PerformancePresetPayload): Promise<PerformancePreset> {
+	return http.put<PerformancePreset>(TASK_BASE + '/' + taskId + '/presets/' + presetId, payload)
+}
+
+export function deletePreset(taskId: number, presetId: number): Promise<void> {
+	return http.delete<void>(TASK_BASE + '/' + taskId + '/presets/' + presetId)
+}
+
+/** 按方案跑一遍映射（在方案之间切换时用） */
+export function mapWithPreset(taskId: number, presetId: number): Promise<KeySequence> {
+	return http.get<KeySequence>(TASK_BASE + '/' + taskId + '/presets/' + presetId + '/keys')
 }
 
 export function listInstruments(): Promise<InstrumentProfile[]> {

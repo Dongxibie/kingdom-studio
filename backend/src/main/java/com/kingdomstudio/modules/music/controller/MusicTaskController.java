@@ -54,8 +54,15 @@ public class MusicTaskController {
 	public Result<PageVO<MusicTaskListItemVO>> page(
 			@RequestParam(required = false) String keyword,
 			@RequestParam(defaultValue = "1") long page,
-			@RequestParam(defaultValue = "10") long size) {
-		return Result.success(musicTaskService.page(keyword, page, size));
+			@RequestParam(defaultValue = "10") long size,
+			@RequestParam(defaultValue = "false") boolean favorite) {
+		return Result.success(musicTaskService.page(keyword, page, size, favorite));
+	}
+
+	@Operation(summary = "收藏 / 取消收藏", description = "曲库可以只看收藏；返回切换后的状态")
+	@PostMapping("/{id}/favorite")
+	public Result<Boolean> toggleFavorite(@PathVariable Long id) {
+		return Result.success(musicTaskService.toggleFavorite(id));
 	}
 
 	@Operation(summary = "任务详情", description = "含全部音符，前端时间线直接用")

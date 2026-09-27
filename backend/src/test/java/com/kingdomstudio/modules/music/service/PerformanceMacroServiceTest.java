@@ -53,12 +53,15 @@ class PerformanceMacroServiceTest {
 	private DesktopAgentService desktopAgentService;
 	@Mock
 	private PerformancePlanMapper planMapper;
+	@Mock
+	private PerformancePresetService presetService;
 
 	private PerformanceMacroService service;
 
 	@BeforeEach
 	void setUp() {
-		service = new PerformanceMacroService(musicTaskService, desktopAgentService, planMapper,
+		// 构造参数顺序按字段声明：… planMapper, presetService, generator, adapters
+		service = new PerformanceMacroService(musicTaskService, desktopAgentService, planMapper, presetService,
 				new MacroScriptGenerator(),
 				List.of(new PreviewExecutionAdapter(), new ManualExecutionAdapter(), new LocalExecutionAdapter()));
 	}
