@@ -129,11 +129,12 @@ npm run dev
 | 主站 · 工程基础 | Spring Boot + Vue 3 + 数据库 + Redis，统一响应体与全局异常处理 | ✅ 已完成 |
 | 主站 · 四个业务模块 | 项目王国 / 技术图鉴 / 成长时间线 / 代码知识库 | 规划中（页面为占位） |
 | 扩展 · 动效基因库 | 动效工作台（官方 30 + 社区精选 30 双集合 / 七分类 / 推荐组合 / 智能助手 / 运行档位）、候选池流水线（发现 → 分析 → 筛选 → 转 Pattern）、资源增删改查、GitHub 采集与三级去重、代码生成、沙箱预览 | ✅ v1.1.0 |
-| 扩展 · 音乐 Agent | MIDI / 简谱解析、乐器按键映射、演奏时间线、Demo 回放 | ✅ v1.1.0 |
+| 扩展 · 音乐 Agent | MIDI / 简谱解析、乐器按键映射、演奏时间线、Demo 回放、演奏宏导出（TXT / AutoHotkey / JSON）、本机演奏运行时（用户主动开启 + ESC 急停）、AI 音乐助手（初学 / 标准 / 展示三档方案） | ✅ v1.1.0 |
 | 扩展 · 桌面代理 | WebSocket 协议与派发计划（模拟，不驱动系统输入） | ✅ v1.1.0 |
 
 扩展模块的详细说明见 [docs/EXTENSIONS-COMPLETION-REPORT.md](docs/EXTENSIONS-COMPLETION-REPORT.md)；
 2.0 的分阶段计划见 [docs/EXTENSIONS-2.0-PLAN.md](docs/EXTENSIONS-2.0-PLAN.md)，Phase 1 变更报告见 [docs/PHASE-1-REPORT.md](docs/PHASE-1-REPORT.md)；
+音乐侧的宏导出、本机演奏与 AI 助手分别见 [docs/MACRO-EXPORT-REPORT.md](docs/MACRO-EXPORT-REPORT.md)、[docs/LOCAL-RUNTIME-REPORT.md](docs/LOCAL-RUNTIME-REPORT.md)、[docs/AI-MUSIC-ASSISTANT-REPORT.md](docs/AI-MUSIC-ASSISTANT-REPORT.md)；
 两个扩展的作品集仓库（含截图与演示素材）在 <https://github.com/Dongxibie/kingdom-extensions>。
 
 明确不做：微服务、分布式、复杂权限系统、支付、消息队列。

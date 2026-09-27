@@ -9,6 +9,7 @@ import MusicNoteTimeline from '@/extensions/music-agent/components/MusicNoteTime
 import MusicKeyboard from '@/extensions/music-agent/components/MusicKeyboard.vue'
 import KeySequencePanel from '@/extensions/music-agent/components/KeySequencePanel.vue'
 import DesktopAgentPanel from '@/extensions/music-agent/components/DesktopAgentPanel.vue'
+import MusicAssistantPanel from '@/extensions/music-agent/components/MusicAssistantPanel.vue'
 import PerformanceControlPanel from '@/extensions/music-agent/components/PerformanceControlPanel.vue'
 import {
 	deleteMusicTask,
@@ -89,6 +90,11 @@ async function loadInfo() {
 		info.value = null
 		errorMessage.value = error instanceof Error ? error.message : '模块自检失败'
 	}
+}
+
+/** 助手生成了新版本曲目：刷新曲库，让它出现在列表里 */
+async function reloadAfterAssistant() {
+	await loadTasks()
 }
 
 async function loadTasks() {
@@ -386,6 +392,11 @@ onBeforeUnmount(stopPlayback)
 					<div class="ext-kv"><span class="k">阶段</span><span class="v">{{ info.phase }}</span></div>
 					<div class="ext-kv"><span class="k">数据表</span><span class="v">{{ info.plannedTables.join('、') }}</span></div>
 				</div>
+			</div>
+
+			<div class="ext-panel">
+				<div class="ext-panel-title">AI 音乐助手</div>
+				<MusicAssistantPanel :task-id="activeTaskId" @applied="reloadAfterAssistant" />
 			</div>
 
 			<div class="ext-panel">

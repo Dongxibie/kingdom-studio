@@ -122,6 +122,29 @@ public class MusicTaskService {
 	}
 
 	/** 分页列表：关键词匹配曲子名与来源信息 */
+	/**
+	 * 读出一首曲子的音符结构（AI 助手与策略层用）。
+	 *
+	 * <p>只读取、不修改：助手拿到的永远是库里那份原始音符。
+	 */
+	public ParsedSong songOf(Long taskId) {
+		MusicTask task = musicTaskMapper.selectById(taskId);
+		if (task == null) {
+			throw new BusinessException(ResultCode.NOT_FOUND, "音乐任务不存在（id=" + taskId + "）");
+		}
+		return toParsedSong(task);
+	}
+
+	/**
+	 * 把一份「调整后的曲子」落成新曲目（例如初学版 / 展示版）。
+	 *
+	 * <p>走的是与上传同一套持久化逻辑，所以音数、速度、音域等统计口径完全一致；
+	 * 原曲目不会被改动。
+	 */
+	public MusicTaskDetailVO createDerived(ParsedSong song, String sourceRef) {
+		return persist(song, sourceRef);
+	}
+
 	public PageVO<MusicTaskListItemVO> page(String keyword, long page, long size) {
 		long current = Math.max(1, page);
 		long pageSize = Math.min(Math.max(1, size), 100);
