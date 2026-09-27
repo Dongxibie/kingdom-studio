@@ -65,6 +65,41 @@ export interface ExecutionCommand {
 	strokeSeq?: number | null
 }
 
+/** 本机演奏状态：READY / RUNNING / PAUSED / STOPPED / FINISHED */
+export interface ExecutionStatus {
+	taskId?: number | null
+	taskName?: string
+	profileName?: string
+	status: 'READY' | 'RUNNING' | 'PAUSED' | 'STOPPED' | 'FINISHED'
+	statusLabel: string
+	progress: number
+	currentKey: string
+	executedCount: number
+	commandCount: number
+	elapsedMs: number
+	duration: number
+	remainingMs: number
+	heldKeys: string[]
+	targetWindow: string
+	currentWindow: string
+	guardAlive: boolean
+	injector: string
+	warnings: string[]
+	stopReason: string
+}
+
+/** 本机演奏环境自检 */
+export interface RuntimePreflight {
+	enabled: boolean
+	currentWindow: string
+	injector: string
+	guardAvailable: boolean
+	ready: boolean
+	reason: string
+	requirements: string[]
+	running: boolean
+}
+
 export interface ExecutionResult {
 	mode: string
 	modeLabel: string

@@ -9,6 +9,7 @@ import MusicNoteTimeline from '@/extensions/music-agent/components/MusicNoteTime
 import MusicKeyboard from '@/extensions/music-agent/components/MusicKeyboard.vue'
 import KeySequencePanel from '@/extensions/music-agent/components/KeySequencePanel.vue'
 import DesktopAgentPanel from '@/extensions/music-agent/components/DesktopAgentPanel.vue'
+import PerformanceControlPanel from '@/extensions/music-agent/components/PerformanceControlPanel.vue'
 import {
 	deleteMusicTask,
 	fetchMusicModuleInfo,
@@ -385,6 +386,11 @@ onBeforeUnmount(stopPlayback)
 					<div class="ext-kv"><span class="k">阶段</span><span class="v">{{ info.phase }}</span></div>
 					<div class="ext-kv"><span class="k">数据表</span><span class="v">{{ info.plannedTables.join('、') }}</span></div>
 				</div>
+			</div>
+
+			<div class="ext-panel">
+				<div class="ext-panel-title">演奏控制（本机演奏）</div>
+				<PerformanceControlPanel :task-id="activeTaskId" />
 			</div>
 
 			<div class="ext-panel">

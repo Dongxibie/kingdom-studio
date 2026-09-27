@@ -7,8 +7,10 @@ import com.kingdomstudio.modules.desktop.vo.KeyCommandVO;
 import com.kingdomstudio.modules.music.dto.ExecutionRequestDTO;
 import com.kingdomstudio.modules.music.dto.MappingRequestDTO;
 import com.kingdomstudio.modules.music.entity.PerformancePlan;
-import com.kingdomstudio.modules.music.macro.ExecutionAdapter;
-import com.kingdomstudio.modules.music.macro.ExecutionAdapters;
+import com.kingdomstudio.modules.music.execution.ExecutionAdapter;
+import com.kingdomstudio.modules.music.execution.LocalExecutionAdapter;
+import com.kingdomstudio.modules.music.execution.ManualExecutionAdapter;
+import com.kingdomstudio.modules.music.execution.PreviewExecutionAdapter;
 import com.kingdomstudio.modules.music.macro.MacroScriptGenerator;
 import com.kingdomstudio.modules.music.mapper.PerformancePlanMapper;
 import com.kingdomstudio.modules.music.vo.ExecutionResultVO;
@@ -58,7 +60,7 @@ class PerformanceMacroServiceTest {
 	void setUp() {
 		service = new PerformanceMacroService(musicTaskService, desktopAgentService, planMapper,
 				new MacroScriptGenerator(),
-				List.of(new ExecutionAdapters.Preview(), new ExecutionAdapters.Manual(), new ExecutionAdapters.Local()));
+				List.of(new PreviewExecutionAdapter(), new ManualExecutionAdapter(), new LocalExecutionAdapter()));
 	}
 
 	private KeySequenceVO sequence() {
@@ -188,20 +190,22 @@ class PerformanceMacroServiceTest {
 	}
 
 	@Test
-	@DisplayName("执行：本机与逐条确认当前未开启，如实说明原因且不给出命令流")
+	@DisplayName("执行：LOCAL 引导去演奏控制面板，MANUAL 明确未开启，两者都不给出命令流")
 	void localAndManualAreRefusedHonestly() {
 		when(planMapper.selectList(any())).thenReturn(List.of(persisted()));
 
 		ExecutionRequestDTO local = new ExecutionRequestDTO();
 		local.setMode("LOCAL");
 		ExecutionResultVO localResult = service.execute(1L, local);
-		assertFalse(localResult.getAccepted());
-		assertTrue(localResult.getMessage().contains("急停"));
+		assertFalse(localResult.getAccepted(), "一次性派发接口不负责启动有状态的会话");
+		assertTrue(localResult.getMessage().contains("演奏控制面板"), localResult.getMessage());
 		assertTrue(localResult.getCommands().isEmpty());
 
 		ExecutionRequestDTO manual = new ExecutionRequestDTO();
 		manual.setMode("MANUAL");
-		assertFalse(service.execute(1L, manual).getAccepted());
+		ExecutionResultVO manualResult = service.execute(1L, manual);
+		assertFalse(manualResult.getAccepted());
+		assertTrue(manualResult.getMessage().contains("还没做"), manualResult.getMessage());
 	}
 
 	@Test
@@ -212,7 +216,10 @@ class PerformanceMacroServiceTest {
 				modes.stream().map(item -> String.valueOf(item.get("mode"))).toList());
 		assertEquals(true, modes.stream().filter(item -> "PREVIEW".equals(item.get("mode")))
 				.findFirst().orElseThrow().get("available"));
-		assertEquals(false, modes.stream().filter(item -> "LOCAL".equals(item.get("mode")))
+		// LOCAL 走的是有状态会话，是否真能开由 ExecutionService 按配置判断
+		assertEquals(true, modes.stream().filter(item -> "LOCAL".equals(item.get("mode")))
+				.findFirst().orElseThrow().get("available"));
+		assertEquals(false, modes.stream().filter(item -> "MANUAL".equals(item.get("mode")))
 				.findFirst().orElseThrow().get("available"));
 	}
 

@@ -11,7 +11,7 @@ import com.kingdomstudio.modules.desktop.vo.KeyCommandVO;
 import com.kingdomstudio.modules.music.dto.ExecutionRequestDTO;
 import com.kingdomstudio.modules.music.dto.MappingRequestDTO;
 import com.kingdomstudio.modules.music.entity.PerformancePlan;
-import com.kingdomstudio.modules.music.macro.ExecutionAdapter;
+import com.kingdomstudio.modules.music.execution.ExecutionAdapter;
 import com.kingdomstudio.modules.music.macro.MacroScriptGenerator;
 import com.kingdomstudio.modules.music.mapper.PerformancePlanMapper;
 import com.kingdomstudio.modules.music.vo.ExecutionResultVO;
@@ -44,8 +44,8 @@ import java.util.stream.Collectors;
  *       所以导出脚本里的时序与桌面代理派发计划永远一致。</li>
  *   <li><b>计划落库</b>：生成一次就存一份（{@code performance_plan}），
  *       导出与执行都读同一份，避免「同一个曲子每次导出结果不一样」。</li>
- *   <li><b>不碰真实输入</b>：导出只产出文本；执行走 {@link ExecutionAdapter}，
- *       当前只有「仅模拟」是可用的，另外两种如实说明未开启。</li>
+ *   <li><b>导出与执行分开</b>：导出只产出文本；一次性的执行走 {@link ExecutionAdapter}（仅模拟可用），
+ *       真正的本机演奏是有状态的会话，见 {@code com.kingdomstudio.modules.music.service.ExecutionService}。</li>
  * </ol>
  */
 @Slf4j
@@ -125,7 +125,7 @@ public class PerformanceMacroService {
 				.build();
 	}
 
-	/** 执行（当前只有「仅模拟」可用，另外两种如实说明未开启） */
+	/** 一次性执行（PREVIEW 仅模拟可用；LOCAL 会指向演奏控制面板，避免误触） */
 	public ExecutionResultVO execute(Long taskId, ExecutionRequestDTO request) {
 		PerformancePlan entity = requireLatest(taskId);
 		String mode = request == null || request.getMode() == null || request.getMode().isBlank()

@@ -2,9 +2,13 @@ package com.kingdomstudio.modules.music.controller;
 
 import com.kingdomstudio.common.Result;
 import com.kingdomstudio.modules.music.dto.ExecutionRequestDTO;
+import com.kingdomstudio.modules.music.dto.LocalRunRequestDTO;
 import com.kingdomstudio.modules.music.dto.MappingRequestDTO;
+import com.kingdomstudio.modules.music.service.ExecutionService;
 import com.kingdomstudio.modules.music.service.PerformanceMacroService;
 import com.kingdomstudio.modules.music.vo.ExecutionResultVO;
+import com.kingdomstudio.modules.music.vo.ExecutionStatusVO;
+import com.kingdomstudio.modules.music.vo.RuntimePreflightVO;
 import com.kingdomstudio.modules.music.vo.MacroExportVO;
 import com.kingdomstudio.modules.music.vo.PerformancePlanVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,6 +40,7 @@ import java.util.Map;
 public class PerformanceMacroController {
 
 	private final PerformanceMacroService macroService;
+	private final ExecutionService executionService;
 
 	@Operation(summary = "生成演奏计划",
 			description = "按键序列 → 校验过的命令流 → 按键事件流；同一份计划可反复导出三种格式")
@@ -70,5 +75,44 @@ public class PerformanceMacroController {
 	@GetMapping("/modes")
 	public Result<List<Map<String, Object>>> modes(@PathVariable Long taskId) {
 		return Result.success(macroService.modes());
+	}
+
+	@Operation(summary = "本机演奏环境自检",
+			description = "开关是否打开、此刻的前台窗口是什么、注入方式、必须先确认的条件")
+	@GetMapping("/runtime/preflight")
+	public Result<RuntimePreflightVO> preflight(@PathVariable Long taskId) {
+		return Result.success(executionService.preflight());
+	}
+
+	@Operation(summary = "开始本机演奏",
+			description = "需要 confirm=true 与已确认的目标窗口；只对该窗口生效，ESC 随时急停")
+	@PostMapping("/runtime/start")
+	public Result<ExecutionStatusVO> start(@PathVariable Long taskId,
+			@RequestBody LocalRunRequestDTO request) {
+		return Result.success(executionService.start(taskId, request));
+	}
+
+	@Operation(summary = "演奏状态", description = "状态 / 进度 / 当前按键 / 剩余时间 / 按住的键 / 窗口")
+	@GetMapping("/runtime/status")
+	public Result<ExecutionStatusVO> runtimeStatus(@PathVariable Long taskId) {
+		return Result.success(executionService.status());
+	}
+
+	@Operation(summary = "暂停演奏", description = "暂停会立刻松开所有按下的键，时间轴停住")
+	@PostMapping("/runtime/pause")
+	public Result<ExecutionStatusVO> pause(@PathVariable Long taskId) {
+		return Result.success(executionService.pause());
+	}
+
+	@Operation(summary = "继续演奏")
+	@PostMapping("/runtime/resume")
+	public Result<ExecutionStatusVO> resume(@PathVariable Long taskId) {
+		return Result.success(executionService.resume());
+	}
+
+	@Operation(summary = "停止演奏（等同急停）", description = "立刻停止并松开所有按下的键")
+	@PostMapping("/runtime/stop")
+	public Result<ExecutionStatusVO> stop(@PathVariable Long taskId) {
+		return Result.success(executionService.stop());
 	}
 }

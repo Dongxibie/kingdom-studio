@@ -110,6 +110,17 @@ kingdom:
     prefix: 'Bearer '
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+  # 本机演奏（Local Performance Runtime）：默认关闭，必须显式开启
+  # 键名必须与 @Value("${kingdom.music.local-execution.*}") 完全一致：@Value 不做宽松绑定
+  music:
+    local-execution:
+      # 关着的时候「本地演奏」一律拒绝启动
+      enabled: ${MUSIC_LOCAL_EXECUTION_ENABLED:false}
+      # robot 真实按键 / record 记录模式（一个键都不发，用于自检与演示）
+      injector: ${MUSIC_LOCAL_EXECUTION_INJECTOR:robot}
+      # auto 使用 tools/ks-performance-guard.ps1；none 表示不做窗口判断
+      guard: ${MUSIC_LOCAL_EXECUTION_GUARD:auto}
+      guard-script: ${MUSIC_LOCAL_EXECUTION_GUARD_SCRIPT:}
 
 logging:
   level:
