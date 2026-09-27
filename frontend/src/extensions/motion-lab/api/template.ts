@@ -11,6 +11,7 @@ import type {
 } from '@/extensions/motion-lab/types/workbench'
 import type { MotionRecommendResult } from '@/extensions/motion-lab/types/recommend'
 import type { MotionDesign } from '@/extensions/motion-lab/types/design'
+import type { MotionExport } from '@/extensions/motion-lab/types/export'
 
 /** 工作台接口前缀（后端 context-path 是 /api） */
 export const TEMPLATE_BASE = '/motion/templates'
@@ -78,6 +79,20 @@ export function recommendMotions(query: string, limit = 5): Promise<MotionRecomm
  */
 export function designMotions(query: string, performance = '', maxSteps = 5): Promise<MotionDesign> {
 	return http.post<MotionDesign>(TEMPLATE_BASE + '/design', { query, performance, maxSteps })
+}
+
+/**
+ * 导出方案代码：把一套方案编译成可运行的工程文件（Vue / React / HTML+CSS）。
+ * 同时返回组合预览 HTML，前端塞进沙箱 iframe 就能看到导出结果的样子。
+ */
+export function exportMotions(payload: {
+	recipeKey?: string
+	planName?: string
+	format?: string
+	templateKeys?: string[]
+	params?: Record<string, Record<string, number>>
+}): Promise<MotionExport> {
+	return http.post<MotionExport>(TEMPLATE_BASE + '/export', payload)
 }
 
 /** 组合方案列表 */

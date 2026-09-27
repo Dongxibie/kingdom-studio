@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ExtCodeBlock, ExtEmpty, ExtShell, ExtStatusTag } from '@/extensions/_shared/components'
+import MotionExportPanel from '@/extensions/motion-lab/components/MotionExportPanel.vue'
 import { designMotions } from '@/extensions/motion-lab/api/template'
 import {
 	DESIGN_BUDGETS,
@@ -84,6 +85,23 @@ function usePreset(preset: { query: string }) {
 	query.value = preset.query
 	void run()
 }
+
+/** 导出用的参数覆盖：把本方案里每一步的落地值交给代码生成器 */
+const exportParams = computed(() => {
+	const result: Record<string, Record<string, number>> = {}
+	for (const step of design.value?.animations ?? []) {
+		const values: Record<string, number> = {}
+		for (const param of step.params) {
+			if (param.value !== null && param.value !== undefined) {
+				values[param.key] = param.value
+			}
+		}
+		if (Object.keys(values).length) {
+			result[step.templateKey] = values
+		}
+	}
+	return result
+})
 
 /** 一键进工作台：带上方案 key，工作台会自动打开这套方案并进入组合模式 */
 function openInWorkbench() {
@@ -266,6 +284,15 @@ onMounted(() => {
 				<button v-if="design.recipe" class="mdes-open" type="button" @click="openInWorkbench">
 					在工作台里打开这套方案
 				</button>
+			</div>
+
+			<div v-if="design?.recipe" class="ext-panel">
+				<div class="ext-panel-title">导出代码（Vue / React / HTML）</div>
+				<p class="mdes-tip">把整套方案编译成工程文件：主组件 + 每个步骤一个文件 + 配置 + 样式，参数已按本方案落地。</p>
+				<MotionExportPanel
+					:recipe-key="design.recipe.recipeKey"
+					:plan-name="design.recipe.name"
+					:params="exportParams" />
 			</div>
 
 			<div v-if="design?.recipe?.prompt" class="ext-panel">
