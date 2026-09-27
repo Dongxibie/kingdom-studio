@@ -110,6 +110,66 @@ kingdom-studio/.github/workflows/ci.yml 的内容整段粘进去提交。
 文件本身的命令与本地验证完全一致：后端 `mvn -B -ntp test`；前端 `npm ci` → `npm run type-check` → `npm run test` → `npm run build`。
 另外**「失败阻止合并」需要在仓库设置里把 CI 设为必需检查**，这一步是仓库权限操作，脚本层做不到。
 
+顺带说明两个已经排掉的坑：CI 里 Node 用 **22**（依赖链里的 `abbrev@5.0.0` / `nopt@10.0.1` 要求 `Node ^22.22.2`，用 Node 20 会刷一屏 `EBADENGINE`）；
+`npm ci --dry-run` 验证过锁文件与 `package.json` 完全同步，安装步骤不会因为依赖锁不同步失败。
+
+### 工作流原文（可直接复制到 GitHub 网页新建文件）
+
+```yaml
+# Kingdom Studio CI
+#
+# 目标：推送或提 PR 时，后端与前端各自跑一遍「能不能过」的证据 —— 不通过就是红灯，
+# 不依赖本机的 MySQL / Redis（后端全部是单元测试，前端跑类型检查 + 单元测试 + 构建）。
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  backend:
+    name: 后端 · 单元测试
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 准备 JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: mvn test
+        working-directory: backend
+        run: mvn -B -ntp test
+
+  frontend:
+    name: 前端 · 类型检查 / 单元测试 / 构建
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 准备 Node 22
+        uses: actions/setup-node@v4
+        with:
+          # 依赖里有包要求 Node ^22.22.2（abbrev / nopt），Node 20 会刷一屏 EBADENGINE 警告
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: 安装依赖
+        working-directory: frontend
+        run: npm ci
+      - name: 类型检查（vue-tsc）
+        working-directory: frontend
+        run: npm run type-check
+      - name: 单元测试（关键流程）
+        working-directory: frontend
+        run: npm run test
+      - name: 生产构建
+        working-directory: frontend
+        run: npm run build
+```
+
 ---
 
 ## 六、Phase 6 前端测试：Vitest
