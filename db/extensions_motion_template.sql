@@ -140,6 +140,7 @@ CREATE TABLE IF NOT EXISTS `motion_recipe` (
 	`best_for`      VARCHAR(160) NOT NULL DEFAULT ''     COMMENT '适合场景，逗号分隔',
 	`score`         TINYINT      NOT NULL DEFAULT 80     COMMENT '推荐指数 = 组成模板的加权平均（由服务端算出）',
 	`template_keys` VARCHAR(600) NOT NULL DEFAULT '[]'   COMMENT '包含的模板 template_key JSON 数组，按应用顺序排列',
+	`steps`         LONGTEXT     NULL                   COMMENT '组合步骤 JSON：[{templateKey, stage, role}]，按应用顺序；为空时回退到 template_keys',
 	`prompt`        MEDIUMTEXT   NOT NULL               COMMENT '整套组合的 Prompt（比单模板更完整的一句话需求）',
 	`status`        VARCHAR(16)  NOT NULL DEFAULT 'READY' COMMENT '状态：READY / DRAFT / ARCHIVED',
 	`deleted`       TINYINT      NOT NULL DEFAULT 0      COMMENT '逻辑删除',

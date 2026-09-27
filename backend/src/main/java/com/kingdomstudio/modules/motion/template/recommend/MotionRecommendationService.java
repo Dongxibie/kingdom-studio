@@ -173,16 +173,9 @@ public class MotionRecommendationService {
 		return hits;
 	}
 
-	/** 性能等级：轻量档且性能子分高就是 A，均衡是 B，依赖 GPU 是 C */
+	/** 性能等级：算法放在模板服务里（组合方案的每一步也用它），这里只做转发 */
 	String performanceGrade(String tier, Integer scorePerf) {
-		int perf = scorePerf == null ? 80 : scorePerf;
-		if ("LIGHTWEIGHT".equals(tier)) {
-			return perf >= 92 ? "A" : "B";
-		}
-		if ("BALANCED".equals(tier)) {
-			return "B";
-		}
-		return "C";
+		return templateService.performanceGrade(tier, scorePerf);
 	}
 
 	/**

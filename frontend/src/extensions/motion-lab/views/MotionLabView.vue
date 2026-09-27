@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { ExtCodeBlock, ExtShell, ExtStatusTag } from '@/extensions/_shared/components'
@@ -9,6 +9,7 @@ import MotionSearchBar from '@/extensions/motion-lab/components/MotionSearchBar.
 import MotionDiscoverPanel from '@/extensions/motion-lab/components/MotionDiscoverPanel.vue'
 import MotionTemplateCards from '@/extensions/motion-lab/components/MotionTemplateCards.vue'
 import MotionPreviewStage from '@/extensions/motion-lab/components/MotionPreviewStage.vue'
+import MotionRecipeSteps from '@/extensions/motion-lab/components/MotionRecipeSteps.vue'
 import MotionStageControls from '@/extensions/motion-lab/components/MotionStageControls.vue'
 import { fetchMotionModuleInfo } from '@/extensions/motion-lab/api/motion'
 import {
@@ -49,6 +50,12 @@ const activeKey = ref('')
 const detail = ref<MotionTemplateDetail | null>(null)
 const detailLoading = ref(false)
 const activeRecipe = ref<MotionRecipe | null>(null)
+
+/** 依次预览：按组合方案的步骤顺序自动往下走，走完最后一步自动停 */
+const autoPlaying = ref(false)
+const autoStep = ref(0)
+let autoTimer: number | null = null
+const AUTO_INTERVAL = 4200
 
 const searchLoading = ref(false)
 const searchResult = ref<MotionSearchResult | null>(null)
@@ -153,6 +160,10 @@ async function selectTemplate(templateKey: string, keepOverrides = false) {
 
 /** 选中组合方案：先加载它的第一个成员做预览，再回到方案视图（效果 = 这几个叠起来） */
 async function selectRecipe(recipeKey: string) {
+	stopAuto()
+	// 左栏的「组合方案」在引导页上也是可点的：点了就说明用户已经动手，
+	// 直接进工作台，否则高亮变了却看不到任何东西（引导只是首访的一次性提示）
+	enterWorkbench()
 	try {
 		const recipe = await getRecipe(recipeKey)
 		const first = recipe.memberKeys[0]
@@ -216,8 +227,58 @@ async function onSearch(text: string) {
 
 /** 组合方案卡片里点成员：模型的方案保留参数建议，库里的方案没有覆盖值 */
 function openMember(templateKey: string) {
+	stopAuto()
 	void selectTemplate(templateKey, activeRecipe.value?.recipeKey === 'model-suggestion')
 }
+
+/** 当前方案的步骤顺序：模型临时给的方案没有 steps，就用成员清单 */
+function stepKeys(): string[] {
+	const recipe = activeRecipe.value
+	if (!recipe) {
+		return []
+	}
+	if (recipe.steps?.length) {
+		return recipe.steps.map((step) => step.templateKey)
+	}
+	return recipe.memberKeys ?? []
+}
+
+function toggleAuto() {
+	if (autoPlaying.value) {
+		stopAuto()
+		return
+	}
+	const keys = stepKeys()
+	if (!keys.length) {
+		return
+	}
+	autoPlaying.value = true
+	autoStep.value = 1
+	void selectTemplate(keys[0], activeRecipe.value?.recipeKey === 'model-suggestion')
+	autoTimer = window.setInterval(() => {
+		const list = stepKeys()
+		if (autoStep.value >= list.length) {
+			stopAuto()
+			return
+		}
+		autoStep.value += 1
+		void selectTemplate(list[autoStep.value - 1], activeRecipe.value?.recipeKey === 'model-suggestion')
+	}, AUTO_INTERVAL)
+}
+
+/** 停掉依次预览：离开页面、手动点某一步、清筛选都要停，不然它会自己继续跑 */
+function stopAuto() {
+	if (autoTimer !== null) {
+		window.clearInterval(autoTimer)
+		autoTimer = null
+	}
+	autoPlaying.value = false
+	autoStep.value = 0
+}
+
+onBeforeUnmount(() => {
+	stopAuto()
+})
 
 function onSearchPick(kind: 'TEMPLATE' | 'RECIPE', key: string) {
 	if (kind === 'RECIPE') {
@@ -291,6 +352,14 @@ function onRestart() {
 	restartToken.value += 1
 	playing.value = true
 	window.setTimeout(() => stageRef.value?.restart(), 60)
+}
+
+/** 用一次工作台：把首访引导标记为已看过（选过场景 / 点过方案之后不再重复出现） */
+function enterWorkbench() {
+	if (!onboarded.value) {
+		localStorage.setItem('mlab_onboarded', '1')
+		onboarded.value = true
+	}
 }
 
 function onParamChange(values: Record<string, number>) {
@@ -430,20 +499,13 @@ onMounted(async () => {
 					:restart-token="restartToken" />
 
 				<div v-if="activeRecipe" class="mlab-recipe-box">
-					<div class="mlab-recipe-title">组合方案「{{ activeRecipe.name }}」由这些动效叠成</div>
-					<div class="mlab-recipe-members">
-						<button
-							v-for="member in activeRecipe.members"
-							:key="member.templateKey"
-							class="mlab-member"
-							type="button"
-							@click="openMember(member.templateKey)">
-							<span class="mlab-member-name">{{ member.name }}</span>
-							<span class="mlab-member-score">{{ member.score }}</span>
-						</button>
-					</div>
-					<div class="mlab-recipe-why">{{ activeRecipe.description }}</div>
-					<div v-if="activeRecipe.prompt" class="mlab-recipe-prompt">{{ activeRecipe.prompt }}</div>
+					<MotionRecipeSteps
+						:recipe="activeRecipe"
+						:active-key="activeKey"
+						:auto-playing="autoPlaying"
+						:auto-step="autoStep"
+						@pick="openMember"
+						@toggle-auto="toggleAuto" />
 				</div>
 
 				<div class="mlab-list-head">

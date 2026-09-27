@@ -41,6 +41,15 @@ public class MotionRecipe {
 	/** 包含的模板 template_key JSON 数组，按应用顺序 */
 	private String templateKeys;
 
+	/**
+	 * 组合步骤 JSON 数组，按应用顺序，每步带 stage（负责哪一层）与 role（这一步的作用）。
+	 *
+	 * <p>v1.1 只记「包含哪些模板」，界面能做的只有列出成员；但真实网页的组合是有分工的
+	 * （谁铺底、谁给纵深、谁收尾），所以把「作用」也变成数据 —— 界面上那一列就是它。
+	 * 为空时回退到 templateKeys：老数据仍能展示，只是没有作用说明。
+	 */
+	private String steps;
+
 	private String prompt;
 
 	private String status;

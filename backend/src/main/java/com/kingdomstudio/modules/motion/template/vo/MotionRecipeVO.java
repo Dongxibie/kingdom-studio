@@ -43,6 +43,12 @@ public class MotionRecipeVO {
 
 	private List<String> memberKeys;
 
+	@Schema(description = "组合步骤：每一步的动画 / 作用 / 参数 / 性能成本，界面按这个渲染组合模式")
+	private List<RecipeStepVO> steps;
+
+	@Schema(description = "整体性能成本：最重档位、各档步数与降级建议")
+	private RecipePerformanceVO performance;
+
 	private String prompt;
 
 	@Schema(description = "人工评分（若有人评过）")

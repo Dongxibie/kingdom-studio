@@ -85,6 +85,45 @@ export interface MotionTemplateDetail extends MotionTemplateItem {
 	manualReason: string | null
 }
 
+/** 组合方案里的一步：动画 / 作用 / 参数 / 性能成本 */
+export interface RecipeStep {
+	/** 第几步，从 1 开始 */
+	order: number
+	templateKey: string
+	name: string
+	nameEn: string
+	/** 这一步负责哪一层：背景 / 内容 / 滚动 / 交互 / 收尾 */
+	stage: string
+	/** 这一步的作用：为什么在这里用它 */
+	role: string
+	description: string
+	category: string
+	technology: string
+	triggerType: string
+	triggerLabel: string
+	runtimeTier: 'LIGHTWEIGHT' | 'BALANCED' | 'GPU_ENHANCED'
+	runtimeTierLabel: string
+	/** 性能等级：A 轻量 / B 均衡 / C 依赖 GPU 加速 */
+	performanceGrade: 'A' | 'B' | 'C'
+	score: number
+	stars: number
+	params: TemplateParam[]
+	/** 该模板是否带沙箱预览结构（决定这一步能不能单独预览） */
+	previewReady: boolean
+}
+
+/** 组合方案的整体性能成本 */
+export interface RecipePerformance {
+	worstTier: 'LIGHTWEIGHT' | 'BALANCED' | 'GPU_ENHANCED'
+	worstTierLabel: string
+	grade: 'A' | 'B' | 'C'
+	lightweight: number
+	balanced: number
+	gpuEnhanced: number
+	/** 一句话说明代价在哪、怎么降级 */
+	note: string
+}
+
 /** 组合方案 */
 export interface MotionRecipe {
 	id: number
@@ -101,6 +140,10 @@ export interface MotionRecipe {
 	grade: string
 	members: MotionTemplateItem[]
 	memberKeys: string[]
+	/** 组合步骤（模型临时给的方案没有这一步，界面上按 members 兜底） */
+	steps?: RecipeStep[]
+	/** 整体性能成本 */
+	performance?: RecipePerformance | null
 	prompt: string
 	manualScore: number | null
 	manualReason: string | null

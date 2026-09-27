@@ -27,3 +27,7 @@ application-local.yml
 # ---- 构建缓存 / 系统文件（Phase 1 扩展架构时补）----
 *.tsbuildinfo
 Thumbs.db
+
+# ---- Python（_gh 下的种子生成器）----
+__pycache__/
+*.pyc

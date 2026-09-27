@@ -184,6 +184,28 @@ public class MotionTemplateService {
 		return "均衡";
 	}
 
+	/**
+	 * 性能等级：由运行档位与性能子分算出。
+	 *
+	 * <p>只有这一份算法：推荐结果、组合方案的每一步、模板详情都走它，
+	 * 免得同一张卡片在不同页面显示出两个等级。
+	 */
+	public String performanceGrade(String tier, Integer scorePerf) {
+		int perf = scorePerf == null ? 80 : scorePerf;
+		if ("LIGHTWEIGHT".equals(tier)) {
+			return perf >= 92 ? "A" : "B";
+		}
+		if ("BALANCED".equals(tier)) {
+			return "B";
+		}
+		return "C";
+	}
+
+	/** 模板的性能等级 */
+	public String performanceGrade(MotionTemplate template) {
+		return performanceGrade(runtimeTier(template), template.getScorePerf());
+	}
+
 	/** 运行建议：库里存过就用库里的，没存过按档位给一句通用建议 */
 	public String runtimeNote(MotionTemplate template) {
 		String stored = template.getRuntimeNote();
