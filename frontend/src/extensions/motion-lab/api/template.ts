@@ -10,6 +10,7 @@ import type {
 	TemplateQuery,
 } from '@/extensions/motion-lab/types/workbench'
 import type { MotionRecommendResult } from '@/extensions/motion-lab/types/recommend'
+import type { MotionDesign } from '@/extensions/motion-lab/types/design'
 
 /** 工作台接口前缀（后端 context-path 是 /api） */
 export const TEMPLATE_BASE = '/motion/templates'
@@ -69,6 +70,14 @@ export function assistMotions(query: string, limit = 6): Promise<MotionSearchRes
  */
 export function recommendMotions(query: string, limit = 5): Promise<MotionRecommendResult> {
 	return http.post<MotionRecommendResult>(TEMPLATE_BASE + '/recommend', { query, limit })
+}
+
+/**
+ * AI 设计方案：一句需求 → 完整方案（五轴意图 + 选中的组合 + 每一步的动画/作用/参数/性能成本）。
+ * 模型可用时由它在现有组合里挑并微调，不可用时走同一结构的规则设计（source 会说明是哪种）。
+ */
+export function designMotions(query: string, performance = '', maxSteps = 5): Promise<MotionDesign> {
+	return http.post<MotionDesign>(TEMPLATE_BASE + '/design', { query, performance, maxSteps })
 }
 
 /** 组合方案列表 */

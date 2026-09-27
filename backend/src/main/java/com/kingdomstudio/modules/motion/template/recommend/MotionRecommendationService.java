@@ -40,15 +40,6 @@ public class MotionRecommendationService {
 	private static final int WEIGHT_EMOTION = 15;
 	private static final int WEIGHT_PERFORMANCE = 12;
 
-	/** 情绪词表：情绪不进库，用它去比对模板的风格 / 标签 / 说明 */
-	private static final Map<String, List<String>> EMOTION_KEYWORDS = Map.of(
-			"premium", List.of("luxury", "gold", "高级", "premium", "elegant", "精致", "金"),
-			"tech", List.of("cyber", "neon", "glow", "科技", "未来", "赛博", "shader", "particle", "three", "mesh"),
-			"calm", List.of("minimal", "soft", "极简", "柔和", "克制", "fade", "smooth"),
-			"playful", List.of("organic", "bounce", "活泼", "有趣", "跳"),
-			"warm", List.of("organic", "warm", "温暖", "治愈", "噪点", "noise"),
-			"bold", List.of("particle", "3d", "tilt", "shader", "冲击", "强", "粒子", "三维"));
-
 	/** 意图里的性能预算 → 期望档位 */
 	private static final Map<String, String> PERFORMANCE_TIER = Map.of(
 			"LOW", "LIGHTWEIGHT", "MEDIUM", "BALANCED", "HIGH", "GPU_ENHANCED");
@@ -154,23 +145,12 @@ public class MotionRecommendationService {
 				.build();
 	}
 
-	/** 情绪轴：拿情绪词表去比对模板的风格 / 分类 / 标签 / 名称与说明 */
+	/** 情绪轴：拿共用的情绪词表去比对模板的风格 / 分类 / 标签 / 名称与说明 */
 	private List<String> emotionHits(MotionTemplate template, String emotion) {
-		List<String> words = EMOTION_KEYWORDS.get(emotion);
-		if (words == null) {
-			return List.of();
-		}
 		String text = String.join(" ",
 				nullSafe(template.getStyle()), nullSafe(template.getCategory()), nullSafe(template.getTags()),
-				nullSafe(template.getName()), nullSafe(template.getNameEn()), nullSafe(template.getDescription()))
-				.toLowerCase(Locale.ROOT);
-		List<String> hits = new ArrayList<>();
-		for (String word : words) {
-			if (text.contains(word)) {
-				hits.add(word);
-			}
-		}
-		return hits;
+				nullSafe(template.getName()), nullSafe(template.getNameEn()), nullSafe(template.getDescription()));
+		return MotionEmotionWords.hits(text, emotion);
 	}
 
 	/** 性能等级：算法放在模板服务里（组合方案的每一步也用它），这里只做转发 */

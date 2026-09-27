@@ -2,6 +2,8 @@ package com.kingdomstudio.modules.motion.template.controller;
 
 import com.kingdomstudio.common.PageVO;
 import com.kingdomstudio.common.Result;
+import com.kingdomstudio.modules.motion.template.design.MotionDesignService;
+import com.kingdomstudio.modules.motion.template.dto.MotionDesignDTO;
 import com.kingdomstudio.modules.motion.template.dto.MotionRatingDTO;
 import com.kingdomstudio.modules.motion.template.dto.MotionSearchDTO;
 import com.kingdomstudio.modules.motion.template.dto.TemplateQueryDTO;
@@ -10,6 +12,7 @@ import com.kingdomstudio.modules.motion.template.service.MotionAssistantService;
 import com.kingdomstudio.modules.motion.template.service.MotionRecipeService;
 import com.kingdomstudio.modules.motion.template.service.MotionTemplateService;
 import com.kingdomstudio.modules.motion.template.vo.MotionAssistantVO;
+import com.kingdomstudio.modules.motion.template.vo.MotionDesignVO;
 import com.kingdomstudio.modules.motion.template.vo.MotionFacetVO;
 import com.kingdomstudio.modules.motion.template.vo.MotionRecommendVO;
 import com.kingdomstudio.modules.motion.template.vo.MotionRecipeVO;
@@ -45,6 +48,7 @@ public class MotionTemplateController {
 	private final MotionRecipeService recipeService;
 	private final MotionAssistantService assistantService;
 	private final MotionRecommendationService recommendService;
+	private final MotionDesignService designService;
 
 	@Operation(summary = "模板分页", description = "分组 / 场景 / 风格 / 技术 / 难度 / 关键词可任意组合")
 	@GetMapping
@@ -78,6 +82,15 @@ public class MotionTemplateController {
 	@PostMapping("/recommend")
 	public Result<MotionRecommendVO> recommend(@Valid @RequestBody MotionSearchDTO request) {
 		return Result.success(recommendService.recommend(request.getQuery(), request.getLimit()));
+	}
+
+	@Operation(summary = "AI 设计方案",
+			description = "一句需求 → 完整设计方案：五轴意图 + 选中的组合方案 + 每一步的动画 / 作用 / 参数建议 / 性能成本 + 逐条说明。"
+					+ "模型只负责在现有 30 套组合里挑一套、在参数区间内微调、写说明；未配置模型或模型失败时走同一套结构的规则设计，"
+					+ "来源与回退原因在 source / fallbackReason 里如实说明")
+	@PostMapping("/design")
+	public Result<MotionDesignVO> design(@Valid @RequestBody MotionDesignDTO request) {
+		return Result.success(designService.design(request.getQuery(), request.getPerformance(), request.getMaxSteps()));
 	}
 
 	@Operation(summary = "组合方案列表", description = "按场景筛选；推荐指数为组成模板的加权平均")

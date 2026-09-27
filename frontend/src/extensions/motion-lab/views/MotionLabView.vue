@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ExtCodeBlock, ExtShell, ExtStatusTag } from '@/extensions/_shared/components'
 import '@/extensions/motion-lab/styles/obsidian.css'
 import '@/extensions/motion-lab/styles/workbench.css'
@@ -33,6 +33,7 @@ import type {
 import { ONBOARDING_SCENES, RUNTIME_TIER_META } from '@/extensions/motion-lab/types/workbench'
 
 const router = useRouter()
+const route = useRoute()
 
 const info = ref<ExtModuleInfo | null>(null)
 const errorMessage = ref('')
@@ -380,6 +381,11 @@ function toRecommendPage() {
 	void router.push('/extensions/motion-lab/recommend')
 }
 
+/** AI 设计：一句需求 → 完整方案（组合 + 每一步 + 参数建议） */
+function toDesignPage() {
+	void router.push('/extensions/motion-lab/design')
+}
+
 function startWith(scene: string) {
 	localStorage.setItem('mlab_onboarded', '1')
 	onboarded.value = true
@@ -396,6 +402,13 @@ function skipGuide() {
 onMounted(async () => {
 	onboarded.value = localStorage.getItem('mlab_onboarded') === '1'
 	await Promise.all([loadInfo(), loadFacets(), loadRecipes(), loadList()])
+	// 从 AI 设计页带 ?recipe=key 进来时直接打开那套方案（组合模式面板会一起出现）
+	const wanted = typeof route.query.recipe === 'string' ? route.query.recipe : ''
+	if (wanted) {
+		enterWorkbench()
+		await selectRecipe(wanted)
+		return
+	}
 	if (items.value.length) {
 		// 默认打开推荐指数最高的那条，首次进入就有东西可看
 		await selectTemplate(items.value[0].templateKey)
@@ -413,6 +426,7 @@ onMounted(async () => {
 		<template #actions>
 			<ExtStatusTag :text="statusTag.text" :tone="statusTag.tone" />
 			<button class="ext-btn" type="button" @click="loadInfo">重新自检</button>
+			<button class="ext-btn" type="button" @click="toDesignPage">AI 设计</button>
 			<button class="ext-btn" type="button" @click="toRecommendPage">智能推荐</button>
 			<button class="ext-btn" type="button" @click="toCandidatePage">候选池</button>
 			<button class="ext-btn" type="button" @click="toResourcePage">我的资源</button>

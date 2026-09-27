@@ -76,6 +76,13 @@ const routes: RouteRecordRaw[] = [
 		component: () => import('@/extensions/motion-lab/views/MotionCandidateView.vue'),
 	},
 	{
+		// AI 设计页：一句需求 → 完整方案（组合 + 每一步 + 参数建议 + 逐条说明）。
+		path: '/extensions/motion-lab/design',
+		name: 'motion-lab-design',
+		meta: { title: 'AI 设计' },
+		component: () => import('@/extensions/motion-lab/views/MotionDesignView.vue'),
+	},
+	{
 		// 智能推荐页：一句话需求 → 五轴意图 → Top N 与理由。
 		// 从工作台右上角进入，与候选池一样不占侧边栏菜单位。
 		path: '/extensions/motion-lab/recommend',

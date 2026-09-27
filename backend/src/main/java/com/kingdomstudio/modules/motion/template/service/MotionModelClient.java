@@ -66,6 +66,29 @@ public class MotionModelClient {
 			}
 			""";
 
+	/** 设计方案的提示词：职责被收窄到「在已有 30 套组合里挑一套 + 调参 + 解释」，不让它生成结构或代码 */
+	private static final String DESIGN_PROMPT = """
+			你是 Motion Designer，一个网页动效设计助手。你的职责只有四件事：
+			1) 理解用户想做什么页面；2) 判断它的场景与风格；
+			3) 从下面给出的**组合方案清单**里挑一套最合适的；4) 在方案每一步允许的参数范围内微调，并解释为什么。
+
+			硬性规则：
+			- 组合方案只能从清单里挑，用它的 recipeKey，绝不杜撰；
+			- 不要增删步骤、不要改步骤顺序：结构由系统给，你只负责选与调；
+			- 参数只能改清单里标注过的参数名（形如 --m-duration），数值必须落在给出的区间内；
+			- 不要生成代码、不要写 CSS/JS 片段；
+			- 只输出一个 JSON 对象，不要输出解释文字，不要用 markdown 代码块包裹。
+
+			输出结构：
+			{
+			  "scene": "Landing Page|Dashboard|Portfolio|Login|AI SaaS|Game UI 或 null",
+			  "style": "Minimal|Luxury|Cyber|Glass|Organic 或 null",
+			  "recipeKey": "清单里的某个 recipeKey",
+			  "params": { "templateKey": { "--m-duration": 0.9 } },
+			  "explanation": "两三句话说明这套设计为什么合适"
+			}
+			""";
+
 	private final RestClient.Builder restClientBuilder;
 
 	/** 模型服务地址（OpenAI 兼容），例如 https://api.deepseek.com/v1；留空表示不启用模型 */
@@ -328,5 +351,66 @@ public class MotionModelClient {
 	}
 
 	record Step(String templateKey, String role, Map<String, Object> params) {
+	}
+
+	/**
+	 * 让模型做设计决策：在给定的组合方案里挑一套、给每步参数微调、写一段设计说明。
+	 *
+	 * <p>返回的是**原始 JSON**：校验放在服务层做（哪些 key 存在、参数是否越界、区间是多少都在那边），
+	 * 这一层只负责调用与容错。任何异常都返回 null，由调用方回退到规则设计。
+	 */
+	public JsonNode design(String query, String catalog) {
+		if (!enabled()) {
+			log.debug("未配置模型，跳过设计调用");
+			return null;
+		}
+		try {
+			String payload = OBJECT_MAPPER.writeValueAsString(Map.of(
+					"model", model,
+					"temperature", 0.2,
+					"messages", List.of(
+							Map.of("role", "system", "content", DESIGN_PROMPT + """
+
+									可选清单：
+									""" + catalog),
+							Map.of("role", "user", "content", query))));
+
+			String body = restClientBuilder.build()
+					.post()
+					.uri(trimEnd(baseUrl) + "/chat/completions")
+					.header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey.trim())
+					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+					.body(payload)
+					.retrieve()
+					.body(String.class);
+
+			String content = extractContent(body);
+			if (content == null) {
+				log.warn("模型没有返回可用的设计内容");
+				return null;
+			}
+			JsonNode root = OBJECT_MAPPER.readTree(stripFence(content));
+			if (!root.isObject()) {
+				log.warn("模型返回的不是 JSON 对象，按回退处理");
+				return null;
+			}
+			return root;
+		} catch (Exception e) {
+			log.warn("模型设计调用失败，回退到规则设计：{}", e.getMessage());
+			return null;
+		}
+	}
+
+	/** 去掉 ```json 包裹，只留下 JSON 正文 */
+	String stripFence(String content) {
+		String text = content.trim();
+		if (text.startsWith("```")) {
+			int start = text.indexOf('{');
+			int end = text.lastIndexOf('}');
+			if (start >= 0 && end > start) {
+				return text.substring(start, end + 1);
+			}
+		}
+		return text;
 	}
 }
