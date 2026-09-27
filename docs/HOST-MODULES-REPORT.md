@@ -87,7 +87,28 @@
 | 前端 · 类型检查 / 单元测试 / 构建 | `actions/setup-node@v4`（Node 20 + npm 缓存）→ `npm ci` → `npm run type-check` → `npm run test` → `npm run build` |
 
 不需要 MySQL / Redis：后端全部是单元测试（Mockito），前端测试用 Vitest + jsdom，都不连真实服务。
-README 顶部加了版本徽章与 CI 徽章。**「失败阻止合并」需要在仓库设置里把 CI 设为必需检查**，这一步是仓库权限操作，脚本层做不到。
+README 顶部加了版本徽章与 CI 徽章。
+
+### CI 文件的落地状态
+
+`ci.yml` 已经写好并在本地验证过它跑的每一条命令（与手工执行的一致），但**推送时被 GitHub 拦下**：
+当前这台机器上保存的推送凭证是一个 OAuth App 令牌，**没有 `workflow` 权限**，
+任何包含 `.github/workflows/` 的推送会被整体拒绝（报错 `refusing to allow an OAuth App to create or update workflow`）。
+
+补上这一步有两个办法，任选其一：
+
+```bash
+# 办法一：重新授权一次（会提示浏览器授权，勾上 workflow 权限），然后补一次提交
+git add .github/workflows/ci.yml && git commit -m "ci: 后端 mvn test + 前端类型检查 / 测试 / 构建" && git push
+```
+
+```text
+办法二：在 GitHub 网页上新建文件 .github/workflows/ci.yml，把本机
+kingdom-studio/.github/workflows/ci.yml 的内容整段粘进去提交。
+```
+
+文件本身的命令与本地验证完全一致：后端 `mvn -B -ntp test`；前端 `npm ci` → `npm run type-check` → `npm run test` → `npm run build`。
+另外**「失败阻止合并」需要在仓库设置里把 CI 设为必需检查**，这一步是仓库权限操作，脚本层做不到。
 
 ---
 
