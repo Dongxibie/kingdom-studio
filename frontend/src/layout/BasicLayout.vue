@@ -18,7 +18,7 @@ const menus = [
 // 平铺进主菜单会把侧边栏挤爆，这里用子菜单收拢
 const extensionMenus = [
 	{ path: '/extensions/motion-lab', title: '动效工作台', icon: MagicStick },
-	{ path: '/extensions/music-agent', title: '音乐 Agent', icon: Headset }
+	{ path: '/extensions/music-studio', title: 'AI 演奏工作室', icon: Headset }
 ]
 
 const activeMenu = computed(() => route.path)

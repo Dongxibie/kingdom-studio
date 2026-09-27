@@ -97,6 +97,33 @@ const routes: RouteRecordRaw[] = [
 		meta: { title: '我的资源', icon: 'MagicStick' }
 	},
 	{
+		// AI 演奏工作室：曲目台 / 编排台 / 演奏回放 / 导出中心。
+		// 四个页面共享同一份会话（当前曲目 + 乐器档案 + 播放状态），切页不丢上下文。
+		path: '/extensions/music-studio',
+		name: 'music-studio-dashboard',
+		meta: { title: 'AI 演奏工作室' },
+		component: () => import('@/extensions/music-studio/views/StudioDashboardView.vue'),
+	},
+	{
+		path: '/extensions/music-studio/composer',
+		name: 'music-studio-composer',
+		meta: { title: '编排台' },
+		component: () => import('@/extensions/music-studio/views/StudioComposerView.vue'),
+	},
+	{
+		path: '/extensions/music-studio/replay',
+		name: 'music-studio-replay',
+		meta: { title: '演奏回放' },
+		component: () => import('@/extensions/music-studio/views/StudioReplayView.vue'),
+	},
+	{
+		path: '/extensions/music-studio/export',
+		name: 'music-studio-export',
+		meta: { title: '导出中心' },
+		component: () => import('@/extensions/music-studio/views/StudioExportView.vue'),
+	},
+	{
+		// 原音乐 Agent 工作台：能力都还在，作为「完整工作台」保留，从工作室的入口可以进
 		path: '/extensions/music-agent',
 		name: 'KingdomMusicAgent',
 		component: () => import('@/extensions/music-agent/views/MusicAgentView.vue'),

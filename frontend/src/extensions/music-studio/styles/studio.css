@@ -1,0 +1,249 @@
+/* =====================================================================
+   AI 演奏工作室 —— 视觉基座
+   dark · glass · timeline glow
+
+   只在 music-studio 的页面里生效：颜色全部用 --ext-* 变量（来自
+   extensions/_shared/styles/ext-theme.css），工作室自己的色板另起 --st-* 前缀，
+   避免和主站主题打架。
+   ===================================================================== */
+
+.studio-root {
+	/* 玻璃与层次 */
+	--st-glass: rgba(255, 255, 255, 0.045);
+	--st-glass-strong: rgba(255, 255, 255, 0.075);
+	--st-edge: rgba(255, 255, 255, 0.09);
+	--st-edge-hot: rgba(240, 205, 114, 0.45);
+	--st-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+
+	/* 时间轴 */
+	--st-track: rgba(255, 255, 255, 0.035);
+	--st-grid: rgba(255, 255, 255, 0.06);
+	--st-grid-strong: rgba(255, 255, 255, 0.12);
+	--st-note: linear-gradient(180deg, #6ee7d7, #2fa8a0);
+	--st-note-black: linear-gradient(180deg, #f0a5a5, #b7454a);
+	--st-note-hot: linear-gradient(180deg, #ffe9a8, #f0cd72);
+	--st-lane: rgba(167, 139, 250, 0.16);
+
+	/* 键盘 */
+	--st-key: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
+	--st-key-on: linear-gradient(180deg, #f0cd72, #b98a2c);
+
+	min-height: 100%;
+}
+
+/* ---------------------------------------------------------------- 玻璃面板 */
+
+.st-glass {
+	position: relative;
+	border: 1px solid var(--st-edge);
+	border-radius: calc(var(--ext-radius) + 2px);
+	background: linear-gradient(160deg, var(--st-glass-strong), var(--st-glass));
+	backdrop-filter: blur(14px) saturate(1.15);
+	box-shadow: var(--st-shadow);
+	padding: 14px 16px;
+}
+
+.st-glass::after {
+	/* 顶部一道高光，玻璃质感的关键 */
+	content: '';
+	position: absolute;
+	inset: 0 0 auto 0;
+	height: 1px;
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+	pointer-events: none;
+}
+
+.st-glass--flush {
+	padding: 0;
+	overflow: hidden;
+}
+
+.st-title {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	font-size: 12.5px;
+	color: var(--ext-text);
+	margin-bottom: 10px;
+}
+
+.st-title .st-sub {
+	font-size: 11px;
+	color: var(--ext-text-mute);
+}
+
+.st-label {
+	font-size: 11px;
+	color: var(--ext-text-mute);
+	letter-spacing: 0.02em;
+}
+
+/* ---------------------------------------------------------------- 小元件 */
+
+.st-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	border: 1px solid var(--st-edge);
+	background: var(--st-glass);
+	border-radius: 999px;
+	font-size: 11px;
+	padding: 3px 10px;
+	color: var(--ext-text-dim);
+}
+
+.st-chip--hot {
+	border-color: var(--st-edge-hot);
+	background: rgba(240, 205, 114, 0.12);
+	color: var(--ext-gold-light);
+}
+
+.st-chip--violet {
+	border-color: rgba(167, 139, 250, 0.45);
+	background: rgba(167, 139, 250, 0.12);
+	color: var(--ext-neon-violet);
+}
+
+.st-chip--ok {
+	border-color: rgba(126, 214, 165, 0.42);
+	background: rgba(126, 214, 165, 0.12);
+	color: #7ed6a5;
+}
+
+.st-btn {
+	border: 1px solid var(--st-edge);
+	background: var(--st-glass);
+	color: var(--ext-text-dim);
+	border-radius: 10px;
+	font-size: 12px;
+	padding: 6px 12px;
+	cursor: pointer;
+	transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+
+.st-btn:hover:not(:disabled) {
+	border-color: var(--st-edge-hot);
+	color: var(--ext-gold-light);
+	transform: translateY(-1px);
+}
+
+.st-btn:disabled {
+	opacity: 0.45;
+	cursor: default;
+}
+
+.st-btn--primary {
+	border-color: var(--ext-gold);
+	background: linear-gradient(180deg, rgba(240, 205, 114, 0.22), rgba(240, 205, 114, 0.1));
+	color: var(--ext-gold-light);
+}
+
+.st-btn--ghost {
+	background: transparent;
+}
+
+/* ---------------------------------------------------------------- 数值展示 */
+
+.st-metric {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 8px 10px;
+	border: 1px solid var(--st-edge);
+	border-radius: 10px;
+	background: var(--st-glass);
+	min-width: 74px;
+}
+
+.st-metric .st-metric-value {
+	font-family: var(--ext-font-mono);
+	font-size: 15px;
+	color: var(--ext-text);
+}
+
+.st-metric .st-metric-label {
+	font-size: 10.5px;
+	color: var(--ext-text-mute);
+}
+
+/* ---------------------------------------------------------------- 动效 */
+
+@keyframes st-rise {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes st-pulse {
+	0%,
+	100% {
+		box-shadow: 0 0 0 0 rgba(240, 205, 114, 0.45);
+	}
+	50% {
+		box-shadow: 0 0 0 6px rgba(240, 205, 114, 0);
+	}
+}
+
+@keyframes st-sweep {
+	from {
+		background-position: -140% 0;
+	}
+	to {
+		background-position: 240% 0;
+	}
+}
+
+.st-rise {
+	animation: st-rise 0.32s ease both;
+}
+
+.st-pulse {
+	animation: st-pulse 1.6s ease-out infinite;
+}
+
+/* 正在播放：顶部一条流动的光带 */
+.st-sweep {
+	position: relative;
+	overflow: hidden;
+}
+
+.st-sweep::before {
+	content: '';
+	position: absolute;
+	inset: 0 auto auto 0;
+	width: 100%;
+	height: 1px;
+	background: linear-gradient(90deg, transparent, var(--ext-gold-light), transparent);
+	background-size: 40% 100%;
+	animation: st-sweep 2.4s linear infinite;
+	pointer-events: none;
+}
+
+/* ---------------------------------------------------------------- 滚动条 */
+
+.studio-root ::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+.studio-root ::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 0.14);
+	border-radius: 4px;
+}
+
+.studio-root ::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+/* ---------------------------------------------------------------- 窄屏 */
+
+@media (max-width: 900px) {
+	.st-glass {
+		padding: 12px;
+	}
+}
