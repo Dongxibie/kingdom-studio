@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { ExtCodeBlock } from '@/extensions/_shared/components'
+import MacroExportPanel from '@/extensions/music-agent/components/MacroExportPanel.vue'
 import type { KeySequence } from '@/extensions/music-agent/types/music'
 import { STRATEGY_LABELS } from '@/extensions/music-agent/types/music'
 import { formatMs } from '@/extensions/music-agent/utils/note-format'
@@ -10,6 +11,9 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+
+/** 导出演奏脚本：把按键序列变成可带走的脚本（TXT / AutoHotkey / JSON） */
+const exportVisible = ref(false)
 
 const stats = computed(() => {
 	const sequence = props.sequence
@@ -65,7 +69,19 @@ const unmappedSummary = computed(() => {
 			<div class="ext-hint">可以换一个音域更宽的档案，或把超范围策略改成「移八度」再试。</div>
 		</div>
 
+		<div class="seq-actions">
+			<button class="ext-btn" type="button" @click="exportVisible = true">导出演奏脚本</button>
+			<span class="seq-actions-hint">AutoHotkey / TXT 时间线 / JSON 计划，三种格式都从同一份演奏计划生成</span>
+		</div>
+
 		<ExtCodeBlock :code="sequence.exportText" title="按键序列（可直接复制去练）" />
+
+		<MacroExportPanel
+			v-if="exportVisible"
+			:task-id="sequence.taskId"
+			:profile-id="sequence.profileId"
+			:strategy="sequence.strategy"
+			@close="exportVisible = false" />
 	</div>
 </template>
 
@@ -122,6 +138,18 @@ const unmappedSummary = computed(() => {
 
 .seq-hint {
 	font-size: 12.5px;
+	color: var(--ext-text-mute);
+}
+
+.seq-actions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.seq-actions-hint {
+	font-size: 11px;
 	color: var(--ext-text-mute);
 }
 </style>
