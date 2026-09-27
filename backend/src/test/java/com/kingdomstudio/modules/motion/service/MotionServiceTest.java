@@ -13,6 +13,7 @@ import com.kingdomstudio.modules.motion.mapper.MotionCodeMapper;
 import com.kingdomstudio.modules.motion.mapper.MotionResourceMapper;
 import com.kingdomstudio.modules.motion.vo.MotionDetailVO;
 import com.kingdomstudio.modules.motion.vo.MotionListItemVO;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -79,6 +81,12 @@ class MotionServiceTest {
 		dto.setTags(" glass , premium ,");
 		dto.setSourceUrl("https://example.com/card");
 		return dto;
+	}
+
+	@BeforeEach
+	void injectVersion() {
+		// @InjectMocks 不会处理 @Value 字段，这里按 application.yml 的值注入一次
+		ReflectionTestUtils.setField(motionService, "appVersion", "v1.2.0");
 	}
 
 	@Test

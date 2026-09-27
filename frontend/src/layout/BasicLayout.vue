@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { Clock, Collection, Document, Headset, HomeFilled, MagicStick, OfficeBuilding } from '@element-plus/icons-vue'
 import { useNarrowScreen } from '@/composables/useNarrowScreen'
+import { APP_VERSION_TAG } from '@/config/app'
 
 const route = useRoute()
 
@@ -21,7 +22,13 @@ const extensionMenus = [
 	{ path: '/extensions/music-studio', title: 'AI 演奏工作室', icon: Headset }
 ]
 
-const activeMenu = computed(() => route.path)
+const activeMenu = computed(() => {
+	// 项目详情页也归到「项目王国」这一项下面，否则侧边栏会没有任何一项高亮
+	if (route.path.startsWith('/projects')) {
+		return '/projects'
+	}
+	return route.path
+})
 const pageTitle = computed(() => (route.meta.title as string) || 'Kingdom Studio')
 
 // 窄屏（平板竖屏 / 手机）把侧边栏收成图标条：固定 232px 会占掉手机屏幕六成宽度，
@@ -36,8 +43,8 @@ const { isNarrow } = useNarrowScreen()
 				<svg class="crown" viewBox="0 0 24 24" aria-hidden="true">
 					<path
 						d="M3 8l4 3 5-6 5 6 4-3-2 11H5L3 8z"
-						fill="var(--kingdom-gold)"
-						stroke="var(--kingdom-gold-light)"
+						fill="var(--ks-gold)"
+						stroke="var(--ks-gold-soft)"
 						stroke-width="0.8" />
 				</svg>
 				<div v-show="!isNarrow">
@@ -69,7 +76,7 @@ const { isNarrow } = useNarrowScreen()
 				</el-sub-menu>
 			</el-menu>
 
-			<div v-show="!isNarrow" class="sidebar-footer">v1.2.0</div>
+			<div v-show="!isNarrow" class="sidebar-footer">{{ APP_VERSION_TAG }}</div>
 		</el-aside>
 
 		<el-container>
@@ -94,10 +101,12 @@ const { isNarrow } = useNarrowScreen()
 	height: 100vh;
 }
 
+/* 侧边栏走暖白：金色作为强调色，只有在浅底上才看得出「一点金」的分量 */
 .sidebar {
 	display: flex;
 	flex-direction: column;
-	background: linear-gradient(180deg, var(--kingdom-red-dark) 0%, #2a0b0d 100%);
+	background: var(--ks-surface);
+	border-right: 1px solid var(--ks-line);
 	padding: 18px 12px;
 }
 
@@ -106,7 +115,7 @@ const { isNarrow } = useNarrowScreen()
 	align-items: center;
 	gap: 10px;
 	padding: 6px 10px 18px;
-	border-bottom: 1px solid rgba(240, 205, 114, 0.18);
+	border-bottom: 1px solid var(--ks-line-soft);
 	margin-bottom: 12px;
 }
 
@@ -117,14 +126,14 @@ const { isNarrow } = useNarrowScreen()
 }
 
 .brand-name {
-	color: #fff;
+	color: var(--ks-ink);
 	font-weight: 700;
 	letter-spacing: 0.4px;
 	font-size: 16px;
 }
 
 .brand-sub {
-	color: rgba(255, 255, 255, 0.55);
+	color: var(--ks-ink-3);
 	font-size: 12px;
 	margin-top: 2px;
 }
@@ -135,25 +144,26 @@ const { isNarrow } = useNarrowScreen()
 }
 
 .menu :deep(.el-menu-item) {
-	color: rgba(255, 255, 255, 0.72);
+	color: var(--ks-ink-2);
 	border-radius: 10px;
 	margin-bottom: 4px;
 	height: 44px;
 }
 
 .menu :deep(.el-menu-item:hover) {
-	background-color: rgba(240, 205, 114, 0.12);
-	color: #fff;
+	background-color: var(--ks-surface-2);
+	color: var(--ks-ink);
 }
 
 .menu :deep(.el-menu-item.is-active) {
-	background: linear-gradient(90deg, rgba(194, 150, 58, 0.9) 0%, rgba(194, 150, 58, 0.5) 100%);
-	color: #fff;
+	background: #fdf8ec;
+	color: var(--ks-gold-deep);
 	font-weight: 600;
+	box-shadow: inset 2px 0 0 var(--ks-gold);
 }
 
 .sidebar-footer {
-	color: rgba(255, 255, 255, 0.35);
+	color: var(--ks-ink-3);
 	font-size: 12px;
 	text-align: center;
 	padding-top: 12px;
@@ -163,8 +173,8 @@ const { isNarrow } = useNarrowScreen()
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	background: #fff;
-	border-bottom: 1px solid #ebeef5;
+	background: var(--ks-surface);
+	border-bottom: 1px solid var(--ks-line);
 }
 
 .header-title {

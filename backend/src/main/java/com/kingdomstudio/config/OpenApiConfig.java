@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,13 +21,17 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
+	/** 与健康检查同源：application.yml 的 info.app.version */
+	@Value("${info.app.version:}")
+	private String appVersion;
+
 	@Bean
 	public OpenAPI kingdomStudioOpenAPI() {
 		return new OpenAPI()
 				.info(new Info()
 						.title("Kingdom Studio API")
 						.description("个人开发者工作台 —— 项目王国 / 技术图鉴 / 成长时间线 / 代码知识库")
-						.version("v1.2.0")
+						.version(appVersion)
 						.license(new License().name("MIT"))
 						.contact(new Contact().name("Dongxibie").url("https://github.com/Dongxibie")))
 				.components(new Components().addSecuritySchemes("bearerAuth",

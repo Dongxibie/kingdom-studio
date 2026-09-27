@@ -16,6 +16,14 @@
    这里覆盖的变量都在 .ext-shell 作用域内，所以只影响工作室这几个页面。
    --------------------------------------------------------------------------- */
 .studio-root {
+	/* 主站把 Element 主色改成了金色；工作室是紫绿主题，这里按容器改回紫色 */
+	--el-color-primary: #a78bfa;
+	--el-color-primary-light-3: #bda6fc;
+	--el-color-primary-light-5: #d0c0fd;
+	--el-color-primary-light-7: #e3d9fe;
+	--el-color-primary-light-8: #ece6fe;
+	--el-color-primary-light-9: #f5f2ff;
+	--el-color-primary-dark-2: #8b6ae6;
 	--ext-bg: #07080b;
 	--ext-bg-soft: #0d0f13;
 	--ext-bg-raised: #14171d;

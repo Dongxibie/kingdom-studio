@@ -2,6 +2,7 @@ package com.kingdomstudio.service;
 
 import com.kingdomstudio.vo.HealthVO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -24,8 +25,15 @@ public class HealthService {
 
 	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	private static final String APP_NAME = "kingdom-studio";
-	private static final String APP_VERSION = "v1.2.0";
 	private static final int DETAIL_MAX_LENGTH = 120;
+
+	/**
+	 * 版本号唯一来源是 application.yml 的 info.app.version，
+	 * 而那个值由 {@code npm run version:sync} 从 frontend/package.json 同步过来 ——
+	 * 全项目只有 package.json 需要手改版本号。
+	 */
+	@Value("${info.app.version:}")
+	private String appVersion;
 
 	private final JdbcTemplate jdbcTemplate;
 	private final StringRedisTemplate stringRedisTemplate;
@@ -40,7 +48,7 @@ public class HealthService {
 		return HealthVO.builder()
 				.application(APP_NAME)
 				.status(allUp ? "UP" : "DEGRADED")
-				.version(APP_VERSION)
+				.version(appVersion)
 				.javaVersion(System.getProperty("java.version"))
 				.serverTime(LocalDateTime.now().format(TIME_FORMATTER))
 				.database(database)

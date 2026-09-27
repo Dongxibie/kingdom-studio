@@ -2,6 +2,9 @@
 
 > 一个属于开发者自己的数字王国。
 
+![版本](https://img.shields.io/badge/版本-v1.2.0-c2963a)
+![CI](https://github.com/Dongxibie/kingdom-studio/actions/workflows/ci.yml/badge.svg)
+
 个人开发者工作台：管理**我的项目**、**我的技术资产**、**我的成长路线**和**我的代码知识库**。
 视觉概念是「个人开发者 = 王国建设者」，后续可结合 Husky King（哈士奇国王）个人 IP 做视觉延展。
 
@@ -38,14 +41,20 @@ kingdom-studio/
 │       │   └── vo/              # 返回给前端的视图对象
 │       └── resources/application.yml
 ├── frontend/                    # Vue 3 前端
-│   └── src/
-│       ├── api/                 # Axios 封装（统一响应处理）
-│       ├── extensions/          # 扩展模块页面：motion-lab、music-agent、_shared 公共外壳
-│       ├── layout/              # 侧边栏 + 顶栏骨架
-│       ├── router/              # 路由表
-│       └── views/               # 主站页面
+│   ├── scripts/                 # 版本号同步脚本（package.json → pom / yml / README）
+│   ├── src/
+│   │   ├── api/                 # Axios 封装（统一响应处理）+ 四个主站模块的接口
+│   │   ├── config/              # 应用信息（版本号由 Vite 从 package.json 注入）
+│   │   ├── extensions/          # 扩展模块页面：motion-lab、music-studio、music-agent、_shared
+│   │   ├── layout/              # 侧边栏 + 顶栏骨架
+│   │   ├── router/              # 路由表
+│   │   ├── utils/               # Markdown 渲染等前端工具
+│   │   └── views/               # 主站四个业务模块 + 工作台
+│   └── vitest.config.ts         # 前端单元测试配置（关键流程）
+├── .github/workflows/ci.yml     # CI：后端 mvn test，前端类型检查 / 测试 / 构建
 ├── db/
 │   ├── kingdom_studio.sql               # 主站建表 + 种子数据（会重建这 5 张表）
+│   ├── host_modules_v12.sql             # 主站四模块补列与内容（幂等，可重复执行）
 │   ├── extensions_motion.sql            # 扩展：动效资源表 + 代码表
 │   ├── extensions_motion_seed.sql       # 扩展：10 条动效示例（含源码，幂等）
 │   └── extensions_music.sql             # 扩展：音乐任务 / 音符 / 乐器档案（含 3 套乐器）
@@ -60,6 +69,7 @@ kingdom-studio/
 ```bash
 # 1. 初始化数据库（顺序不能变：扩展表建在主库之后）
 mysql -uroot -p < db/kingdom_studio.sql                          # 主站 5 张表（含种子数据）
+mysql -uroot -p kingdom_studio < db/host_modules_v12.sql         # 主站四模块的字段与内容（幂等）
 mysql -uroot -p kingdom_studio < db/extensions_motion.sql        # 动效资源表
 mysql -uroot -p kingdom_studio < db/extensions_motion_seed.sql   # 动效示例（10 条，幂等可重跑）
 mysql -uroot -p kingdom_studio < db/extensions_music.sql         # 音乐表 + 3 套乐器档案
@@ -127,7 +137,10 @@ npm run dev
 | 线 | 内容 | 状态 |
 |---|---|---|
 | 主站 · 工程基础 | Spring Boot + Vue 3 + 数据库 + Redis，统一响应体与全局异常处理 | ✅ 已完成 |
-| 主站 · 四个业务模块 | 项目王国 / 技术图鉴 / 成长时间线 / 代码知识库 | 规划中（页面为占位） |
+| 主站 · 项目王国 | 项目列表与详情、技术栈、完成度、仓库 / 演示地址、Markdown 项目亮点、项目成果 | ✅ v1.2.0 |
+| 主站 · 技术图鉴 | 分类导航（含数量）、掌握程度星级、项目应用、学习时间、增删改 | ✅ v1.2.0 |
+| 主站 · 成长时间线 | 按年份分组的时间轴，支持精确到日的节点与关联项目 | ✅ v1.2.0 |
+| 主站 · 代码知识库 | 可复用解决方案：场景说明 + 代码正文、语言与标签检索、复制与增删改 | ✅ v1.2.0 |
 | 扩展 · 动效基因库 | 动效工作台（官方 30 + 社区精选 30 双集合 / 七分类 / 推荐组合 / 智能助手 / 运行档位）、候选池流水线（发现 → 分析 → 筛选 → 转 Pattern）、资源增删改查、GitHub 采集与三级去重、代码生成、沙箱预览 | ✅ v1.2.0 |
 | 扩展 · 音乐 Agent | MIDI / 简谱解析、乐器按键映射、演奏时间线、Demo 回放、演奏宏导出（TXT / AutoHotkey / JSON）、本机演奏运行时（用户主动开启 + ESC 急停）、AI 音乐助手（初学 / 标准 / 展示三档方案）、演奏难度评估（五星 + 适合人群）、游戏乐器档案与匹配推荐、曲谱分享（演奏码生成 / 查看 / 导入还原） | ✅ v1.2.0 |
 | 扩展 · 桌面代理 | WebSocket 协议与派发计划（模拟，不驱动系统输入） | ✅ v1.2.0 |
@@ -142,9 +155,23 @@ npm run dev
 ## 测试
 
 ```bash
-cd backend && mvn test          # 后端单元测试（不依赖本机 MySQL / Redis）
-cd frontend && npx vue-tsc --noEmit && npm run build
+cd backend && mvn test          # 后端单元测试（333 个，不依赖本机 MySQL / Redis）
+cd frontend
+npm run type-check              # vue-tsc 类型检查
+npm run test                    # 前端单元测试（关键流程：出码下载 / 分享码导入 / 项目详情跳转）
+npm run build                   # 生产构建
 ```
+
+推送或提 PR 时这三个环节由 [.github/workflows/ci.yml](.github/workflows/ci.yml) 自动跑一遍；
+要让红灯阻止合并，需要在仓库设置里把 CI 设为必需检查。
+
+发布新版本只需要改一处：把 `frontend/package.json` 的 `version` 改掉，然后
+
+```bash
+cd frontend && npm run version:sync
+```
+
+它会把版本号同步到 `backend/pom.xml`、`application.yml`（健康检查 / 接口文档 / 模块自检都读它）与 README 徽章。
 
 ## 默认账号
 

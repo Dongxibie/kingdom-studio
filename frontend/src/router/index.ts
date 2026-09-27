@@ -14,49 +14,32 @@ const routes: RouteRecordRaw[] = [
 	{
 		path: '/projects',
 		name: 'ProjectKingdom',
-		component: () => import('@/views/ModulePlaceholder.vue'),
-		props: {
-			title: '项目王国',
-			subtitle: 'Project Kingdom',
-			description: '管理个人项目：名称、技术栈、完成度、GitHub 地址。每个项目都是一座建筑。',
-			phase: '后续版本'
-		},
+		component: () => import('@/views/ProjectKingdomView.vue'),
 		meta: { title: '项目王国', icon: 'OfficeBuilding' }
+	},
+	{
+		// 项目详情：基本信息 / 技术架构 / Markdown 亮点 / 项目成果
+		path: '/projects/:id',
+		name: 'ProjectDetail',
+		component: () => import('@/views/ProjectDetailView.vue'),
+		meta: { title: '项目详情' }
 	},
 	{
 		path: '/technologies',
 		name: 'TechnologyLibrary',
-		component: () => import('@/views/ModulePlaceholder.vue'),
-		props: {
-			title: '技术图鉴',
-			subtitle: 'Technology Library',
-			description: '记录学习中的技术：分类、掌握程度、学习日期，形成自己的技能卡片墙。',
-			phase: '后续版本'
-		},
+		component: () => import('@/views/TechnologyAtlasView.vue'),
 		meta: { title: '技术图鉴', icon: 'Collection' }
 	},
 	{
 		path: '/journey',
 		name: 'RoyalJourney',
-		component: () => import('@/views/ModulePlaceholder.vue'),
-		props: {
-			title: '成长时间线',
-			subtitle: 'Royal Journey',
-			description: '按年份记录成长节点：Java Apprentice → Backend Knight → AI Kingdom Builder。',
-			phase: '后续版本'
-		},
+		component: () => import('@/views/TimelineView.vue'),
 		meta: { title: '成长时间线', icon: 'Clock' }
 	},
 	{
 		path: '/code-library',
 		name: 'CodeLibrary',
-		component: () => import('@/views/ModulePlaceholder.vue'),
-		props: {
-			title: '代码知识库',
-			subtitle: 'Code Library',
-			description: '沉淀常用代码片段：Java / SQL / JavaScript，支持新增、查看、删除。',
-			phase: '后续版本'
-		},
+		component: () => import('@/views/CodeKnowledgeView.vue'),
 		meta: { title: '代码知识库', icon: 'Document' }
 	},
 	{

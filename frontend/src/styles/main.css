@@ -1,11 +1,39 @@
 :root {
-	/* 王国配色：深红 + 金，呼应 Husky King 的个人 IP */
-	--kingdom-red: #7d1418;
-	--kingdom-red-dark: #3c1013;
-	--kingdom-gold: #c2963a;
-	--kingdom-gold-light: #f0cd72;
-	--kingdom-bg: #f6f7f9;
-	--kingdom-text: #1f2430;
+	/* 数字王国：暖白打底、浅灰分层，金色只用在「值得强调」的地方 */
+	--ks-gold: #c2963a;
+	--ks-gold-deep: #a67c26;
+	--ks-gold-soft: #f3e7c9;
+	--ks-ink: #241f19;
+	--ks-ink-2: #6f6656;
+	--ks-ink-3: #9c9384;
+	--ks-line: #ebe5da;
+	--ks-line-soft: #f4f0e8;
+	--ks-bg: #faf8f4;
+	--ks-surface: #ffffff;
+	--ks-surface-2: #f5f2ec;
+
+	/* 兼容旧变量名：主站早期页面按这两个名字取色 */
+	--kingdom-red: #8a2b2f;
+	--kingdom-red-dark: #2a1b16;
+	--kingdom-gold: var(--ks-gold);
+	--kingdom-gold-light: #e6cd8a;
+	--kingdom-bg: var(--ks-bg);
+	--kingdom-text: var(--ks-ink);
+
+	/* Element Plus 的主色改成金色：默认的蓝色一出现，「不要深蓝」就破了 */
+	--el-color-primary: #c2963a;
+	--el-color-primary-light-3: #d0ac62;
+	--el-color-primary-light-5: #ddc389;
+	--el-color-primary-light-7: #ead9b4;
+	--el-color-primary-light-8: #f1e5cc;
+	--el-color-primary-light-9: #f8f2e3;
+	--el-color-primary-dark-2: #a67c26;
+	--el-text-color-primary: #241f19;
+	--el-text-color-regular: #6f6656;
+	--el-border-color: #ebe5da;
+	--el-border-color-light: #f0ebe1;
+	--el-fill-color-blank: #ffffff;
+	--el-border-radius-base: 10px;
 }
 
 * {
@@ -21,8 +49,8 @@ body,
 }
 
 body {
-	background-color: var(--kingdom-bg);
-	color: var(--kingdom-text);
+	background-color: var(--ks-bg);
+	color: var(--ks-ink);
 	font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 	-webkit-font-smoothing: antialiased;
 }
@@ -30,4 +58,171 @@ body {
 a {
 	color: inherit;
 	text-decoration: none;
+}
+
+/* ------------------------------------------------------------------
+   主站页面共用样式：四个模块的页面结构一致，样式集中在这里，
+   页面里只写自己特有的部分，避免每个 view 复制一份卡片与标题样式
+   ------------------------------------------------------------------ */
+.ks-page {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	max-width: 1240px;
+}
+
+.ks-head {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 16px;
+	flex-wrap: wrap;
+}
+
+.ks-head h2 {
+	margin: 0;
+	font-size: 22px;
+	letter-spacing: 0.2px;
+}
+
+.ks-head .ks-sub {
+	margin: 6px 0 0;
+	color: var(--ks-ink-2);
+	font-size: 13px;
+	line-height: 1.7;
+}
+
+.ks-eyebrow {
+	font-size: 11px;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	color: var(--ks-gold-deep);
+}
+
+.ks-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.ks-panel {
+	background: var(--ks-surface);
+	border: 1px solid var(--ks-line);
+	border-radius: 14px;
+	padding: 16px;
+}
+
+.ks-panel-title {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	font-size: 14px;
+	font-weight: 600;
+	margin-bottom: 12px;
+}
+
+.ks-muted {
+	color: var(--ks-ink-3);
+	font-size: 12px;
+}
+
+.ks-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 8px;
+	border-radius: 999px;
+	border: 1px solid var(--ks-line);
+	background: var(--ks-surface-2);
+	color: var(--ks-ink-2);
+	font-size: 12px;
+	line-height: 1.6;
+}
+
+.ks-chip--gold {
+	border-color: var(--ks-gold-soft);
+	background: #fdf8ec;
+	color: var(--ks-gold-deep);
+}
+
+.ks-stat-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: 12px;
+}
+
+.ks-stat {
+	background: var(--ks-surface);
+	border: 1px solid var(--ks-line);
+	border-radius: 12px;
+	padding: 14px 16px;
+}
+
+.ks-stat .ks-stat-value {
+	font-size: 24px;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.ks-stat .ks-stat-label {
+	margin-top: 4px;
+	color: var(--ks-ink-2);
+	font-size: 12px;
+}
+
+.ks-stat .ks-stat-hint {
+	margin-top: 2px;
+	color: var(--ks-ink-3);
+	font-size: 11px;
+}
+
+/* Markdown 渲染出来的内容（项目亮点） */
+.md-body {
+	font-size: 13.5px;
+	line-height: 1.85;
+	color: var(--ks-ink-2);
+}
+
+.md-body h1,
+.md-body h2,
+.md-body h3,
+.md-body h4 {
+	color: var(--ks-ink);
+	font-size: 14px;
+	margin: 14px 0 6px;
+}
+
+.md-body h1:first-child,
+.md-body h2:first-child,
+.md-body h3:first-child {
+	margin-top: 0;
+}
+
+.md-body ul,
+.md-body ol {
+	margin: 6px 0;
+	padding-left: 20px;
+}
+
+.md-body li {
+	margin: 3px 0;
+}
+
+.md-body strong {
+	color: var(--ks-ink);
+}
+
+.md-body code {
+	background: var(--ks-surface-2);
+	border: 1px solid var(--ks-line);
+	border-radius: 5px;
+	padding: 1px 5px;
+	font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
+	font-size: 12.5px;
+	color: var(--ks-gold-deep);
+}
+
+.md-body p {
+	margin: 6px 0;
 }

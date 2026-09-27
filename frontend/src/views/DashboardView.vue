@@ -1,21 +1,96 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { Refresh } from '@element-plus/icons-vue'
 import { fetchHealth, type HealthInfo } from '@/api/health'
-import { useNarrowScreen } from '@/composables/useNarrowScreen'
+import { fetchProjects } from '@/api/project'
+import { fetchTechnologyAtlas } from '@/api/technology'
+import { fetchTimeline, type TimelineNode } from '@/api/timeline'
+import { fetchCodeSnippets } from '@/api/knowledge'
+
+const router = useRouter()
 
 const loading = ref(false)
 const health = ref<HealthInfo | null>(null)
 const errorMessage = ref('')
 
-// 窄屏下信息表退回单列，三列会把每个格子的中文压成竖排
-const { isNarrow } = useNarrowScreen()
+const counts = ref({ projects: 0, developing: 0, technologies: 0, timeline: 0, snippets: 0 })
+const recentNodes = ref<TimelineNode[]>([])
 
-async function loadHealth() {
+const modules = computed(() => [
+	{
+		path: '/projects',
+		en: 'Project Kingdom',
+		title: '项目王国',
+		desc: '项目列表、技术栈、完成度与仓库 / 演示地址',
+		count: counts.value.projects,
+		unit: '座建筑',
+		hint: counts.value.developing ? counts.value.developing + ' 座在建' : '全部完工'
+	},
+	{
+		path: '/technologies',
+		en: 'Technology Library',
+		title: '技术图鉴',
+		desc: '按分类记录掌握程度、项目应用与学习时间',
+		count: counts.value.technologies,
+		unit: '项技术',
+		hint: '六类技术资产'
+	},
+	{
+		path: '/journey',
+		en: 'Royal Journey',
+		title: '成长时间线',
+		desc: '年份是台阶，具体日期是关键节点',
+		count: counts.value.timeline,
+		unit: '个节点',
+		hint: recentNodes.value[0] ? '最新：' + recentNodes.value[0].title : '暂无节点'
+	},
+	{
+		path: '/code-library',
+		en: 'Code Library',
+		title: '代码知识库',
+		desc: '可复用的解决方案：一段代码 + 使用场景',
+		count: counts.value.snippets,
+		unit: '段代码',
+		hint: '按语言与标签检索'
+	}
+])
+
+const extensions = [
+	{
+		path: '/extensions/motion-lab',
+		en: 'Motion Lab',
+		title: '动效工作台',
+		desc: '官方 30 + 社区 30 模板、五轴意图推荐、30 套组合方案，最后一键出 Vue / React / HTML 代码'
+	},
+	{
+		path: '/extensions/music-studio',
+		en: 'AI Performance Studio',
+		title: 'AI 演奏工作室',
+		desc: 'MIDI / 简谱 → 键位映射 → 演奏计划 → 宏导出；难度分层、游戏乐器匹配与曲谱分享'
+	}
+]
+
+async function load() {
 	loading.value = true
 	errorMessage.value = ''
 	try {
-		health.value = await fetchHealth()
+		const [healthValue, projects, atlas, timeline, snippets] = await Promise.all([
+			fetchHealth(),
+			fetchProjects({ size: 1 }),
+			fetchTechnologyAtlas(),
+			fetchTimeline(),
+			fetchCodeSnippets({ size: 1 })
+		])
+		health.value = healthValue
+		counts.value = {
+			projects: projects.total,
+			developing: projects.records.filter(item => item.status === 'DEVELOPING').length,
+			technologies: atlas.total,
+			timeline: timeline.length,
+			snippets: snippets.total
+		}
+		recentNodes.value = timeline.slice(0, 3)
 	} catch (error) {
 		health.value = null
 		errorMessage.value = error instanceof Error ? error.message : '无法连接后端服务'
@@ -24,128 +99,125 @@ async function loadHealth() {
 	}
 }
 
-const modules = [
-	{ path: '/projects', title: '项目王国', en: 'Project Kingdom', desc: '项目列表、技术栈、完成度与 GitHub 地址' },
-	{ path: '/technologies', title: '技术图鉴', en: 'Technology Library', desc: '按分类记录技术掌握程度与学习日期' },
-	{ path: '/journey', title: '成长时间线', en: 'Royal Journey', desc: '按年份沉淀自己的成长节点' },
-	{ path: '/code-library', title: '代码知识库', en: 'Code Library', desc: 'Java / SQL / JavaScript 片段管理' }
-]
-
-onMounted(loadHealth)
+onMounted(load)
 </script>
 
 <template>
-	<div class="dashboard">
-		<el-card shadow="never" class="intro">
-			<div class="intro-main">
-				<div>
-					<h2>Kingdom Studio</h2>
-					<p>一个属于开发者自己的数字王国 —— 管理我的项目、技术资产、成长路线和代码知识库。</p>
-				</div>
-				<div class="intro-meta">
-					<el-tag type="warning" effect="plain">Java 21</el-tag>
-					<el-tag type="warning" effect="plain">Spring Boot 3</el-tag>
-					<el-tag type="warning" effect="plain">MyBatis Plus</el-tag>
-					<el-tag type="warning" effect="plain">MySQL 8</el-tag>
-					<el-tag type="warning" effect="plain">Redis</el-tag>
-					<el-tag type="warning" effect="plain">Vue 3</el-tag>
-				</div>
+	<div class="ks-page">
+		<div class="ks-head">
+			<div>
+				<div class="ks-eyebrow">Kingdom Overview</div>
+				<h2>我的数字王国</h2>
+				<p class="ks-sub">
+					这里放我的项目、技术资产、成长路线与代码知识库；两个扩展工具挂在下面，
+					一个管界面动效，一个把曲子翻译成乐器按键。
+				</p>
 			</div>
-		</el-card>
+			<div class="ks-toolbar">
+				<el-button :icon="Refresh" :loading="loading" @click="load">刷新</el-button>
+			</div>
+		</div>
 
-		<el-card shadow="never" class="panel">
-			<template #header>
-				<div class="panel-header">
-					<span>服务状态</span>
-					<el-button :icon="Refresh" size="small" :loading="loading" @click="loadHealth">刷新</el-button>
-				</div>
-			</template>
+		<div class="ks-stat-grid">
+			<div class="ks-stat">
+				<div class="ks-stat-value">{{ counts.projects }}</div>
+				<div class="ks-stat-label">项目</div>
+				<div class="ks-stat-hint">其中 {{ counts.developing }} 个在持续开发</div>
+			</div>
+			<div class="ks-stat">
+				<div class="ks-stat-value">{{ counts.technologies }}</div>
+				<div class="ks-stat-label">技术记录</div>
+				<div class="ks-stat-hint">覆盖 Java / Spring / 数据库 / AI / 前端 / 工程化</div>
+			</div>
+			<div class="ks-stat">
+				<div class="ks-stat-value">{{ counts.timeline }}</div>
+				<div class="ks-stat-label">成长节点</div>
+				<div class="ks-stat-hint">最近 {{ recentNodes.length }} 个见下方</div>
+			</div>
+			<div class="ks-stat">
+				<div class="ks-stat-value">{{ counts.snippets }}</div>
+				<div class="ks-stat-label">代码片段</div>
+				<div class="ks-stat-hint">可直接复用的解决方案</div>
+			</div>
+		</div>
 
-			<el-alert
-				v-if="errorMessage"
-				type="error"
-				show-icon
-				:closable="false"
-				title="服务状态获取失败"
-				:description="errorMessage" />
-
-			<el-descriptions v-else-if="health" :column="isNarrow ? 1 : 3" border>
-				<el-descriptions-item label="服务状态">
-					<el-tag :type="health.status === 'UP' ? 'success' : 'warning'">{{ health.status }}</el-tag>
-				</el-descriptions-item>
-				<el-descriptions-item label="应用">{{ health.application }}</el-descriptions-item>
-				<el-descriptions-item label="版本">{{ health.version }} / Java {{ health.javaVersion }}</el-descriptions-item>
-
-				<el-descriptions-item label="MySQL">
-					<el-tag :type="health.database.status === 'UP' ? 'success' : 'danger'">
-						{{ health.database.status }} · {{ health.database.latencyMs }}ms
-					</el-tag>
-				</el-descriptions-item>
-				<el-descriptions-item label="Redis">
-					<el-tag :type="health.redis.status === 'UP' ? 'success' : 'danger'">
-						{{ health.redis.status }} · {{ health.redis.latencyMs }}ms
-					</el-tag>
-				</el-descriptions-item>
-				<el-descriptions-item label="服务器时间">{{ health.serverTime }}</el-descriptions-item>
-			</el-descriptions>
-
-			<el-skeleton v-else :rows="2" animated />
-		</el-card>
+		<el-alert
+			v-if="errorMessage"
+			type="error"
+			show-icon
+			:closable="false"
+			title="部分数据获取失败"
+			:description="errorMessage + '（后端未启动时，页面上的数字会是 0）'" />
 
 		<div class="module-grid">
-			<el-card v-for="item in modules" :key="item.path" shadow="hover" class="module-card" @click="$router.push(item.path)">
+			<el-card v-for="item in modules" :key="item.path" shadow="hover" class="module-card" @click="router.push(item.path)">
 				<div class="module-en">{{ item.en }}</div>
 				<div class="module-title">{{ item.title }}</div>
 				<div class="module-desc">{{ item.desc }}</div>
-				<el-tag size="small" type="info" effect="plain">规划中</el-tag>
+				<div class="module-foot">
+					<span class="module-count">{{ item.count }}<small>{{ item.unit }}</small></span>
+					<span class="ks-muted">{{ item.hint }}</span>
+				</div>
 			</el-card>
 		</div>
 
-		<el-card shadow="never" class="panel">
-			<template #header><span>工程进度</span></template>
-			<el-timeline>
-				<el-timeline-item type="success" timestamp="已完成" placement="top">Spring Boot 3 工程骨架、统一响应体、全局异常处理</el-timeline-item>
-				<el-timeline-item type="success" timestamp="已完成" placement="top">MySQL 建库建表 + 种子数据（主站 5 张表 + 扩展 5 张表）</el-timeline-item>
-				<el-timeline-item type="success" timestamp="已完成" placement="top">Redis 缓存配置、Swagger 文档、跨域配置</el-timeline-item>
-				<el-timeline-item type="success" timestamp="已完成" placement="top">Vue3 + TS + Element Plus 前端骨架与接口联调</el-timeline-item>
-				<el-timeline-item type="success" timestamp="已完成" placement="top">扩展模块：动效基因库、音乐 Agent</el-timeline-item>
-				<el-timeline-item timestamp="规划中" placement="top">主站四个业务模块的后端接口与页面</el-timeline-item>
-			</el-timeline>
-		</el-card>
+		<div class="ks-panel">
+			<div class="ks-panel-title">
+				<span>扩展工具</span>
+				<span class="ks-muted">与主站共用一套后端与数据库</span>
+			</div>
+			<div class="extension-grid">
+				<div v-for="item in extensions" :key="item.path" class="extension-card" @click="router.push(item.path)">
+					<div class="ks-eyebrow">{{ item.en }}</div>
+					<div class="module-title">{{ item.title }}</div>
+					<div class="module-desc">{{ item.desc }}</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="bottom-grid">
+			<div class="ks-panel">
+				<div class="ks-panel-title">
+					<span>最近的成长节点</span>
+					<el-link type="primary" @click="router.push('/journey')">全部</el-link>
+				</div>
+				<el-timeline v-if="recentNodes.length">
+					<el-timeline-item
+						v-for="node in recentNodes"
+						:key="node.id"
+						:timestamp="node.timeText"
+						placement="top"
+						:type="node.eventDate ? 'primary' : 'info'">
+						<b>{{ node.title }}</b>
+						<div class="ks-muted">{{ node.description }}</div>
+					</el-timeline-item>
+				</el-timeline>
+				<p v-else class="ks-muted">还没有成长节点。</p>
+			</div>
+
+			<div class="ks-panel">
+				<div class="ks-panel-title">
+					<span>服务状态</span>
+					<el-tag v-if="health" :type="health.status === 'UP' ? 'success' : 'warning'" size="small">{{ health.status }}</el-tag>
+				</div>
+				<el-descriptions v-if="health" :column="1" size="small" border>
+					<el-descriptions-item label="应用">{{ health.application }} · {{ health.version }}</el-descriptions-item>
+					<el-descriptions-item label="Java">{{ health.javaVersion }}</el-descriptions-item>
+					<el-descriptions-item label="MySQL">
+						{{ health.database.status }} · {{ health.database.detail }} · {{ health.database.latencyMs }}ms
+					</el-descriptions-item>
+					<el-descriptions-item label="Redis">
+						{{ health.redis.status }} · {{ health.redis.latencyMs }}ms
+					</el-descriptions-item>
+					<el-descriptions-item label="服务器时间">{{ health.serverTime }}</el-descriptions-item>
+				</el-descriptions>
+				<el-skeleton v-else :rows="3" animated />
+			</div>
+		</div>
 	</div>
 </template>
 
 <style scoped>
-.dashboard {
-	display: flex;
-	flex-direction: column;
-	gap: 16px;
-}
-
-.intro h2 {
-	margin: 0 0 8px;
-	font-size: 22px;
-}
-
-.intro p {
-	margin: 0;
-	color: #606266;
-	line-height: 1.7;
-}
-
-.intro-meta {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
-	margin-top: 14px;
-}
-
-.panel-header {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-}
-
 .module-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -157,10 +229,10 @@ onMounted(loadHealth)
 }
 
 .module-en {
-	font-size: 12px;
-	letter-spacing: 0.12em;
+	font-size: 11px;
+	letter-spacing: 0.16em;
 	text-transform: uppercase;
-	color: var(--kingdom-gold);
+	color: var(--ks-gold-deep);
 }
 
 .module-title {
@@ -170,9 +242,58 @@ onMounted(loadHealth)
 }
 
 .module-desc {
-	color: #606266;
+	color: var(--ks-ink-2);
 	font-size: 13px;
 	line-height: 1.6;
 	margin-bottom: 12px;
+}
+
+.module-foot {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 8px;
+	padding-top: 10px;
+	border-top: 1px solid var(--ks-line-soft);
+}
+
+.module-count {
+	font-size: 20px;
+	font-weight: 700;
+	color: var(--ks-ink);
+}
+
+.module-count small {
+	margin-left: 4px;
+	font-size: 12px;
+	font-weight: 400;
+	color: var(--ks-ink-3);
+}
+
+.extension-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 14px;
+}
+
+.extension-card {
+	background: var(--ks-surface-2);
+	border: 1px solid var(--ks-line);
+	border-radius: 12px;
+	padding: 14px 16px;
+	cursor: pointer;
+	transition: border-color 0.18s ease, transform 0.18s ease;
+}
+
+.extension-card:hover {
+	border-color: var(--ks-gold-soft);
+	transform: translateY(-1px);
+}
+
+.bottom-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+	gap: 16px;
+	align-items: start;
 }
 </style>

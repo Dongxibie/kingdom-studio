@@ -17,6 +17,7 @@ import com.kingdomstudio.modules.motion.vo.MotionListItemVO;
 import com.kingdomstudio.modules.motion.vo.MotionModuleVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +41,10 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class MotionService {
 
+	/** 版本段来自 application.yml，模块文案不必跟着版本号手动改 */
+	@Value("${info.app.version:}")
+	private String appVersion;
+
 	/** 十个固定分类，与数据库 CHECK 约束、前端分类树三处保持一致 */
 	public static final List<String> CATEGORIES = List.of(
 			"Entrance", "Hover", "Scroll", "Text", "Particle", "3D", "Glass", "Cursor", "Background", "Loading");
@@ -58,7 +63,7 @@ public class MotionService {
 				.module("motion")
 				.name("动效基因库")
 				.englishName("Kingdom Motion Lab")
-				.phase("v1.2.0 · 已上线（动效工作台 / 智能助手 / 模板组合 / 代码生成）")
+				.phase(appVersion + " · 已上线（动效工作台 / 智能助手 / 模板组合 / 代码生成）")
 				.apiBase("/api/motion")
 				.capabilities(List.of(
 						"动效资源的增删改查（列表支持分类 / 技术栈 / 关键词筛选与分页）",

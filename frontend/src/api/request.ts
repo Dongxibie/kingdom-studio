@@ -8,6 +8,15 @@ export interface ApiResult<T = unknown> {
 	data: T
 }
 
+/** 后端分页外壳 */
+export interface PageResult<T> {
+	records: T[]
+	total: number
+	page: number
+	size: number
+	pages: number
+}
+
 const TOKEN_KEY = 'kingdom_studio_token'
 
 const service: AxiosInstance = axios.create({
