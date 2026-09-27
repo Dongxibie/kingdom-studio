@@ -70,6 +70,12 @@ const routes: RouteRecordRaw[] = [
 	{
 		// 动效资源页：工作台之外的「我的资源」（自建与采集的资源）。
 		// 从工作台右上角进入，不占侧边栏菜单位，避免两个入口互相抢注意力。
+		path: '/extensions/motion-lab/candidates',
+		name: 'motion-lab-candidates',
+		meta: { title: '动效候选池' },
+		component: () => import('@/extensions/motion-lab/views/MotionCandidateView.vue'),
+	},
+	{
 		path: '/extensions/motion-lab/resources',
 		name: 'KingdomMotionResources',
 		component: () => import('@/extensions/motion-lab/views/MotionResourceView.vue'),

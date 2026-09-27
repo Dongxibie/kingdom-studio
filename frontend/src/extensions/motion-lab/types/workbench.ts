@@ -40,6 +40,16 @@ export interface MotionTemplateItem {
 	scoreReuse: number
 	scorePerf: number
 	tags: string[]
+	/** 触发方式：load / hover / scroll / click */
+	triggerType?: string
+	triggerLabel?: string
+	/** 来源：OFFICIAL 官方 / COMMUNITY 社区精选 */
+	source?: string
+	sourceLabel?: string
+	/** 灵感来源地址与许可（社区精选才有，仅作标注） */
+	sourceUrl?: string
+	sourceLicense?: string
+	community?: boolean
 	/** 运行档位：LIGHTWEIGHT 轻量 / BALANCED 均衡 / GPU_ENHANCED 依赖 GPU 加速 */
 	runtimeTier: 'LIGHTWEIGHT' | 'BALANCED' | 'GPU_ENHANCED'
 	/** 档位中文名 */
@@ -113,6 +123,10 @@ export interface MotionFacets {
 	difficulties: FacetOption[]
 	/** 按运行档位（性能成本）分面 */
 	runtimeTiers: FacetOption[]
+	/** 按来源分面：官方 / 社区精选 */
+	sources: FacetOption[]
+	/** 按触发方式分面：加载时 / 悬停 / 滚动 / 点击 */
+	triggers: FacetOption[]
 	total: number
 	recipeTotal: number
 }
@@ -181,6 +195,8 @@ export interface TemplateQuery {
 	technology?: string
 	difficulty?: number
 	runtimeTier?: string
+	source?: string
+	trigger?: string
 	keyword?: string
 	sort?: 'SCORE' | 'NAME' | 'DIFFICULTY'
 	page?: number

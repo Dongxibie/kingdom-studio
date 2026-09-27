@@ -31,6 +31,12 @@ public class TemplateQueryDTO {
 	@Schema(description = "运行档位：LIGHTWEIGHT / BALANCED / GPU_ENHANCED")
 	private String runtimeTier;
 
+	@Schema(description = "来源：OFFICIAL 官方 / COMMUNITY 社区精选")
+	private String source;
+
+	@Schema(description = "触发方式：load / hover / scroll / click")
+	private String trigger;
+
 	@Schema(description = "关键词，匹配名称、说明、标签、适合场景")
 	private String keyword;
 

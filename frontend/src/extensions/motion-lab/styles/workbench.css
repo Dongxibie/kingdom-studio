@@ -351,6 +351,28 @@
 	cursor: default;
 }
 
+/* ---------- 来源标注（社区精选：地址 + 许可，实现仍是本项目的） ---------- */
+.mlab-source {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+	margin-top: 8px;
+	font-size: 10.5px;
+	color: var(--ext-text-mute);
+}
+
+.mlab-source a {
+	color: var(--ext-gold-light);
+	text-decoration: none;
+	font-family: var(--ext-font-mono);
+	word-break: break-all;
+}
+
+.mlab-source .v {
+	color: var(--ext-text-dim);
+}
+
 /* ---------- 运行档位（性能成本） ---------- */
 .mlab-tier {
 	margin-top: 10px;

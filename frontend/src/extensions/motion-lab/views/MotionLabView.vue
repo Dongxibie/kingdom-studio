@@ -165,7 +165,7 @@ async function selectRecipe(recipeKey: string) {
 	}
 }
 
-function onFacetSelect(field: 'scene' | 'style' | 'technology' | 'category' | 'difficulty' | 'runtimeTier', value: string) {
+function onFacetSelect(field: 'scene' | 'style' | 'technology' | 'category' | 'difficulty' | 'runtimeTier' | 'source' | 'trigger', value: string) {
 	const next: TemplateQuery = { ...query.value }
 	if (field === 'difficulty') {
 		next.difficulty = String(query.value.difficulty ?? '') === value ? undefined : Number(value)
@@ -301,6 +301,11 @@ function toResourcePage() {
 	void router.push('/extensions/motion-lab/resources')
 }
 
+/** 候选池：GitHub 发现 → 分析 → 筛选 → 转成 Pattern 的入口 */
+function toCandidatePage() {
+	void router.push('/extensions/motion-lab/candidates')
+}
+
 function startWith(scene: string) {
 	localStorage.setItem('mlab_onboarded', '1')
 	onboarded.value = true
@@ -334,6 +339,7 @@ onMounted(async () => {
 		<template #actions>
 			<ExtStatusTag :text="statusTag.text" :tone="statusTag.tone" />
 			<button class="ext-btn" type="button" @click="loadInfo">重新自检</button>
+			<button class="ext-btn" type="button" @click="toCandidatePage">候选池</button>
 			<button class="ext-btn" type="button" @click="toResourcePage">我的资源</button>
 		</template>
 
@@ -489,6 +495,12 @@ onMounted(async () => {
 						<span class="mlab-tier-name">{{ RUNTIME_TIER_META[detail.runtimeTier]?.label ?? detail.runtimeTierLabel }}</span>
 						<span class="mlab-tier-note">{{ detail.runtimeNote }}</span>
 					</div>
+					<div v-if="detail.community" class="mlab-source">
+						<span class="k">灵感来源</span>
+						<a :href="detail.sourceUrl" target="_blank" rel="noopener">{{ detail.sourceUrl }}</a>
+						<span>许可 {{ detail.sourceLicense || '未标注' }} · 实现为本项目原创</span>
+					</div>
+					<div v-else class="mlab-source"><span class="k">来源</span><span class="v">{{ detail.sourceLabel }}</span></div>
 					<div v-if="detail.manualScore" class="mlab-manual">人工评分 {{ detail.manualScore }} 星：{{ detail.manualReason }}</div>
 					<div v-if="detail.usedByRecipes.length" class="mlab-used">被「{{ detail.usedByRecipes.join('、') }}」用到</div>
 				</div>

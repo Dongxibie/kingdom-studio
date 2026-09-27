@@ -25,6 +25,12 @@ public class MotionFacetVO {
 	@Schema(description = "按运行档位（性能成本）分面")
 	private List<FacetOption> runtimeTiers;
 
+	@Schema(description = "按来源分面：官方 / 社区精选")
+	private List<FacetOption> sources;
+
+	@Schema(description = "按触发方式分面：加载时 / 悬停 / 滚动 / 点击")
+	private List<FacetOption> triggers;
+
 	@Schema(description = "模板总数")
 	private Long total;
 

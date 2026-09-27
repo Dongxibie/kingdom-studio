@@ -13,7 +13,7 @@ interface Props {
 const props = defineProps<Props>()
 const emit = defineEmits<{
 	/** 选择某个发现方式：按字段名与值筛选（再点一次取消） */
-	select: [field: 'scene' | 'style' | 'technology' | 'category' | 'difficulty' | 'runtimeTier', value: string]
+	select: [field: 'scene' | 'style' | 'technology' | 'category' | 'difficulty' | 'runtimeTier' | 'source' | 'trigger', value: string]
 	recipe: [recipeKey: string]
 	clear: []
 }>()
@@ -30,6 +30,8 @@ const groups = computed(() => {
 		{ field: 'style' as const, title: '按视觉风格', options: facets.styles, active: props.query.style },
 		{ field: 'technology' as const, title: '按技术类型', options: facets.technologies, active: props.query.technology },
 		{ field: 'category' as const, title: '按模板分组', options: facets.categories, active: props.query.category },
+		{ field: 'source' as const, title: '按来源', options: facets.sources, active: props.query.source },
+		{ field: 'trigger' as const, title: '按触发方式', options: facets.triggers, active: props.query.trigger },
 	]
 })
 
@@ -46,7 +48,7 @@ function difficultyActive(value: string) {
 	<div class="discover">
 		<div v-if="facets" class="head">
 			<span class="total">{{ facets.total }} 个模板 · {{ facets.recipeTotal }} 个组合方案</span>
-			<button v-if="query.scene || query.style || query.technology || query.category || query.difficulty || query.runtimeTier" class="reset" type="button" @click="emit('clear')">
+			<button v-if="query.scene || query.style || query.technology || query.category || query.difficulty || query.runtimeTier || query.source || query.trigger" class="reset" type="button" @click="emit('clear')">
 				清除筛选
 			</button>
 		</div>

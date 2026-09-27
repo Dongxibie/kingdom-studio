@@ -76,9 +76,36 @@ public class MotionTemplateService {
 	private static final Map<Integer, String> DIFFICULTY_LABELS = Map.of(
 			1, "入门", 2, "进阶", 3, "高阶");
 
+	/** 来源：官方集合与社区精选。界面按它打标，筛选也按它走 */
+	private static final Map<String, String> SOURCE_LABELS = Map.of(
+			"OFFICIAL", "官方",
+			"COMMUNITY", "社区精选",
+			"IMPORTED", "采集导入");
+
+	/** 触发方式：同一套值在候选池与模板库共用 */
+	private static final Map<String, String> TRIGGER_LABELS = Map.of(
+			"load", "加载时",
+			"hover", "悬停",
+			"scroll", "滚动",
+			"click", "点击");
+
 	private final MotionTemplateMapper templateMapper;
 	private final MotionRecipeMapper recipeMapper;
 	private final MotionRatingMapper ratingMapper;
+
+	/**
+	 * 取中文标签。
+	 *
+	 * <p>不能直接用 {@code Map.of(...).getOrDefault(key, fallback)}：不可变集合不接受 null 键，
+	 * 而老数据里 source / trigger_type 可能为空，那样渲染列表时会抛 NPE。这里统一兜住。
+	 */
+	private static String label(Map<String, String> labels, String key, String fallback) {
+		if (key == null) {
+			return fallback;
+		}
+		String value = labels.get(key);
+		return value == null ? fallback : value;
+	}
 
 	/** 推荐指数：四项子分加权，四舍五入到整数 */
 	public int recommendScore(MotionTemplate template) {
@@ -171,7 +198,9 @@ public class MotionTemplateService {
 				.eq(notBlank(query.getStyle()), MotionTemplate::getStyle, query.getStyle())
 				.eq(notBlank(query.getTechnology()), MotionTemplate::getTechnology, query.getTechnology())
 				.eq(query.getDifficulty() != null, MotionTemplate::getDifficulty, query.getDifficulty())
-				.eq(notBlank(query.getRuntimeTier()), MotionTemplate::getRuntimeTier, query.getRuntimeTier());
+				.eq(notBlank(query.getRuntimeTier()), MotionTemplate::getRuntimeTier, query.getRuntimeTier())
+				.eq(notBlank(query.getSource()), MotionTemplate::getSource, query.getSource())
+				.eq(notBlank(query.getTrigger()), MotionTemplate::getTriggerType, query.getTrigger());
 		if (notBlank(query.getKeyword())) {
 			String like = query.getKeyword().trim();
 			wrapper.and(inner -> inner.like(MotionTemplate::getName, like)
@@ -233,6 +262,13 @@ public class MotionTemplateService {
 				.difficulty(template.getDifficulty())
 				.difficultyLabel(DIFFICULTY_LABELS.getOrDefault(nz(template.getDifficulty()), "入门"))
 				.bestFor(split(template.getBestFor()))
+				.triggerType(template.getTriggerType())
+				.triggerLabel(label(TRIGGER_LABELS, template.getTriggerType(), "加载时"))
+				.source(template.getSource())
+				.sourceLabel(label(SOURCE_LABELS, template.getSource(), "官方"))
+				.sourceUrl(template.getSourceUrl())
+				.sourceLicense(template.getSourceLicense())
+				.community("COMMUNITY".equals(template.getSource()))
 				.runtimeTier(runtimeTier(template))
 				.runtimeTierLabel(runtimeTierLabel(runtimeTier(template)))
 				.runtimeNote(runtimeNote(template))
@@ -268,6 +304,8 @@ public class MotionTemplateService {
 				.categories(facet(all, MotionTemplate::getCategory, Map.of()))
 				.difficulties(difficultyFacet(all))
 				.runtimeTiers(tierFacet(all))
+				.sources(facet(all, MotionTemplate::getSource, SOURCE_LABELS))
+				.triggers(facet(all, MotionTemplate::getTriggerType, TRIGGER_LABELS))
 				.total((long) all.size())
 				.recipeTotal(recipeMapper.selectCount(new LambdaQueryWrapper<>()))
 				.build();
@@ -359,6 +397,8 @@ public class MotionTemplateService {
 				.difficulty(template.getDifficulty())
 				.difficultyLabel(DIFFICULTY_LABELS.getOrDefault(nz(template.getDifficulty()), "入门"))
 				.bestFor(split(template.getBestFor()))
+				.triggerType(template.getTriggerType())
+				.triggerLabel(label(TRIGGER_LABELS, template.getTriggerType(), "加载时"))
 				.runtimeTier(runtimeTier(template))
 				.runtimeTierLabel(runtimeTierLabel(runtimeTier(template)))
 				.runtimeNote(runtimeNote(template))
@@ -370,6 +410,11 @@ public class MotionTemplateService {
 				.scoreReuse(nz(template.getScoreReuse()))
 				.scorePerf(nz(template.getScorePerf()))
 				.tags(split(template.getTags()))
+				.source(template.getSource())
+				.sourceLabel(label(SOURCE_LABELS, template.getSource(), "官方"))
+				.sourceUrl(template.getSourceUrl())
+				.sourceLicense(template.getSourceLicense())
+				.community("COMMUNITY".equals(template.getSource()))
 				.build();
 	}
 

@@ -46,7 +46,11 @@ function stars(value: number) {
 				<span class="stars" :title="`推荐指数 ${item.score}`">{{ stars(item.stars) }}</span>
 				<span class="score">{{ item.score }}</span>
 			</div>
-			<div class="sub">{{ item.sceneLabel }} · {{ item.technology }}</div>
+			<div class="sub">
+			<span v-if="item.community" class="origin community" title="社区精选：实现为本项目的原创实现，来源已标注">社区</span>
+			<span v-else class="origin" title="官方模板">官方</span>
+			{{ item.sceneLabel }} · {{ item.technology }}
+		</div>
 			<div class="metrics">
 				<span class="metric" title="视觉效果评分">视觉 {{ item.scoreVisual }}</span>
 				<span class="metric" title="性能表现评分：越高越省">性能 {{ item.scorePerf }}</span>
@@ -146,6 +150,21 @@ function stars(value: number) {
 	margin-top: 5px;
 	font-size: 10.5px;
 	color: var(--ext-text-mute);
+}
+
+.origin {
+	display: inline-block;
+	margin-right: 5px;
+	padding: 0 5px;
+	border-radius: 4px;
+	font-size: 9.5px;
+	border: 1px solid var(--ext-line);
+	color: var(--ext-text-mute);
+}
+
+.origin.community {
+	border-color: rgba(240, 205, 114, 0.5);
+	color: var(--ext-gold-light);
 }
 
 .metrics {

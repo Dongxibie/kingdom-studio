@@ -49,6 +49,9 @@ public class MotionTemplate {
 	/** 适合场景，逗号分隔 */
 	private String bestFor;
 
+	/** 触发方式：load 加载时 / hover 悬停 / scroll 滚动 / click 点击 */
+	private String triggerType;
+
 	/** 四项子分：推荐指数由它们加权算出，不单独手写 */
 	private Integer scoreVisual;
 	private Integer scoreCode;
@@ -87,8 +90,14 @@ public class MotionTemplate {
 	private String prompt;
 	private String tags;
 
-	/** OFFICIAL 官方模板 / IMPORTED 采集导入 */
+	/** OFFICIAL 官方模板 / COMMUNITY 社区精选 / IMPORTED 采集导入 */
 	private String source;
+
+	/** 灵感来源地址：社区精选标注用，官方模板留空 */
+	private String sourceUrl;
+
+	/** 来源许可（只记录来源项目的许可；实现代码一律是 Kingdom Studio 原创） */
+	private String sourceLicense;
 
 	private String status;
 

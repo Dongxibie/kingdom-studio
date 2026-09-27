@@ -1,5 +1,6 @@
 import { http } from '@/api/request'
 import type { PageResult } from '@/extensions/motion-lab/types/motion'
+import type { CandidateQuery, CandidateStats, MotionCandidate } from '@/extensions/motion-lab/types/candidate'
 import type {
 	MotionFacets,
 	MotionRecipe,
@@ -11,6 +12,32 @@ import type {
 
 /** 工作台接口前缀（后端 context-path 是 /api） */
 export const TEMPLATE_BASE = '/motion/templates'
+export const CANDIDATE_BASE = '/motion/candidates'
+
+/** 候选池分页：状态 / 分类 / 技术 / 关键词 / 星数下限任意组合 */
+export function listCandidates(query: CandidateQuery): Promise<PageResult<MotionCandidate>> {
+	return http.get<PageResult<MotionCandidate>>(CANDIDATE_BASE, { ...query })
+}
+
+/** 候选池概览：总数、各状态、各分类，以及资源库的官方与社区配比 */
+export function fetchCandidateStats(): Promise<CandidateStats> {
+	return http.get<CandidateStats>(CANDIDATE_BASE + '/stats')
+}
+
+/** 重新跑一遍规则分析（分类 / 触发 / 难度 / 档位） */
+export function analyzeCandidate(id: number): Promise<MotionCandidate> {
+	return http.post<MotionCandidate>(CANDIDATE_BASE + '/' + id + '/analyze')
+}
+
+/** 人工筛选：改状态 + 写意见（淘汰必须写理由） */
+export function reviewCandidate(id: number, status: string, note: string): Promise<MotionCandidate> {
+	return http.post<MotionCandidate>(CANDIDATE_BASE + '/' + id + '/review', { status, note })
+}
+
+/** 转成模板：指定用哪个内置 Pattern 承载，代码来自 Pattern，候选只提供名字、来源与许可 */
+export function promoteCandidate(id: number, patternTemplateKey: string, name?: string): Promise<Record<string, unknown>> {
+	return http.post<Record<string, unknown>>(CANDIDATE_BASE + '/' + id + '/promote', { patternTemplateKey, name })
+}
 
 /** 模板分页：分组 / 场景 / 风格 / 技术 / 难度 / 关键词任意组合 */
 export function listTemplates(query: TemplateQuery): Promise<PageResult<MotionTemplateItem>> {

@@ -30,6 +30,16 @@ public class MotionTemplateDetailVO {
 	private Integer difficulty;
 	private String difficultyLabel;
 	private List<String> bestFor;
+
+	private String triggerType;
+	private String triggerLabel;
+
+	/** 来源与出处标注：社区精选带来源地址与许可 */
+	private String source;
+	private String sourceLabel;
+	private String sourceUrl;
+	private String sourceLicense;
+	private Boolean community;
 	private Integer score;
 	private Double stars;
 	private String grade;

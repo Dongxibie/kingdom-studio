@@ -40,6 +40,12 @@ public class MotionTemplateItemVO {
 
 	private List<String> bestFor;
 
+	@Schema(description = "触发方式：load / hover / scroll / click")
+	private String triggerType;
+
+	@Schema(description = "触发方式中文名，如「滚动」")
+	private String triggerLabel;
+
 	@Schema(description = "运行档位：LIGHTWEIGHT 轻量 / BALANCED 均衡 / GPU_ENHANCED 依赖 GPU 加速")
 	private String runtimeTier;
 
@@ -65,4 +71,19 @@ public class MotionTemplateItemVO {
 	private Integer scorePerf;
 
 	private List<String> tags;
+
+	@Schema(description = "来源：OFFICIAL 官方 / COMMUNITY 社区精选")
+	private String source;
+
+	@Schema(description = "来源中文名，如「社区精选」")
+	private String sourceLabel;
+
+	@Schema(description = "灵感来源地址（社区精选才有）")
+	private String sourceUrl;
+
+	@Schema(description = "来源项目许可（仅标注，实现代码为本项目原创）")
+	private String sourceLicense;
+
+	@Schema(description = "是否社区精选（前端据此打标）")
+	private Boolean community;
 }
