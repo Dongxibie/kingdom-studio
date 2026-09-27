@@ -7,7 +7,25 @@
    避免和主站主题打架。
    ===================================================================== */
 
+/* ---------------------------------------------------------------------------
+   工作室配色（V1.2）
+
+   设计取向：纯黑底 + 中性深灰层次 + 紫/绿双强调，不要偏蓝的工程蓝。
+   参考 Ableton / Linear / Raycast / Figma 那一类的「深色工具」观感：
+   背景压到接近纯黑，层次全靠灰度与描边，颜色只留给状态与数据。
+   这里覆盖的变量都在 .ext-shell 作用域内，所以只影响工作室这几个页面。
+   --------------------------------------------------------------------------- */
 .studio-root {
+	--ext-bg: #07080b;
+	--ext-bg-soft: #0d0f13;
+	--ext-bg-raised: #14171d;
+	--ext-line: #23262e;
+	--ext-line-soft: #1a1d23;
+	--ext-text: #eceef2;
+	--ext-text-dim: #9ba1ad;
+	--ext-text-mute: #6b7280;
+	--ext-ok: #6ede9a;
+
 	/* 玻璃与层次 */
 	--st-glass: rgba(255, 255, 255, 0.045);
 	--st-glass-strong: rgba(255, 255, 255, 0.075);
@@ -15,18 +33,24 @@
 	--st-edge-hot: rgba(240, 205, 114, 0.45);
 	--st-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
 
+	/* 双强调：紫做主色（选择、方案、时间线），绿做「健康 / 已完成」 */
+	--st-violet: #a78bfa;
+	--st-violet-soft: rgba(167, 139, 250, 0.14);
+	--st-green: #6ede9a;
+	--st-green-soft: rgba(110, 222, 154, 0.13);
+
 	/* 时间轴 */
 	--st-track: rgba(255, 255, 255, 0.035);
 	--st-grid: rgba(255, 255, 255, 0.06);
 	--st-grid-strong: rgba(255, 255, 255, 0.12);
-	--st-note: linear-gradient(180deg, #6ee7d7, #2fa8a0);
-	--st-note-black: linear-gradient(180deg, #f0a5a5, #b7454a);
-	--st-note-hot: linear-gradient(180deg, #ffe9a8, #f0cd72);
-	--st-lane: rgba(167, 139, 250, 0.16);
+	--st-note: linear-gradient(180deg, #8be3b8, #37a97e);
+	--st-note-black: linear-gradient(180deg, #b9a8f7, #7c63d8);
+	--st-note-hot: linear-gradient(180deg, #e6dcff, #a78bfa);
+	--st-lane: rgba(110, 222, 154, 0.14);
 
 	/* 键盘 */
-	--st-key: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
-	--st-key-on: linear-gradient(180deg, #f0cd72, #b98a2c);
+	--st-key: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.025));
+	--st-key-on: linear-gradient(180deg, #c4b1fb, #8266e0);
 
 	min-height: 100%;
 }
@@ -182,10 +206,10 @@
 @keyframes st-pulse {
 	0%,
 	100% {
-		box-shadow: 0 0 0 0 rgba(240, 205, 114, 0.45);
+		box-shadow: 0 0 0 0 rgba(167, 139, 250, 0.45);
 	}
 	50% {
-		box-shadow: 0 0 0 6px rgba(240, 205, 114, 0);
+		box-shadow: 0 0 0 6px rgba(167, 139, 250, 0);
 	}
 }
 
@@ -218,7 +242,7 @@
 	inset: 0 auto auto 0;
 	width: 100%;
 	height: 1px;
-	background: linear-gradient(90deg, transparent, var(--ext-gold-light), transparent);
+	background: linear-gradient(90deg, transparent, var(--st-violet), transparent);
 	background-size: 40% 100%;
 	animation: st-sweep 2.4s linear infinite;
 	pointer-events: none;

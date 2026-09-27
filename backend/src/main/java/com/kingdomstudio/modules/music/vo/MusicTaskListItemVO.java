@@ -48,5 +48,8 @@ public class MusicTaskListItemVO {
 	@Schema(description = "难度文字：入门 / 简单 / 进阶 / 较难 / 挑战")
 	private String difficultyLabel;
 
+	@Schema(description = "难度分层：EASY 简单 / NORMAL 普通 / ADVANCED 高级")
+	private String difficultyTier;
+
 	private LocalDateTime createTime;
 }

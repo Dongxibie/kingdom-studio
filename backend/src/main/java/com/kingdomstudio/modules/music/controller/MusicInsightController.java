@@ -2,12 +2,14 @@ package com.kingdomstudio.modules.music.controller;
 
 import com.kingdomstudio.common.Result;
 import com.kingdomstudio.modules.music.analysis.PerformanceOptimizerService;
+import com.kingdomstudio.modules.music.analysis.ProfileMatchService;
 import com.kingdomstudio.modules.music.analysis.SongAnalysisService;
 import com.kingdomstudio.modules.music.dto.PerformancePresetDTO;
 import com.kingdomstudio.modules.music.service.PerformancePresetService;
 import com.kingdomstudio.modules.music.vo.KeySequenceVO;
 import com.kingdomstudio.modules.music.vo.OptimizationVO;
 import com.kingdomstudio.modules.music.vo.PerformancePresetVO;
+import com.kingdomstudio.modules.music.vo.ProfileMatchVO;
 import com.kingdomstudio.modules.music.vo.SongAnalysisVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,6 +40,7 @@ import java.util.List;
 public class MusicInsightController {
 
 	private final SongAnalysisService analysisService;
+	private final ProfileMatchService profileMatchService;
 	private final PerformanceOptimizerService optimizerService;
 	private final PerformancePresetService presetService;
 
@@ -57,6 +60,33 @@ public class MusicInsightController {
 			@RequestParam(required = false) String strategy,
 			@RequestParam(required = false) Long presetId) {
 		return Result.success(optimizerService.optimize(taskId, profileId, strategy, presetId));
+	}
+
+	@Operation(summary = "匹配游戏乐器档案",
+			description = "按 游戏 / 乐器 / 键数 优先级给可用档案排序：能全落下的优先、键数最接近的次之；"
+					+ "库里没有该游戏的档案时会退回通用档案并在理由里说明")
+	@GetMapping("/profiles/match")
+	public Result<List<ProfileMatchVO>> matchProfiles(@PathVariable Long taskId,
+			@RequestParam(required = false) String game,
+			@RequestParam(required = false) String instrument,
+			@RequestParam(required = false) Integer keyCount,
+			@RequestParam(defaultValue = "5") int limit) {
+		return Result.success(profileMatchService.top(taskId, game, instrument, keyCount, Math.max(1, limit)).stream()
+				.map(candidate -> ProfileMatchVO.builder()
+						.profileId(candidate.profile().getId())
+						.profileName(candidate.profile().getName())
+						.game(candidate.profile().getGame())
+						.instrument(candidate.profile().getInstrument())
+						.keyCount(candidate.sequence().getKeyCount())
+						.octaveRange(candidate.profile().getOctaveRange())
+						.specialRules(candidate.profile().getSpecialRules())
+						.coversAll(candidate.coversAll())
+						.unmappedCount(candidate.sequence().getUnmappedCount())
+						.mappedCount(candidate.sequence().getMappedCount())
+						.score(candidate.score())
+						.reasons(candidate.reasons())
+						.build())
+				.toList());
 	}
 
 	@Operation(summary = "演奏方案列表", description = "首次访问会为这首曲子补齐「原版 / 简单版 / 快速版」三套内置方案")

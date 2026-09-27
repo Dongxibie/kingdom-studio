@@ -30,7 +30,7 @@ public class MotionModuleVO {
 	@Schema(description = "模块英文名", example = "Kingdom Motion Lab")
 	private String englishName;
 
-	@Schema(description = "当前状态", example = "v1.1.0 · 已上线（动效工作台 / 智能助手 / 模板组合 / 代码生成）")
+	@Schema(description = "当前状态", example = "v1.2.0 · 已上线（动效工作台 / 智能助手 / 模板组合 / 代码生成）")
 	private String phase;
 
 	@Schema(description = "接口前缀", example = "/api/motion")

@@ -68,6 +68,9 @@ const state = reactive({
 	optimization: null as OptimizationReport | null,
 	insightLoading: false,
 
+	/** 最近演奏：只在本地记，属于使用者的习惯，不写服务端 */
+	recent: [] as MusicTaskListItem[],
+
 	/** 演奏方案 */
 	presets: [] as PerformancePreset[],
 	activePresetId: null as number | null,
@@ -80,6 +83,7 @@ const state = reactive({
 })
 
 let handle: PlayHandle | null = null
+loadRecent()
 let raf = 0
 let timer = 0
 let wallStart = 0
@@ -151,6 +155,77 @@ async function loadProfiles() {
 	}
 }
 
+const RECENT_KEY = 'music_studio_recent'
+const RECENT_LIMIT = 12
+
+/** 从本地读出「最近演奏」（换设备就没了，这符合它的语义） */
+function loadRecent() {
+	try {
+		const raw = localStorage.getItem(RECENT_KEY)
+		if (raw) {
+			state.recent = JSON.parse(raw) as MusicTaskListItem[]
+		}
+	} catch {
+		state.recent = []
+	}
+}
+
+/** 记一次演奏：同名的移到最前，最多留 12 条 */
+function rememberPlayed(task: MusicTaskListItem | null) {
+	if (!task) {
+		return
+	}
+	const rest = state.recent.filter((item) => item.id !== task.id)
+	state.recent = [task, ...rest].slice(0, RECENT_LIMIT)
+	try {
+		localStorage.setItem(RECENT_KEY, JSON.stringify(state.recent))
+	} catch {
+		// 隐私模式下写不了本地存储：只影响「最近演奏」这一处，不影响其它功能
+	}
+}
+
+/** 按 id 打开一首曲子（左侧音乐库点击时用） */
+async function openById(taskId: number) {
+	await selectTask(taskId, { silent: true })
+}
+
+/**
+ * 把 AI 助手的建议落成一套方案。
+ *
+ * 这是「AI 输出建议 → 规则校验 → 演奏方案」的最后一环：助手只给难度与建议，
+ * 具体用哪套键位、要不要移八度，由分析结果与规则决定，最后存成方案（可改名、可删）。
+ */
+async function createPresetFromAdvice(label: string, strategy?: string | null) {
+	const task = state.task
+	if (!task) {
+		return
+	}
+	const recommended = state.analysis?.recommendedProfileId
+	const profileId = recommended ?? state.profileId
+	if (profileId === null || profileId === undefined) {
+		return
+	}
+	const name = 'AI 建议 · ' + label
+	if (state.presets.some((preset) => preset.name === name)) {
+		return
+	}
+	try {
+		const saved = await createPreset(task.id, {
+			name,
+			profileId,
+			strategy: strategy ?? null,
+			speedScale: 1,
+			minGapMs: 0,
+			note: '由 AI 助手的难度建议生成（' + label + '）',
+		})
+		await loadPresets()
+		await applyPreset(saved)
+		ElMessage.success('已按 AI 建议生成方案「' + name + '」')
+	} catch (error) {
+		ElMessage.error(error instanceof Error ? error.message : '按建议生成方案失败')
+	}
+}
+
 /** 收藏 / 取消收藏：先在本地翻转（点了就有反馈），再以后端返回为准 */
 async function switchFavorite(taskId: number) {
 	const item = state.tasks.find((task) => task.id === taskId)
@@ -214,8 +289,10 @@ async function loadPresets() {
 	}
 	try {
 		state.presets = await listPresets(task.id)
-		if (state.activePresetId === null && state.presets.length) {
-			state.activePresetId = state.presets[0].id
+		// 换曲子后上一首的方案不属于这一首，必须换成这首自己的方案，
+		// 否则后面的分析 / 计划会带着别人的方案 id 被后端拒绝。
+		if (!state.presets.some((preset) => preset.id === state.activePresetId)) {
+			state.activePresetId = state.presets.length ? state.presets[0].id : null
 		}
 	} catch (error) {
 		ElMessage.error(error instanceof Error ? error.message : '读取演奏方案失败')
@@ -474,6 +551,7 @@ function start(fromMs = state.currentMs) {
 	state.currentMs = fromMs
 	wallStart = performance.now() - fromMs
 	state.playing = true
+	rememberPlayed(state.tasks.find((item) => item.id === state.task?.id) ?? null)
 
 	handle = play({
 		events: buildPlayEvents(sequence),
@@ -561,6 +639,9 @@ export function useStudioSession() {
 		applyPreset,
 		savePreset,
 		deletePresetById,
+		openById,
+		createPresetFromAdvice,
+		rememberPlayed,
 		applyFix,
 		selectTask,
 		remap,

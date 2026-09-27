@@ -119,6 +119,9 @@ public class InstrumentProfileService {
 		entity.setOctaveShift(request.getOctaveShift() == null ? 0 : request.getOctaveShift());
 		entity.setUnmappedStrategy(strategy);
 		entity.setDescription(request.getDescription() == null ? "" : request.getDescription().trim());
+		entity.setGame(request.getGame() == null || request.getGame().isBlank() ? "通用" : request.getGame().trim());
+		entity.setOctaveRange(request.getOctaveRange() == null ? "" : request.getOctaveRange().trim());
+		entity.setSpecialRules(request.getSpecialRules() == null ? "" : request.getSpecialRules().trim());
 		entity.setStatus(status);
 	}
 
@@ -152,6 +155,7 @@ public class InstrumentProfileService {
 				.id(entity.getId())
 				.name(entity.getName())
 				.instrument(entity.getInstrument())
+				.game(entity.getGame() == null ? "通用" : entity.getGame())
 				.mappingMode(entity.getMappingMode())
 				.scale(entity.getScale())
 				.keyLayout(keys)
@@ -161,7 +165,9 @@ public class InstrumentProfileService {
 				.transpose(entity.getTranspose())
 				.octaveShift(entity.getOctaveShift())
 				.unmappedStrategy(entity.getUnmappedStrategy())
+				.octaveRange(entity.getOctaveRange() == null ? "" : entity.getOctaveRange())
 				.description(entity.getDescription())
+				.specialRules(entity.getSpecialRules() == null ? "" : entity.getSpecialRules())
 				.status(entity.getStatus())
 				.createTime(entity.getCreateTime())
 				.build();

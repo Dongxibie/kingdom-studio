@@ -348,7 +348,7 @@ onBeforeUnmount(stopPlayback)
 		</template>
 		<template v-else>
 			<ExtEmpty
-				tag="v1.1.0"
+				tag="v1.2.0"
 				title="选一首曲子开始"
 				hint="左边上传 .mid 文件或粘贴简谱；解析完成后这里会出现音符时间线、虚拟键盘与 Demo 回放，右边可以切换乐器档案并导出按键序列。" />
 		</template>

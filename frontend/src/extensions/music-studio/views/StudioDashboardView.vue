@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ExtEmpty, ExtStatusTag } from '@/extensions/_shared/components'
 import MusicStudioLayout from '@/extensions/music-studio/components/MusicStudioLayout.vue'
+import MusicLibraryRail from '@/extensions/music-studio/components/MusicLibraryRail.vue'
 import SongAnalysisCard from '@/extensions/music-studio/components/SongAnalysisCard.vue'
 import ShowModeOverlay from '@/extensions/music-studio/components/ShowModeOverlay.vue'
 import MusicUploadPanel from '@/extensions/music-agent/components/MusicUploadPanel.vue'
@@ -13,7 +14,7 @@ import { useStudioSession } from '@/extensions/music-studio/composables/useStudi
 import { DEMO_SONGS, type DemoSong } from '@/extensions/music-studio/types/demo'
 import { starsText } from '@/extensions/music-studio/types/studio'
 import type { ExtModuleInfo } from '@/extensions/_shared/types/common'
-import type { MusicTaskDetail } from '@/extensions/music-agent/types/music'
+import { sourceLabel, type MusicTaskDetail } from '@/extensions/music-agent/types/music'
 
 /**
  * 曲目台（Dashboard）。
@@ -74,8 +75,7 @@ async function importDemo(song: DemoSong) {
 }
 
 async function open(id: number) {
-	await selectTask(id)
-	void router.push('/extensions/music-studio/composer')
+	await selectTask(id, { silent: true })
 }
 
 async function remove(id: number, name: string) {
@@ -118,6 +118,8 @@ onMounted(async () => {
 		</template>
 
 		<template #left>
+			<MusicLibraryRail @open="open" />
+
 			<div class="st-glass">
 				<div class="st-title">演示歌曲<span class="st-sub">点一下直接导入</span></div>
 				<div class="demo-list">
@@ -190,7 +192,7 @@ onMounted(async () => {
 								{{ song.favorite === 1 ? '★' : '☆' }}
 							</button>
 							<span class="song-name">{{ song.name }}</span>
-							<span class="st-chip">{{ song.sourceType === 'MIDI' ? 'MIDI' : '简谱' }}</span>
+							<span class="st-chip">{{ sourceLabel(song.sourceType) }}</span>
 						</header>
 						<div class="song-meta">
 							<span>{{ song.noteCount }} 个音</span>

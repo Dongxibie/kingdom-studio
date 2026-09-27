@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { MusicTaskListItem } from '@/extensions/music-agent/types/music'
+import { sourceLabel, type MusicTaskListItem } from '@/extensions/music-agent/types/music'
 import { formatDuration } from '@/extensions/music-agent/utils/note-format'
 
 interface Props {
@@ -32,7 +32,7 @@ const emit = defineEmits<{
 			@click="emit('select', item.id)">
 			<div class="top">
 				<span class="name">{{ item.name }}</span>
-				<span class="src">{{ item.sourceType === 'MIDI' ? 'MIDI' : '简谱' }}</span>
+				<span class="src">{{ sourceLabel(item.sourceType) }}</span>
 			</div>
 			<div class="meta">
 				{{ item.noteCount }} 音 · {{ item.pitchRange }} · {{ item.tempoBpm }} BPM · {{ formatDuration(item.durationMs) }}

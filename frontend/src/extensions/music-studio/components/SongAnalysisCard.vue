@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { formatDuration } from '@/extensions/music-agent/utils/note-format'
-import { starsText, type SongAnalysis } from '@/extensions/music-studio/types/studio'
+import { starsText, TIER_META, type SongAnalysis } from '@/extensions/music-studio/types/studio'
 
 /**
  * 曲目分析卡（Song Analysis）。
@@ -35,7 +34,7 @@ const facts = computed(() => {
 	return [
 		{ label: '速度', value: value.tempoBpm + ' BPM', sub: value.timeSignature },
 		{ label: '音域', value: value.pitchRange, sub: value.pitchSpan + ' 个半音' },
-		{ label: '预计演奏', value: value.estimatedText, sub: formatDuration(value.estimatedDuration) },
+		{ label: '预计演奏', value: value.estimatedText, sub: '按推荐方案落键' },
 		{ label: '音符', value: String(value.noteCount), sub: value.chordRatio > 0 ? '和弦音 ' + Math.round(value.chordRatio * 100) + '%' : '单音为主' },
 	]
 })
@@ -50,6 +49,10 @@ const facts = computed(() => {
 				<div class="sa-stars">
 					<span class="sa-stars-text">{{ starsText(analysis.difficultyStars) }}</span>
 					<span class="sa-stars-label">{{ analysis.difficultyLabel }}</span>
+					<span class="sa-tier" :class="'sa-tier--' + (TIER_META[analysis.difficultyTier]?.tone ?? 'hot')">
+						分层 {{ analysis.difficultyTierLabel }}
+					</span>
+					<span class="sa-audience">适合：{{ analysis.audience }}</span>
 				</div>
 				<p class="sa-hint">{{ analysis.difficultyHint }}</p>
 			</div>
@@ -140,6 +143,33 @@ const facts = computed(() => {
 	letter-spacing: 2px;
 	color: var(--ext-gold-light);
 	animation: st-rise 0.3s ease both;
+}
+
+.sa-tier {
+	border: 1px solid var(--st-edge);
+	border-radius: 999px;
+	font-size: 10px;
+	padding: 1px 8px;
+}
+
+.sa-tier--ok {
+	border-color: rgba(110, 222, 154, 0.45);
+	color: var(--st-green);
+}
+
+.sa-tier--hot {
+	border-color: rgba(240, 205, 114, 0.45);
+	color: var(--ext-gold-light);
+}
+
+.sa-tier--violet {
+	border-color: var(--st-violet);
+	color: #d9ccff;
+}
+
+.sa-audience {
+	font-size: 10.5px;
+	color: var(--ext-text-mute);
 }
 
 .sa-stars-label {

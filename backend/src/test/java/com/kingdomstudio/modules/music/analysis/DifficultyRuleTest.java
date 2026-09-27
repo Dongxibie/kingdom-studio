@@ -87,6 +87,41 @@ class DifficultyRuleTest {
 	}
 
 	@Test
+	@DisplayName("三档分层：1-2 星是简单、3 星普通、4-5 星高级")
+	void shouldMapTier() {
+		assertEquals("EASY", DifficultyRule.tierOf(1));
+		assertEquals("EASY", DifficultyRule.tierOf(2));
+		assertEquals("NORMAL", DifficultyRule.tierOf(3));
+		assertEquals("ADVANCED", DifficultyRule.tierOf(4));
+		assertEquals("ADVANCED", DifficultyRule.tierOf(5));
+		assertEquals("简单", DifficultyRule.tierLabelOf(1));
+		assertEquals("普通", DifficultyRule.tierLabelOf(3));
+		assertEquals("高级", DifficultyRule.tierLabelOf(5));
+	}
+
+	@Test
+	@DisplayName("适合谁：简单→新手、普通→有基础、高级→熟练")
+	void shouldMapAudience() {
+		assertEquals("新手", DifficultyRule.audienceOf(1));
+		assertEquals("新手", DifficultyRule.audienceOf(2));
+		assertEquals("有基础", DifficultyRule.audienceOf(3));
+		assertEquals("熟练", DifficultyRule.audienceOf(4));
+		assertEquals("熟练", DifficultyRule.audienceOf(5));
+	}
+
+	@Test
+	@DisplayName("结果里带着分层与适合谁，界面不用自己再推一遍")
+	void shouldCarryTierInResult() {
+		DifficultyRule.Result beginner = evaluate(14, 10_000, 96, 60, 69);
+		assertEquals("EASY", beginner.tier());
+		assertEquals("新手", beginner.audience());
+
+		DifficultyRule.Result hard = evaluate(60, 8_000, 180, 52, 76);
+		assertEquals("ADVANCED", hard.tier());
+		assertEquals("熟练", hard.audience());
+	}
+
+	@Test
 	@DisplayName("星级与提示文案一一对应，界面直接可用")
 	void shouldProvideHints() {
 		assertEquals("入门", DifficultyRule.labelOf(1));

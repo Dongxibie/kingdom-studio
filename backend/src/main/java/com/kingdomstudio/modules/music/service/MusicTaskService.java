@@ -250,6 +250,7 @@ public class MusicTaskService {
 				.favorite(task.getFavorite() == null ? 0 : task.getFavorite())
 				.difficultyStars(difficulty(task).stars())
 				.difficultyLabel(difficulty(task).label())
+				.difficultyTier(difficulty(task).tier())
 				.createTime(task.getCreateTime())
 				.build();
 	}

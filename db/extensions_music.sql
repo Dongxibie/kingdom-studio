@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `music_task` (
 	PRIMARY KEY (`id`),
 	KEY `idx_music_task_source` (`source_type`),
 	KEY `idx_music_task_status` (`status`),
-	CONSTRAINT `chk_music_task_source` CHECK (`source_type` IN ('MIDI', 'JIANPU')),
+	CONSTRAINT `chk_music_task_source` CHECK (`source_type` IN ('MIDI', 'JIANPU', 'SHARE')),
 	CONSTRAINT `chk_music_task_status` CHECK (`status` IN ('READY', 'ARCHIVED'))
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = '音乐 Agent：解析任务';
 

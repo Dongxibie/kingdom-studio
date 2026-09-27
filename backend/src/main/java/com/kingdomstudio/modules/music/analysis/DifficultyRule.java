@@ -34,7 +34,7 @@ public final class DifficultyRule {
 	public record Reason(String label, boolean hit) {
 	}
 
-	public record Result(int stars, String label, List<Reason> reasons) {
+	public record Result(int stars, String label, List<Reason> reasons, String tier, String tierLabel, String audience) {
 	}
 
 	public static Result evaluate(Input input) {
@@ -63,7 +63,8 @@ public final class DifficultyRule {
 		score += dense ? 1 : 0;
 		score += veryDense ? 1 : 0;
 
-		return new Result(starsOf(score), labelOf(starsOf(score)), reasons);
+		int stars = starsOf(score);
+		return new Result(stars, labelOf(stars), reasons, tierOf(stars), tierLabelOf(stars), audienceOf(stars));
 	}
 
 	/**
@@ -83,6 +84,36 @@ public final class DifficultyRule {
 			return 3;
 		}
 		return score == 5 ? 4 : 5;
+	}
+
+	/**
+	 * 三档分层（简单 / 普通 / 高级）。
+	 *
+	 * <p>星级是给「差多少」用的，分档是给「该走哪条路」用的：
+	 * 界面上要能一句话说清「这首适合直接用 / 先用简单版 / 先练手」。
+	 */
+	public static String tierOf(int stars) {
+		if (stars <= 2) {
+			return "EASY";
+		}
+		return stars == 3 ? "NORMAL" : "ADVANCED";
+	}
+
+	public static String tierLabelOf(int stars) {
+		return switch (tierOf(stars)) {
+			case "EASY" -> "简单";
+			case "NORMAL" -> "普通";
+			default -> "高级";
+		};
+	}
+
+	/** 适合谁：界面上直接显示「适合：新手」 */
+	public static String audienceOf(int stars) {
+		return switch (tierOf(stars)) {
+			case "EASY" -> "新手";
+			case "NORMAL" -> "有基础";
+			default -> "熟练";
+		};
 	}
 
 	public static String labelOf(int stars) {

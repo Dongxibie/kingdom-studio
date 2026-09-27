@@ -23,6 +23,9 @@ public class InstrumentProfileVO {
 
 	private String instrument;
 
+	@Schema(description = "所属游戏：通用 / 光遇 Sky / Minecraft / 三角洲行动 / 自定义")
+	private String game;
+
 	@Schema(description = "CHROMATIC / DIATONIC / CUSTOM")
 	private String mappingMode;
 
@@ -45,7 +48,13 @@ public class InstrumentProfileVO {
 	@Schema(description = "SKIP / NEAREST / SHIFT_OCTAVE")
 	private String unmappedStrategy;
 
+	@Schema(description = "覆盖音域，例如 F#3–F#5")
+	private String octaveRange;
+
 	private String description;
+
+	@Schema(description = "这个游戏乐器的特殊规则")
+	private String specialRules;
 
 	private String status;
 

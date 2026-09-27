@@ -279,7 +279,7 @@ onMounted(async () => {
 		</template>
 		<template v-else>
 			<ExtEmpty
-				tag="v1.1.0"
+				tag="v1.2.0"
 				title="选一条动效开始"
 				hint="左侧选分类或关键词筛出资源，点列表里的一条就会在这里实时预览（沙箱 iframe），右侧可以生成并编辑四种代码。" />
 		</template>

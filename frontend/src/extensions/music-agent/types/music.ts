@@ -5,7 +5,14 @@
  * + 按键序列导出 + Demo 回放。MP3 音频分析留到后续阶段（需要 Python 服务）。
  */
 
-export type MusicSource = 'MIDI' | 'JIANPU'
+export type MusicSource = 'MIDI' | 'JIANPU' | 'SHARE'
+
+/** 来源标签：分享导入的曲目要能一眼看出来，不能混进「简谱」里 */
+export function sourceLabel(source: MusicSource): string {
+	if (source === 'MIDI') return 'MIDI'
+	if (source === 'SHARE') return '分享'
+	return '简谱'
+}
 
 /** 映射方式：半音排列 / 音阶排列 / 自定义 */
 export type MappingMode = 'CHROMATIC' | 'DIATONIC' | 'CUSTOM'
@@ -32,6 +39,8 @@ export interface MusicTaskListItem {
 	difficultyStars: number
 	/** 难度文字：入门 / 简单 / 进阶 / 较难 / 挑战 */
 	difficultyLabel: string
+	/** 难度分层：EASY 简单 / NORMAL 普通 / ADVANCED 高级 */
+	difficultyTier: string
 	createTime: string
 }
 
@@ -114,6 +123,8 @@ export interface KeySequence {
 export interface InstrumentProfile {
 	id: number
 	name: string
+	/** 所属游戏：通用 / 光遇 Sky / Minecraft / 三角洲行动 / 自定义 */
+	game: string
 	instrument: string
 	mappingMode: MappingMode
 	scale: string
@@ -124,13 +135,23 @@ export interface InstrumentProfile {
 	transpose: number
 	octaveShift: number
 	unmappedStrategy: UnmappedStrategy
+	/** 覆盖音域，例如 C4–C6 */
+	octaveRange: string
 	description: string
+	/** 这个游戏乐器的特殊规则 */
+	specialRules: string
 	status: string
 	createTime: string
 }
 
 /** 乐器档案保存入参 */
 export interface InstrumentProfilePayload {
+	/** 所属游戏 */
+	game?: string
+	/** 覆盖音域 */
+	octaveRange?: string
+	/** 特殊规则 */
+	specialRules?: string
 	name: string
 	instrument: string
 	mappingMode: MappingMode

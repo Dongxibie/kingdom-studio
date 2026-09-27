@@ -14,6 +14,8 @@ import type {
 	OptimizationReport,
 	PerformancePreset,
 	PerformancePresetPayload,
+	PerformanceShare,
+	ProfileMatch,
 	SongAnalysis,
 } from '@/extensions/music-studio/types/studio'
 
@@ -110,6 +112,45 @@ export function deletePreset(taskId: number, presetId: number): Promise<void> {
 /** 按方案跑一遍映射（在方案之间切换时用） */
 export function mapWithPreset(taskId: number, presetId: number): Promise<KeySequence> {
 	return http.get<KeySequence>(TASK_BASE + '/' + taskId + '/presets/' + presetId + '/keys')
+}
+
+/**
+ * 匹配游戏乐器档案：按 游戏 / 乐器 / 键数 给可用档案排序。
+ * 库里没有该游戏的档案时会退回通用档案，并把这件事写进 reasons。
+ */
+export function matchProfiles(
+	taskId: number,
+	game?: string,
+	instrument?: string,
+	keyCount?: number | null,
+): Promise<ProfileMatch[]> {
+	return http.get<ProfileMatch[]>(TASK_BASE + '/' + taskId + '/profiles/match', { game, instrument, keyCount })
+}
+
+/** 生成演奏码：把曲目 + 演奏方案 + 最近一次计划打包成自包含快照 */
+export function createShare(payload: {
+	taskId: number
+	creator?: string
+	title?: string
+	presetId?: number | null
+}): Promise<PerformanceShare> {
+	const body = { creator: payload.creator, title: payload.title, presetId: payload.presetId }
+	return http.post<PerformanceShare>(MUSIC_API_BASE + '/shares?taskId=' + payload.taskId, body)
+}
+
+/** 我分享出去的曲谱 */
+export function listShares(): Promise<PerformanceShare[]> {
+	return http.get<PerformanceShare[]>(MUSIC_API_BASE + '/shares')
+}
+
+/** 看一个演奏码里有什么（不导入也能先看摘要） */
+export function describeShare(shareCode: string): Promise<PerformanceShare> {
+	return http.get<PerformanceShare>(MUSIC_API_BASE + '/shares/' + encodeURIComponent(shareCode))
+}
+
+/** 导入演奏码：在本库里还原成一首新曲目（复制一份，不影响原作者） */
+export function importShare(shareCode: string): Promise<PerformanceShare> {
+	return http.post<PerformanceShare>(MUSIC_API_BASE + '/shares/' + encodeURIComponent(shareCode) + '/import')
 }
 
 export function listInstruments(): Promise<InstrumentProfile[]> {

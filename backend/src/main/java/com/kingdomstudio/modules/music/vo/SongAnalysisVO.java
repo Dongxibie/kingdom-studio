@@ -31,6 +31,13 @@ public class SongAnalysisVO {
 	private String difficultyLabel;
 	private String difficultyHint;
 
+	@Schema(description = "分层：EASY 简单 / NORMAL 普通 / ADVANCED 高级")
+	private String difficultyTier;
+	private String difficultyTierLabel;
+
+	@Schema(description = "适合谁：新手 / 有基础 / 熟练")
+	private String audience;
+
 	@Schema(description = "计分依据：每一条都说明命中与否，避免只给一个星级")
 	private List<Reason> reasons;
 

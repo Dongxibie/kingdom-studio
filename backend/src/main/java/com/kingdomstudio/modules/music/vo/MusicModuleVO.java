@@ -30,7 +30,7 @@ public class MusicModuleVO {
 	@Schema(description = "模块英文名", example = "Kingdom Music Agent")
 	private String englishName;
 
-	@Schema(description = "当前状态", example = "v1.1.0 · 已上线（解析 / 映射 / 时间线 / 回放）")
+	@Schema(description = "当前状态", example = "v1.2.0 · 已上线（解析 / 映射 / 时间线 / 回放 / 难度评估 · 游戏乐器匹配 · 曲谱分享）")
 	private String phase;
 
 	@Schema(description = "接口前缀", example = "/api/music")

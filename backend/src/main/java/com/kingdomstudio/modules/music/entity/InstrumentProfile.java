@@ -27,6 +27,9 @@ public class InstrumentProfile {
 
 	private String instrument;
 
+	/** 所属游戏：通用 / 光遇 Sky / Minecraft / 三角洲行动 / 自定义 */
+	private String game;
+
 	/** CHROMATIC / DIATONIC / CUSTOM */
 	private String mappingMode;
 
@@ -48,7 +51,13 @@ public class InstrumentProfile {
 	/** 超范围策略：SKIP / NEAREST / SHIFT_OCTAVE */
 	private String unmappedStrategy;
 
+	/** 覆盖音域，例如 F#3–F#5；留空表示按键位与基准音推导 */
+	private String octaveRange;
+
 	private String description;
+
+	/** 这个游戏乐器的特殊规则：长按是否支持、和弦上限、切换方式等 */
+	private String specialRules;
 
 	private String status;
 

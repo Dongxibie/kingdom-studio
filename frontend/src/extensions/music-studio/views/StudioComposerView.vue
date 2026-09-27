@@ -2,6 +2,8 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ExtEmpty, ExtStatusTag } from '@/extensions/_shared/components'
+import GameInstrumentPicker from '@/extensions/music-studio/components/GameInstrumentPicker.vue'
+import MusicLibraryRail from '@/extensions/music-studio/components/MusicLibraryRail.vue'
 import MusicStudioLayout from '@/extensions/music-studio/components/MusicStudioLayout.vue'
 import TimelineEditor from '@/extensions/music-studio/components/TimelineEditor.vue'
 import PerformanceKeyboard from '@/extensions/music-studio/components/PerformanceKeyboard.vue'
@@ -13,7 +15,7 @@ import SongAnalysisCard from '@/extensions/music-studio/components/SongAnalysisC
 import PerformanceControlPanel from '@/extensions/music-agent/components/PerformanceControlPanel.vue'
 import { formatDuration } from '@/extensions/music-agent/utils/note-format'
 import { useStudioSession } from '@/extensions/music-studio/composables/useStudioSession'
-import { STRATEGY_LABELS, type MusicTaskListItem } from '@/extensions/music-agent/types/music'
+import { sourceLabel, STRATEGY_LABELS } from '@/extensions/music-agent/types/music'
 import type { OptimizationFix, PerformancePreset } from '@/extensions/music-studio/types/studio'
 
 /**
@@ -35,6 +37,7 @@ const {
 	loadInsight,
 	applyPreset,
 	savePreset,
+	createPresetFromAdvice,
 	applyFix,
 	deletePresetById,
 } = useStudioSession()
@@ -53,6 +56,17 @@ function onApplyFix(fix: OptimizationFix, label: string) {
 
 function onApplyPreset(preset: PerformancePreset) {
 	void applyPreset(preset)
+}
+
+/**
+ * AI 助手应用了某个策略：它会生成一首衍生曲目。
+ * 这里接着把「AI 的建议」落成一套方案 —— 建议只是建议，用哪套键位由分析结果决定。
+ */
+async function onAssistantApplied(taskId: number) {
+	await selectTask(taskId, { silent: true })
+	const tier = state.analysis?.difficultyTierLabel ?? 'AI 建议'
+	const strategy = tier === '简单' ? 'SHIFT_OCTAVE' : null
+	await createPresetFromAdvice(tier + '版', strategy)
 }
 
 /** 另存为方案：名字重复时后端会说明原因 */
@@ -84,8 +98,13 @@ const infoCards = computed(() => {
 const unmappedCount = computed(() => state.sequence?.unmappedCount ?? 0)
 const adjustedCount = computed(() => state.sequence?.adjustedCount ?? 0)
 
-async function openSong(song: MusicTaskListItem) {
-	await selectTask(song.id, { silent: true })
+async function openSong(taskId: number) {
+	await selectTask(taskId, { silent: true })
+}
+
+/** 换了游戏乐器档案：不需要额外动作（会话里已经重新映射并刷新洞察），保留钩子便于以后扩展 */
+function emitPicked(profileId: number) {
+	void profileId
 }
 
 onMounted(async () => {
@@ -114,37 +133,25 @@ onMounted(async () => {
 		</template>
 
 		<template #left>
+			<MusicLibraryRail @open="openSong" />
+
 			<div class="st-glass">
-				<div class="st-title">曲目<span class="st-sub">点一下切歌</span></div>
-				<div class="side-list">
-					<button
-						v-for="song in state.tasks"
-						:key="song.id"
-						class="side-item"
-						:class="{ on: state.task?.id === song.id }"
-						type="button"
-						@click="openSong(song)">
-						<span class="side-name">{{ song.name }}</span>
-						<span class="side-meta">{{ song.noteCount }} 音 · {{ song.tempoBpm }} BPM</span>
-					</button>
-					<p v-if="!state.tasks.length" class="st-label">曲库为空，先回曲目台导入一首。</p>
-				</div>
+				<div class="st-title">游戏乐器<span class="st-sub">游戏 · 乐器 · 键数 → 匹配</span></div>
+				<GameInstrumentPicker @picked="(id: number) => emitPicked(id)" />
 			</div>
 
 			<div class="st-glass">
-				<div class="st-title">乐器档案</div>
+				<div class="st-title">超范围音处理<span class="st-sub">当前：{{ activeProfile?.name ?? '未选档案' }}</span></div>
 				<select
 					class="side-select"
 					:value="state.profileId ?? ''"
 					@change="setProfile(Number(($event.target as HTMLSelectElement).value))">
 					<option v-for="profile in state.profiles" :key="profile.id" :value="profile.id">
-						{{ profile.name }}（{{ profile.keyLayout.length }} 键 · {{ profile.instrument }}）
+						{{ profile.game || '通用' }} · {{ profile.name }}（{{ profile.keyLayout.length }} 键）
 					</option>
 				</select>
 				<p class="st-label">{{ activeProfile?.description || '换档案会立刻重新映射这首曲子。' }}</p>
-
-				<div class="st-title" style="margin-top: 12px">超范围音处理</div>
-				<div class="side-chips">
+				<div class="side-chips" style="margin-top: 8px">
 					<button
 						v-for="item in STRATEGY_OPTIONS"
 						:key="item.value"
@@ -193,7 +200,7 @@ onMounted(async () => {
 				<div class="composer-head">
 					<div class="composer-title">
 						<span class="composer-name">{{ state.task.name }}</span>
-						<span class="st-chip">{{ state.task.sourceType === 'MIDI' ? 'MIDI' : '简谱' }}</span>
+						<span class="st-chip">{{ sourceLabel(state.task.sourceType) }}</span>
 						<span v-if="state.sequence" class="st-chip st-chip--violet">{{ state.sequence.profileName }}</span>
 					</div>
 					<div class="composer-metrics">
@@ -270,7 +277,7 @@ onMounted(async () => {
 					:current-profile="state.sequence?.profileName ?? ''"
 					:mapped-count="state.sequence?.mappedCount ?? 0"
 					:unmapped-count="unmappedCount"
-					@applied="(id: number) => selectTask(id, { silent: true })" />
+					@applied="onAssistantApplied" />
 			</div>
 
 			<div class="st-glass">

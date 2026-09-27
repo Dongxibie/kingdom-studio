@@ -58,7 +58,7 @@ public class MotionService {
 				.module("motion")
 				.name("动效基因库")
 				.englishName("Kingdom Motion Lab")
-				.phase("v1.1.0 · 已上线（动效工作台 / 智能助手 / 模板组合 / 代码生成）")
+				.phase("v1.2.0 · 已上线（动效工作台 / 智能助手 / 模板组合 / 代码生成）")
 				.apiBase("/api/motion")
 				.capabilities(List.of(
 						"动效资源的增删改查（列表支持分类 / 技术栈 / 关键词筛选与分页）",

@@ -26,6 +26,11 @@ export interface SongAnalysis {
 	difficultyStars: number
 	difficultyLabel: string
 	difficultyHint: string
+	/** 难度分层：EASY 简单 / NORMAL 普通 / ADVANCED 高级 */
+	difficultyTier: string
+	difficultyTierLabel: string
+	/** 适合谁：新手 / 有基础 / 熟练 */
+	audience: string
 	reasons: DifficultyReason[]
 	tempoBpm: number
 	timeSignature: string
@@ -99,6 +104,47 @@ export interface PerformancePresetPayload {
 	speedScale?: number
 	minGapMs?: number
 	note?: string
+}
+
+/** 游戏乐器匹配结果 */
+export interface ProfileMatch {
+	profileId: number
+	profileName: string
+	game: string
+	instrument: string
+	keyCount: number
+	octaveRange: string
+	specialRules: string
+	coversAll: boolean
+	unmappedCount: number
+	mappedCount: number
+	score: number
+	reasons: string[]
+}
+
+/** 曲谱分享 */
+export interface PerformanceShare {
+	id: number
+	shareCode: string
+	creator: string
+	title: string
+	difficulty: string
+	game: string
+	instrument: string
+	noteCount: number
+	durationMs: number
+	importCount: number
+	createTime: string | null
+	highlights: string[]
+	importedTaskId?: number | null
+	message?: string | null
+}
+
+/** 难度分层的中文名与色调 */
+export const TIER_META: Record<string, { label: string; tone: string }> = {
+	EASY: { label: '简单', tone: 'ok' },
+	NORMAL: { label: '普通', tone: 'hot' },
+	ADVANCED: { label: '高级', tone: 'violet' },
 }
 
 /** 把星级画成 ★★★☆☆ */
