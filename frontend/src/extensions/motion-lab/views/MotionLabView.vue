@@ -306,6 +306,11 @@ function toCandidatePage() {
 	void router.push('/extensions/motion-lab/candidates')
 }
 
+/** 智能推荐：一句话 → 五轴意图 → Top N 与理由（规则推荐，结果可复现） */
+function toRecommendPage() {
+	void router.push('/extensions/motion-lab/recommend')
+}
+
 function startWith(scene: string) {
 	localStorage.setItem('mlab_onboarded', '1')
 	onboarded.value = true
@@ -339,6 +344,7 @@ onMounted(async () => {
 		<template #actions>
 			<ExtStatusTag :text="statusTag.text" :tone="statusTag.tone" />
 			<button class="ext-btn" type="button" @click="loadInfo">重新自检</button>
+			<button class="ext-btn" type="button" @click="toRecommendPage">智能推荐</button>
 			<button class="ext-btn" type="button" @click="toCandidatePage">候选池</button>
 			<button class="ext-btn" type="button" @click="toResourcePage">我的资源</button>
 		</template>

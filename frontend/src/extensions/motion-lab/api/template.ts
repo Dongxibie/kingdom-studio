@@ -9,6 +9,7 @@ import type {
 	MotionTemplateItem,
 	TemplateQuery,
 } from '@/extensions/motion-lab/types/workbench'
+import type { MotionRecommendResult } from '@/extensions/motion-lab/types/recommend'
 
 /** 工作台接口前缀（后端 context-path 是 /api） */
 export const TEMPLATE_BASE = '/motion/templates'
@@ -60,6 +61,14 @@ export function searchMotions(query: string, limit = 6): Promise<MotionSearchRes
  */
 export function assistMotions(query: string, limit = 6): Promise<MotionSearchResult> {
 	return http.post<MotionSearchResult>(TEMPLATE_BASE + '/assist', { query, limit })
+}
+
+/**
+ * 智能推荐：一句话 → 五轴意图 → Top N，每条带命中理由与性能等级。
+ * 规则 + 权重，不调用模型，所以同一句输入每次结果都一样。
+ */
+export function recommendMotions(query: string, limit = 5): Promise<MotionRecommendResult> {
+	return http.post<MotionRecommendResult>(TEMPLATE_BASE + '/recommend', { query, limit })
 }
 
 /** 组合方案列表 */

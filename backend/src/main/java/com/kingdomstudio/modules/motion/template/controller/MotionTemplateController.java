@@ -5,11 +5,13 @@ import com.kingdomstudio.common.Result;
 import com.kingdomstudio.modules.motion.template.dto.MotionRatingDTO;
 import com.kingdomstudio.modules.motion.template.dto.MotionSearchDTO;
 import com.kingdomstudio.modules.motion.template.dto.TemplateQueryDTO;
+import com.kingdomstudio.modules.motion.template.recommend.MotionRecommendationService;
 import com.kingdomstudio.modules.motion.template.service.MotionAssistantService;
 import com.kingdomstudio.modules.motion.template.service.MotionRecipeService;
 import com.kingdomstudio.modules.motion.template.service.MotionTemplateService;
 import com.kingdomstudio.modules.motion.template.vo.MotionAssistantVO;
 import com.kingdomstudio.modules.motion.template.vo.MotionFacetVO;
+import com.kingdomstudio.modules.motion.template.vo.MotionRecommendVO;
 import com.kingdomstudio.modules.motion.template.vo.MotionRecipeVO;
 import com.kingdomstudio.modules.motion.template.vo.MotionTemplateDetailVO;
 import com.kingdomstudio.modules.motion.template.vo.MotionTemplateItemVO;
@@ -42,6 +44,7 @@ public class MotionTemplateController {
 	private final MotionTemplateService templateService;
 	private final MotionRecipeService recipeService;
 	private final MotionAssistantService assistantService;
+	private final MotionRecommendationService recommendService;
 
 	@Operation(summary = "模板分页", description = "分组 / 场景 / 风格 / 技术 / 难度 / 关键词可任意组合")
 	@GetMapping
@@ -68,6 +71,13 @@ public class MotionTemplateController {
 	@PostMapping("/assist")
 	public Result<MotionAssistantVO> assist(@Valid @RequestBody MotionSearchDTO request) {
 		return Result.success(assistantService.assist(request));
+	}
+
+	@Operation(summary = "智能推荐",
+			description = "一句话 → 五轴意图（场景 / 风格 / 情绪 / 性能 / 触发）→ Top N，每条带命中理由与性能等级")
+	@PostMapping("/recommend")
+	public Result<MotionRecommendVO> recommend(@Valid @RequestBody MotionSearchDTO request) {
+		return Result.success(recommendService.recommend(request.getQuery(), request.getLimit()));
 	}
 
 	@Operation(summary = "组合方案列表", description = "按场景筛选；推荐指数为组成模板的加权平均")

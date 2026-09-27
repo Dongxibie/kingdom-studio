@@ -107,6 +107,16 @@ public class MotionTemplateService {
 		return value == null ? fallback : value;
 	}
 
+	/** 全部模板：给推荐层做全量打分用 */
+	public List<MotionTemplate> allTemplates() {
+		return templateMapper.selectList(new LambdaQueryWrapper<>());
+	}
+
+	/** 触发方式的中文名（推荐理由里要用） */
+	public String triggerLabel(String triggerType) {
+		return label(TRIGGER_LABELS, triggerType, "加载时");
+	}
+
 	/** 推荐指数：四项子分加权，四舍五入到整数 */
 	public int recommendScore(MotionTemplate template) {
 		double score = nz(template.getScoreVisual()) * W_VISUAL
@@ -418,11 +428,13 @@ public class MotionTemplateService {
 				.build();
 	}
 
-	String sceneLabel(String scene) {
+	/** 场景中文名：列表、详情与推荐结果都走这一份对照表 */
+	public String sceneLabel(String scene) {
 		return SCENE_LABELS.getOrDefault(scene, scene);
 	}
 
-	String styleLabel(String style) {
+	/** 风格中文名 */
+	public String styleLabel(String style) {
 		return STYLE_LABELS.getOrDefault(style, style);
 	}
 

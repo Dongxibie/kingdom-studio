@@ -76,6 +76,14 @@ const routes: RouteRecordRaw[] = [
 		component: () => import('@/extensions/motion-lab/views/MotionCandidateView.vue'),
 	},
 	{
+		// 智能推荐页：一句话需求 → 五轴意图 → Top N 与理由。
+		// 从工作台右上角进入，与候选池一样不占侧边栏菜单位。
+		path: '/extensions/motion-lab/recommend',
+		name: 'motion-lab-recommend',
+		meta: { title: '智能推荐' },
+		component: () => import('@/extensions/motion-lab/views/MotionRecommendView.vue'),
+	},
+	{
 		path: '/extensions/motion-lab/resources',
 		name: 'KingdomMotionResources',
 		component: () => import('@/extensions/motion-lab/views/MotionResourceView.vue'),
